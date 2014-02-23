@@ -327,9 +327,11 @@ static int failure_chance __ARGS((nfa_state_T *state, int depth));
  * Initialize internal variables before NFA compilation.
  * Return OK on success, FAIL otherwise.
  */
-static int nfa_regcomp_start(expr, re_flags)
-char_u      *expr;
-int re_flags;                       /* see vim_regcomp() */
+static int 
+nfa_regcomp_start (
+    char_u *expr,
+    int re_flags                       /* see vim_regcomp() */
+)
 {
   size_t postfix_size;
   int nstate_max;
@@ -543,7 +545,7 @@ nfa_state_T *start;
  * Allocate more space for post_start.  Called when
  * running above the estimated number of states.
  */
-static int realloc_post_list()                {
+static int realloc_post_list(void)                {
   int nstate_max = (int)(post_end - post_start);
   int new_max = nstate_max + 1000;
   int   *new_start;
@@ -571,10 +573,7 @@ static int realloc_post_list()                {
  * Keep in mind that 'ignorecase' applies at execution time, thus [a-z] may
  * need to be interpreted as [a-zA-Z].
  */
-static int nfa_recognize_char_class(start, end, extra_newl)
-char_u  *start;
-char_u  *end;
-int extra_newl;
+static int nfa_recognize_char_class(char_u *start, char_u *end, int extra_newl)
 {
 #   define CLASS_not            0x80
 #   define CLASS_af             0x40
@@ -696,8 +695,7 @@ int extra_newl;
  *
  * NOTE! When changing this function, also update reg_equi_class()
  */
-static int nfa_emit_equi_class(c)
-int c;
+static int nfa_emit_equi_class(int c)
 {
 #define EMIT2(c)    EMIT(c); EMIT(NFA_CONCAT);
 # define EMITMBC(c) EMIT(c); EMIT(NFA_CONCAT);
@@ -1061,7 +1059,7 @@ int c;
  *     or  \%( pattern \)
  *     or  \z( pattern \)
  */
-static int nfa_regatom()                {
+static int nfa_regatom(void)                {
   int c;
   int charclass;
   int equiclass;
@@ -1740,7 +1738,7 @@ nfa_do_multibyte:
  * piece   ::=	    atom
  *	or  atom  multi
  */
-static int nfa_regpiece()                {
+static int nfa_regpiece(void)                {
   int i;
   int op;
   int ret;
@@ -1931,7 +1929,7 @@ static int nfa_regpiece()                {
  *	or  piece piece piece
  *	etc.
  */
-static int nfa_regconcat()                {
+static int nfa_regconcat(void)                {
   int cont = TRUE;
   int first = TRUE;
 
@@ -2003,7 +2001,7 @@ static int nfa_regconcat()                {
  *		or  concat \& concat \& concat
  *		etc.
  */
-static int nfa_regbranch()                {
+static int nfa_regbranch(void)                {
   int ch;
   int old_post_pos;
 
@@ -2047,8 +2045,10 @@ static int nfa_regbranch()                {
  *	or  branch \| branch \| branch
  *	etc.
  */
-static int nfa_reg(paren)
-int paren;              /* REG_NOPAREN, REG_PAREN, REG_NPAREN or REG_ZPAREN */
+static int 
+nfa_reg (
+    int paren              /* REG_NOPAREN, REG_PAREN, REG_NPAREN or REG_ZPAREN */
+)
 {
   int parno = 0;
 
@@ -2101,8 +2101,7 @@ int paren;              /* REG_NOPAREN, REG_PAREN, REG_NPAREN or REG_ZPAREN */
 #ifdef REGEXP_DEBUG
 static char_u code[50];
 
-static void nfa_set_code(c)
-int c;
+static void nfa_set_code(int c)
 {
   int addnl = FALSE;
 
@@ -2330,9 +2329,7 @@ static FILE *log_fd;
 /*
  * Print the postfix notation of the current regexp.
  */
-static void nfa_postfix_dump(expr, retval)
-char_u  *expr;
-int retval;
+static void nfa_postfix_dump(char_u *expr, int retval)
 {
   int *p;
   FILE *f;
@@ -2459,7 +2456,7 @@ nfa_regprog_T *prog;
  * Parse r.e. @expr and convert it into postfix form.
  * Return the postfix string on success, NULL otherwise.
  */
-static int * re2post()                  {
+static int *re2post(void)                  {
   if (nfa_reg(REG_NOPAREN) == FAIL)
     return NULL;
   EMIT(NFA_MOPEN);
@@ -2579,9 +2576,7 @@ nfa_state_T *s;
 /*
  * Join the two lists l1 and l2, returning the combination.
  */
-static Ptrlist * append(l1, l2)
-Ptrlist *l1;
-Ptrlist *l2;
+static Ptrlist *append(Ptrlist *l1, Ptrlist *l2)
 {
   Ptrlist *oldl1;
 
@@ -2643,10 +2638,7 @@ int *p UNUSED;
 /*
  * Push an item onto the stack.
  */
-static void st_push(s, p, stack_end)
-Frag_T s;
-Frag_T **p;
-Frag_T *stack_end;
+static void st_push(Frag_T s, Frag_T **p, Frag_T *stack_end)
 {
   Frag_T *stackp = *p;
 
@@ -2659,9 +2651,7 @@ Frag_T *stack_end;
 /*
  * Pop an item from the stack.
  */
-static Frag_T st_pop(p, stack)
-Frag_T **p;
-Frag_T *stack;
+static Frag_T st_pop(Frag_T **p, Frag_T *stack)
 {
   Frag_T *stackp;
 
@@ -3489,16 +3479,14 @@ static void log_subsexpr __ARGS((regsubs_T *subs));
 static void log_subexpr __ARGS((regsub_T *sub));
 static char *pim_info __ARGS((nfa_pim_T *pim));
 
-static void log_subsexpr(subs)
-regsubs_T *subs;
+static void log_subsexpr(regsubs_T *subs)
 {
   log_subexpr(&subs->norm);
   if (nfa_has_zsubexpr)
     log_subexpr(&subs->synt);
 }
 
-static void log_subexpr(sub)
-regsub_T *sub;
+static void log_subexpr(regsub_T *sub)
 {
   int j;
 
@@ -3521,8 +3509,7 @@ regsub_T *sub;
     }
 }
 
-static char * pim_info(pim)
-nfa_pim_T *pim;
+static char *pim_info(nfa_pim_T *pim)
 {
   static char buf[30];
 
@@ -3563,9 +3550,7 @@ static void addstate_here __ARGS((nfa_list_T *l, nfa_state_T *state,
 /*
  * Copy postponed invisible match info from "from" to "to".
  */
-static void copy_pim(to, from)
-nfa_pim_T *to;
-nfa_pim_T *from;
+static void copy_pim(nfa_pim_T *to, nfa_pim_T *from)
 {
   to->result = from->result;
   to->state = from->state;
@@ -3575,8 +3560,7 @@ nfa_pim_T *from;
   to->end = from->end;
 }
 
-static void clear_sub(sub)
-regsub_T *sub;
+static void clear_sub(regsub_T *sub)
 {
   if (REG_MULTI)
     /* Use 0xff to set lnum to -1 */
@@ -3590,9 +3574,7 @@ regsub_T *sub;
 /*
  * Copy the submatches from "from" to "to".
  */
-static void copy_sub(to, from)
-regsub_T    *to;
-regsub_T    *from;
+static void copy_sub(regsub_T *to, regsub_T *from)
 {
   to->in_use = from->in_use;
   if (from->in_use > 0) {
@@ -3611,9 +3593,7 @@ regsub_T    *from;
 /*
  * Like copy_sub() but exclude the main match.
  */
-static void copy_sub_off(to, from)
-regsub_T    *to;
-regsub_T    *from;
+static void copy_sub_off(regsub_T *to, regsub_T *from)
 {
   if (to->in_use < from->in_use)
     to->in_use = from->in_use;
@@ -3633,9 +3613,7 @@ regsub_T    *from;
 /*
  * Like copy_sub() but only do the end of the main match if \ze is present.
  */
-static void copy_ze_off(to, from)
-regsub_T    *to;
-regsub_T    *from;
+static void copy_ze_off(regsub_T *to, regsub_T *from)
 {
   if (nfa_has_zend) {
     if (REG_MULTI) {
@@ -3651,9 +3629,7 @@ regsub_T    *from;
 /*
  * Return TRUE if "sub1" and "sub2" have the same start positions.
  */
-static int sub_equal(sub1, sub2)
-regsub_T    *sub1;
-regsub_T    *sub2;
+static int sub_equal(regsub_T *sub1, regsub_T *sub2)
 {
   int i;
   int todo;
@@ -3748,9 +3724,7 @@ nfa_pim_T           *pim;       /* postponed match or NULL */
  * Return TRUE if "one" and "two" are equal.  That includes when both are not
  * set.
  */
-static int pim_equal(one, two)
-nfa_pim_T *one;
-nfa_pim_T *two;
+static int pim_equal(nfa_pim_T *one, nfa_pim_T *two)
 {
   int one_unused = (one == NULL || one->result == NFA_PIM_UNUSED);
   int two_unused = (two == NULL || two->result == NFA_PIM_UNUSED);
@@ -4290,9 +4264,7 @@ int                 *ip;
 /*
  * Check character class "class" against current character c.
  */
-static int check_char_class(class, c)
-int class;
-int c;
+static int check_char_class(int class, int c)
 {
   switch (class) {
   case NFA_CLASS_ALNUM:
@@ -4372,10 +4344,12 @@ int c;
  * Check for a match with subexpression "subidx".
  * Return TRUE if it matches.
  */
-static int match_backref(sub, subidx, bytelen)
-regsub_T    *sub;           /* pointers to subexpressions */
-int subidx;
-int         *bytelen;       /* out: length of match in bytes */
+static int 
+match_backref (
+    regsub_T *sub,           /* pointers to subexpressions */
+    int subidx,
+    int *bytelen       /* out: length of match in bytes */
+)
 {
   int len;
 
@@ -4428,9 +4402,11 @@ static int match_zref __ARGS((int subidx, int *bytelen));
  * Check for a match with \z subexpression "subidx".
  * Return TRUE if it matches.
  */
-static int match_zref(subidx, bytelen)
-int subidx;
-int         *bytelen;       /* out: length of match in bytes */
+static int 
+match_zref (
+    int subidx,
+    int *bytelen       /* out: length of match in bytes */
+)
 {
   int len;
 
@@ -4487,10 +4463,7 @@ int             *list;
   }
 }
 
-static int nfa_re_num_cmp(val, op, pos)
-long_u val;
-int op;
-long_u pos;
+static int nfa_re_num_cmp(long_u val, int op, long_u pos)
 {
   if (op == 1) return pos > val;
   if (op == 2) return pos < val;
@@ -4821,9 +4794,7 @@ int depth;
 /*
  * Skip until the char "c" we know a match must start with.
  */
-static int skip_to_start(c, colp)
-int c;
-colnr_T     *colp;
+static int skip_to_start(int c, colnr_T *colp)
 {
   char_u *s;
 
@@ -4845,10 +4816,7 @@ colnr_T     *colp;
  * Called after skip_to_start() has found regstart.
  * Returns zero for no match, 1 for a match.
  */
-static long find_match_text(startcol, regstart, match_text)
-colnr_T startcol;
-int regstart;
-char_u  *match_text;
+static long find_match_text(colnr_T startcol, int regstart, char_u *match_text)
 {
   colnr_T col = startcol;
   int c1, c2;
@@ -6221,9 +6189,11 @@ colnr_T col;
  *
  * Returns 0 for failure, number of lines contained in the match otherwise.
  */
-static long nfa_regexec_both(line, startcol)
-char_u      *line;
-colnr_T startcol;               /* column to start looking for match */
+static long 
+nfa_regexec_both (
+    char_u *line,
+    colnr_T startcol               /* column to start looking for match */
+)
 {
   nfa_regprog_T   *prog;
   long retval = 0L;

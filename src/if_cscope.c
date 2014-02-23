@@ -319,9 +319,7 @@ exarg_T *eap;
  *
  * returns TRUE if eof, FALSE otherwise
  */
-int cs_fgets(buf, size)
-char_u      *buf;
-int size;
+int cs_fgets(char_u *buf, int size)
 {
   char *p;
 
@@ -338,7 +336,7 @@ int size;
  *
  * called only from do_tag(), when popping the tag stack
  */
-void cs_free_tags()          {
+void cs_free_tags(void)          {
   cs_manage_matches(NULL, NULL, -1, Free);
 }
 
@@ -347,7 +345,7 @@ void cs_free_tags()          {
  *
  * called from do_tag()
  */
-void cs_print_tags()          {
+void cs_print_tags(void)          {
   cs_manage_matches(NULL, NULL, -1, Print);
 }
 
@@ -378,10 +376,7 @@ void cs_print_tags()          {
  *
  *		Note: All string comparisons are case sensitive!
  */
-int cs_connection(num, dbpath, ppath)
-int num;
-char_u *dbpath;
-char_u *ppath;
+int cs_connection(int num, char_u *dbpath, char_u *ppath)
 {
   int i;
 
@@ -454,8 +449,7 @@ exarg_T *eap UNUSED;
   return cs_add_common(fname, ppath, flags);
 }
 
-static void cs_stat_emsg(fname)
-char *fname;
+static void cs_stat_emsg(char *fname)
 {
   char *stat_emsg = _("E563: stat(%s) error: %d");
   char *buf = (char *)alloc((unsigned)strlen(stat_emsg) + MAXPATHL + 10);
@@ -476,10 +470,12 @@ char *fname;
  * cs_add() and cs_reset().  i really don't like to do this, but this
  * routine uses a number of goto statements.
  */
-static int cs_add_common(arg1, arg2, flags)
-char *arg1;         /* filename - may contain environment variables */
-char *arg2;         /* prepend path - may contain environment variables */
-char *flags;
+static int 
+cs_add_common (
+    char *arg1,         /* filename - may contain environment variables */
+    char *arg2,         /* prepend path - may contain environment variables */
+    char *flags
+)
 {
   struct stat statbuf;
   int ret;
@@ -595,11 +591,11 @@ add_err:
 } /* cs_add_common */
 
 
-static int cs_check_for_connections()                {
+static int cs_check_for_connections(void)                {
   return cs_cnt_connections() > 0;
 } /* cs_check_for_connections */
 
-static int cs_check_for_tags()                {
+static int cs_check_for_tags(void)                {
   return p_tags[0] != NUL && curbuf->b_p_tags != NULL;
 } /* cs_check_for_tags */
 
@@ -608,7 +604,7 @@ static int cs_check_for_tags()                {
  *
  * count the number of cscope connections
  */
-static int cs_cnt_connections()                {
+static int cs_cnt_connections(void)                {
   short i;
   short cnt = 0;
 
@@ -619,8 +615,10 @@ static int cs_cnt_connections()                {
   return cnt;
 } /* cs_cnt_connections */
 
-static void cs_reading_emsg(idx)
-int idx;        /* connection index */
+static void 
+cs_reading_emsg (
+    int idx        /* connection index */
+)
 {
   EMSGN(_("E262: error reading cscope connection %ld"), idx);
 }
@@ -631,8 +629,7 @@ int idx;        /* connection index */
  *
  * count the number of matches for a given cscope connection.
  */
-static int cs_cnt_matches(idx)
-int idx;
+static int cs_cnt_matches(int idx)
 {
   char *stok;
   char *buf;
@@ -689,9 +686,7 @@ int idx;
  *
  * Creates the actual cscope command query from what the user entered.
  */
-static char * cs_create_cmd(csoption, pattern)
-char *csoption;
-char *pattern;
+static char *cs_create_cmd(char *csoption, char *pattern)
 {
   char *cmd;
   short search;
@@ -750,8 +745,7 @@ char *pattern;
  * This piece of code was taken/adapted from nvi.  do we need to add
  * the BSD license notice?
  */
-static int cs_create_connection(i)
-int i;
+static int cs_create_connection(int i)
 {
 #ifdef UNIX
   int to_cs[2], from_cs[2];
@@ -1004,13 +998,7 @@ exarg_T *eap;
  *
  * common code for cscope find, shared by cs_find() and do_cstag()
  */
-static int cs_find_common(opt, pat, forceit, verbose, use_ll, cmdline)
-char *opt;
-char *pat;
-int forceit;
-int verbose;
-int use_ll;
-char_u *cmdline;
+static int cs_find_common(char *opt, char *pat, int forceit, int verbose, int use_ll, char_u *cmdline)
 {
   int i;
   char *cmd;
@@ -1227,8 +1215,7 @@ exarg_T *eap UNUSED;
 } /* cs_help */
 
 
-static void clear_csinfo(i)
-int i;
+static void clear_csinfo(int i)
 {
   csinfo[i].fname  = NULL;
   csinfo[i].ppath  = NULL;
@@ -1249,7 +1236,7 @@ int i;
 #ifndef UNIX
 static char *GetWin32Error __ARGS((void));
 
-static char * GetWin32Error()                   {
+static char *GetWin32Error(void)                   {
   char *msg = NULL;
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
       NULL, GetLastError(), 0, (LPSTR)&msg, 0, NULL);
@@ -1473,9 +1460,11 @@ exarg_T *eap UNUSED;
  *
  * Actually kills a specific cscope connection.
  */
-static void cs_kill_execute(i, cname)
-int i;              /* cscope table index */
-char *cname;        /* cscope database name */
+static void 
+cs_kill_execute (
+    int i,              /* cscope table index */
+    char *cname        /* cscope database name */
+)
 {
   if (p_csverbose) {
     msg_clr_eos();
@@ -1506,11 +1495,7 @@ char *cname;        /* cscope database name */
  * would still have to be modified to escape all the special regular expression
  * characters to comply with ctags formatting.
  */
-static char * cs_make_vim_style_matches(fname, slno, search, tagstr)
-char *fname;
-char *slno;
-char *search;
-char *tagstr;
+static char *cs_make_vim_style_matches(char *fname, char *slno, char *search, char *tagstr)
 {
   /* vim style is ctags:
    *
@@ -1626,14 +1611,7 @@ mcmd_e cmd;
  *
  * parse cscope output
  */
-static char * cs_parse_results(cnumber, buf, bufsize, context, linenumber,
-    search)
-int cnumber;
-char *buf;
-int bufsize;
-char **context;
-char **linenumber;
-char **search;
+static char *cs_parse_results(int cnumber, char *buf, int bufsize, char **context, char **linenumber, char **search)
 {
   int ch;
   char *p;
@@ -1741,15 +1719,7 @@ int *nummatches_a;
  * into ctags format
  * When there are no matches sets "*matches_p" to NULL.
  */
-static void cs_fill_results(tagstr, totmatches, nummatches_a, matches_p,
-    cntxts_p,
-    matched)
-char *tagstr;
-int totmatches;
-int *nummatches_a;
-char ***matches_p;
-char ***cntxts_p;
-int *matched;
+static void cs_fill_results(char *tagstr, int totmatches, int *nummatches_a, char ***matches_p, char ***cntxts_p, int *matched)
 {
   int i, j;
   char *buf;
@@ -1819,8 +1789,7 @@ parse_out:
 
 
 /* get the requested path components */
-static char * cs_pathcomponents(path)
-char        *path;
+static char *cs_pathcomponents(char *path)
 {
   int i;
   char        *s;
@@ -1844,10 +1813,7 @@ char        *path;
  *
  * called from cs_manage_matches()
  */
-static void cs_print_tags_priv(matches, cntxts, num_matches)
-char **matches;
-char **cntxts;
-int num_matches;
+static void cs_print_tags_priv(char **matches, char **cntxts, int num_matches)
 {
   char        *buf = NULL;
   int bufsize = 0;           /* Track available bufsize */
@@ -1973,8 +1939,7 @@ int num_matches;
  *
  * read a cscope prompt (basically, skip over the ">> ")
  */
-static int cs_read_prompt(i)
-int i;
+static int cs_read_prompt(int i)
 {
   int ch;
   char        *buf = NULL;   /* buffer for possible error message from cscope */
@@ -2065,9 +2030,7 @@ sig_handler SIGDEFARG(sigarg) {
  * Does the actual free'ing for the cs ptr with an optional flag of whether
  * or not to free the filename.  Called by cs_kill and cs_reset.
  */
-static void cs_release_csp(i, freefnpp)
-int i;
-int freefnpp;
+static void cs_release_csp(int i, int freefnpp)
 {
   /*
    * Trying to exit normally (not sure whether it is fit to UNIX cscope
@@ -2252,9 +2215,7 @@ exarg_T *eap UNUSED;
  * ships with Solaris 2.6), the output never has the prefix prepended.
  * Contrast this with my development system (Digital Unix), which does.
  */
-static char * cs_resolve_file(i, name)
-int i;
-char *name;
+static char *cs_resolve_file(int i, char *name)
 {
   char        *fullname;
   int len;
@@ -2340,7 +2301,7 @@ exarg_T *eap UNUSED;
  *
  * Only called when VIM exits to quit any cscope sessions.
  */
-void cs_end()          {
+void cs_end(void)          {
   int i;
 
   for (i = 0; i < csinfo_size; i++)

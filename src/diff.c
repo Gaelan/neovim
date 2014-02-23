@@ -181,11 +181,7 @@ buf_T       *buf;
 /*
  * Called by mark_adjust(): update line numbers in "curbuf".
  */
-void diff_mark_adjust(line1, line2, amount, amount_after)
-linenr_T line1;
-linenr_T line2;
-long amount;
-long amount_after;
+void diff_mark_adjust(linenr_T line1, linenr_T line2, long amount, long amount_after)
 {
   int idx;
   tabpage_T   *tp;
@@ -529,8 +525,10 @@ diff_T      *dp;
 /*
  * Mark all diff buffers in the current tab page for redraw.
  */
-static void diff_redraw(dofold)
-int dofold;                 /* also recompute the folds */
+static void 
+diff_redraw (
+    int dofold                 /* also recompute the folds */
+)
 {
   win_T       *wp;
   int n;
@@ -726,10 +724,7 @@ theend:
 /*
  * Make a diff between files "tmp_orig" and "tmp_new", results in "tmp_diff".
  */
-static void diff_file(tmp_orig, tmp_new, tmp_diff)
-char_u      *tmp_orig;
-char_u      *tmp_new;
-char_u      *tmp_diff;
+static void diff_file(char_u *tmp_orig, char_u *tmp_new, char_u *tmp_diff)
 {
   char_u      *cmd;
   size_t len;
@@ -1079,10 +1074,12 @@ exarg_T     *eap;
 /*
  * Read the diff output and add each entry to the diff list.
  */
-static void diff_read(idx_orig, idx_new, fname)
-int idx_orig;                   /* idx of original file */
-int idx_new;                    /* idx of new file */
-char_u      *fname;             /* name of diff output file */
+static void 
+diff_read (
+    int idx_orig,                   /* idx of original file */
+    int idx_new,                    /* idx of new file */
+    char_u *fname             /* name of diff output file */
+)
 {
   FILE        *fd;
   diff_T      *dprev = NULL;
@@ -1410,9 +1407,7 @@ int idx2;
  * Compare strings "s1" and "s2" according to 'diffopt'.
  * Return non-zero when they are different.
  */
-static int diff_cmp(s1, s2)
-char_u      *s1;
-char_u      *s2;
+static int diff_cmp(char_u *s1, char_u *s2)
 {
   char_u      *p1, *p2;
   int l;
@@ -1586,7 +1581,7 @@ win_T       *towin;
 /*
  * This is called when 'diffopt' is changed.
  */
-int diffopt_changed()         {
+int diffopt_changed(void)         {
   char_u      *p;
   int diff_context_new = 6;
   int diff_flags_new = 0;
@@ -1648,7 +1643,7 @@ int diffopt_changed()         {
 /*
  * Return TRUE if 'diffopt' contains "horizontal".
  */
-int diffopt_horizontal()         {
+int diffopt_horizontal(void)         {
   return (diff_flags & DIFF_HORIZONTAL) != 0;
 }
 
@@ -1808,8 +1803,7 @@ linenr_T lnum;
 /*
  * "dp" and "do" commands.
  */
-void nv_diffgetput(put)
-int put;
+void nv_diffgetput(int put)
 {
   exarg_T ea;
 
@@ -2139,9 +2133,7 @@ buf_T       *buf;
  * Move "count" times in direction "dir" to the next diff block.
  * Return FAIL if there isn't such a diff block.
  */
-int diff_move_to(dir, count)
-int dir;
-long count;
+int diff_move_to(int dir, long count)
 {
   int idx;
   linenr_T lnum = curwin->w_cursor.lnum;

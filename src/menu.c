@@ -710,9 +710,7 @@ int idx;
 /*
  * Show the mapping associated with a menu item or hierarchy in a sub-menu.
  */
-static int show_menus(path_name, modes)
-char_u  *path_name;
-int modes;
+static int show_menus(char_u *path_name, int modes)
 {
   char_u      *p;
   char_u      *name;
@@ -1065,8 +1063,7 @@ int idx;
  * element.  Any \ and ^Vs are removed from the current element.
  * "name" may be modified.
  */
-char_u * menu_name_skip(name)
-char_u  *name;
+char_u *menu_name_skip(char_u *name)
 {
   char_u  *p;
 
@@ -1097,9 +1094,7 @@ vimmenu_T   *menu;
   return menu_namecmp(name, menu->name) || menu_namecmp(name, menu->dname);
 }
 
-static int menu_namecmp(name, mname)
-char_u      *name;
-char_u      *mname;
+static int menu_namecmp(char_u *name, char_u *mname)
 {
   int i;
 
@@ -1118,11 +1113,13 @@ char_u      *mname;
  * If "unmenu" is not NULL, then the flag it points to is set according to
  * whether the command is an "unmenu" command.
  */
-static int get_menu_cmd_modes(cmd, forceit, noremap, unmenu)
-char_u  *cmd;
-int forceit;                /* Was there a "!" after the command? */
-int     *noremap;
-int     *unmenu;
+static int 
+get_menu_cmd_modes (
+    char_u *cmd,
+    int forceit,                /* Was there a "!" after the command? */
+    int *noremap,
+    int *unmenu
+)
 {
   int modes;
 
@@ -1179,9 +1176,7 @@ int     *unmenu;
  * Modify a menu name starting with "PopUp" to include the mode character.
  * Returns the name in allocated memory (NULL for failure).
  */
-static char_u * popup_mode_name(name, idx)
-char_u      *name;
-int idx;
+static char_u *popup_mode_name(char_u *name, int idx)
 {
   char_u      *p;
   int len = (int)STRLEN(name);
@@ -1202,10 +1197,7 @@ int idx;
  * If mnemonic != NULL, *mnemonic is set to the character after the first '&'.
  * If actext != NULL, *actext is set to the text after the first TAB.
  */
-static char_u * menu_text(str, mnemonic, actext)
-char_u      *str;
-int         *mnemonic;
-char_u      **actext;
+static char_u *menu_text(char_u *str, int *mnemonic, char_u **actext)
 {
   char_u      *p;
   char_u      *text;
@@ -1251,8 +1243,7 @@ char_u      **actext;
 /*
  * Return TRUE if "name" can be a menu in the MenuBar.
  */
-int menu_is_menubar(name)
-char_u      *name;
+int menu_is_menubar(char_u *name)
 {
   return !menu_is_popup(name)
          && !menu_is_toolbar(name)
@@ -1262,8 +1253,7 @@ char_u      *name;
 /*
  * Return TRUE if "name" is a popup menu name.
  */
-int menu_is_popup(name)
-char_u      *name;
+int menu_is_popup(char_u *name)
 {
   return STRNCMP(name, "PopUp", 5) == 0;
 }
@@ -1272,8 +1262,7 @@ char_u      *name;
 /*
  * Return TRUE if "name" is a toolbar menu name.
  */
-int menu_is_toolbar(name)
-char_u      *name;
+int menu_is_toolbar(char_u *name)
 {
   return STRNCMP(name, "ToolBar", 7) == 0;
 }
@@ -1282,8 +1271,7 @@ char_u      *name;
  * Return TRUE if the name is a menu separator identifier: Starts and ends
  * with '-'
  */
-int menu_is_separator(name)
-char_u *name;
+int menu_is_separator(char_u *name)
 {
   return name[0] == '-' && name[STRLEN(name) - 1] == '-';
 }
@@ -1291,8 +1279,7 @@ char_u *name;
 /*
  * Return TRUE if the menu is hidden:  Starts with ']'
  */
-static int menu_is_hidden(name)
-char_u *name;
+static int menu_is_hidden(char_u *name)
 {
   return (name[0] == ']') || (menu_is_popup(name) && name[5] != NUL);
 }
@@ -1562,8 +1549,7 @@ exarg_T     *eap UNUSED;
 /*
  * Find the character just after one part of a menu name.
  */
-static char_u * menu_skip_part(p)
-char_u      *p;
+static char_u *menu_skip_part(char_u *p)
 {
   while (*p != NUL && *p != '.' && !vim_iswhite(*p)) {
     if ((*p == '\\' || *p == Ctrl_V) && p[1] != NUL)
@@ -1577,9 +1563,7 @@ char_u      *p;
  * Lookup part of a menu name in the translations.
  * Return a pointer to the translation or NULL if not found.
  */
-static char_u * menutrans_lookup(name, len)
-char_u      *name;
-int len;
+static char_u *menutrans_lookup(char_u *name, int len)
 {
   menutrans_T         *tp = (menutrans_T *)menutrans_ga.ga_data;
   int i;
@@ -1609,8 +1593,7 @@ int len;
 /*
  * Unescape the name in the translate dictionary table.
  */
-static void menu_unescape_name(name)
-char_u      *name;
+static void menu_unescape_name(char_u *name)
 {
   char_u  *p;
 
@@ -1623,8 +1606,7 @@ char_u      *name;
  * Isolate the menu name.
  * Skip the menu name, and translate <Tab> into a real TAB.
  */
-static char_u * menu_translate_tab_and_shift(arg_start)
-char_u      *arg_start;
+static char_u *menu_translate_tab_and_shift(char_u *arg_start)
 {
   char_u      *arg = arg_start;
 

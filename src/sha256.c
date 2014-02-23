@@ -270,11 +270,7 @@ static unsigned int get_some_time __ARGS((void));
  * Returns hex digest of "buf[buf_len]" in a static array.
  * if "salt" is not NULL also do "salt[salt_len]".
  */
-char_u * sha256_bytes(buf, buf_len, salt, salt_len)
-char_u *buf;
-int buf_len;
-char_u *salt;
-int salt_len;
+char_u *sha256_bytes(char_u *buf, int buf_len, char_u *salt, int salt_len)
 {
   char_u sha256sum[32];
   static char_u hexit[65];
@@ -297,10 +293,7 @@ int salt_len;
 /*
  * Returns sha256(buf) as 64 hex chars in static array.
  */
-char_u * sha256_key(buf, salt, salt_len)
-char_u *buf;
-char_u *salt;
-int salt_len;
+char_u *sha256_key(char_u *buf, char_u *salt, int salt_len)
 {
   /* No passwd means don't encrypt */
   if (buf == NULL || *buf == NUL)
@@ -332,7 +325,7 @@ static char *sha_self_test_vector[] = {
  * Perform a test on the SHA256 algorithm.
  * Return FAIL or OK.
  */
-int sha256_self_test()         {
+int sha256_self_test(void)         {
   int i, j;
   char output[65];
   context_sha256_T ctx;
@@ -370,7 +363,7 @@ int sha256_self_test()         {
   return failures > 0 ? FAIL : OK;
 }
 
-static unsigned int get_some_time()                         {
+static unsigned int get_some_time(void)                         {
 # ifdef HAVE_GETTIMEOFDAY
   struct timeval tv;
 
@@ -386,11 +379,7 @@ static unsigned int get_some_time()                         {
  * Fill "header[header_len]" with random_data.
  * Also "salt[salt_len]" when "salt" is not NULL.
  */
-void sha2_seed(header, header_len, salt, salt_len)
-char_u *header;
-int header_len;
-char_u *salt;
-int salt_len;
+void sha2_seed(char_u *header, int header_len, char_u *salt, int salt_len)
 {
   int i;
   static char_u random_data[1000];

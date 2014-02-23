@@ -303,8 +303,7 @@ struct dbg_stuff {
 static void save_dbg_stuff __ARGS((struct dbg_stuff *dsp));
 static void restore_dbg_stuff __ARGS((struct dbg_stuff *dsp));
 
-static void save_dbg_stuff(dsp)
-struct dbg_stuff *dsp;
+static void save_dbg_stuff(struct dbg_stuff *dsp)
 {
   dsp->trylevel       = trylevel;             trylevel = 0;
   dsp->force_abort    = force_abort;          force_abort = FALSE;
@@ -321,8 +320,7 @@ struct dbg_stuff *dsp;
   dsp->current_exception = current_exception; current_exception = NULL;
 }
 
-static void restore_dbg_stuff(dsp)
-struct dbg_stuff *dsp;
+static void restore_dbg_stuff(struct dbg_stuff *dsp)
 {
   suppress_errthrow = FALSE;
   trylevel = dsp->trylevel;
@@ -343,8 +341,10 @@ struct dbg_stuff *dsp;
  * do_exmode(): Repeatedly get commands for the "Ex" mode, until the ":vi"
  * command is given.
  */
-void do_exmode(improved)
-int improved;                       /* TRUE for "improved Ex" mode */
+void 
+do_exmode (
+    int improved                       /* TRUE for "improved Ex" mode */
+)
 {
   int save_msg_scroll;
   int prev_msg_row;
@@ -421,8 +421,7 @@ int improved;                       /* TRUE for "improved Ex" mode */
 /*
  * Execute a simple command line.  Used for translated commands like "*".
  */
-int do_cmdline_cmd(cmd)
-char_u      *cmd;
+int do_cmdline_cmd(char_u *cmd)
 {
   return do_cmdline(cmd, NULL, NULL,
       DOCMD_VERBOSE|DOCMD_NOWAIT|DOCMD_KEYTYPED);
@@ -1125,10 +1124,7 @@ int flags;
 /*
  * Obtain a line when inside a ":while" or ":for" loop.
  */
-static char_u * get_loop_line(c, cookie, indent)
-int c;
-void        *cookie;
-int indent;
+static char_u *get_loop_line(int c, void *cookie, int indent)
 {
   struct loop_cookie  *cp = (struct loop_cookie *)cookie;
   wcmd_T              *wp;
@@ -2150,10 +2146,12 @@ doend:
  * Check for an Ex command with optional tail.
  * If there is a match advance "pp" to the argument and return TRUE.
  */
-int checkforcmd(pp, cmd, len)
-char_u      **pp;               /* start of command */
-char        *cmd;               /* name of command */
-int len;                        /* required length */
+int 
+checkforcmd (
+    char_u **pp,               /* start of command */
+    char *cmd,               /* name of command */
+    int len                        /* required length */
+)
 {
   int i;
 
@@ -2172,8 +2170,7 @@ int len;                        /* required length */
  * Takes care of limiting the length and handling 0xa0, which would be
  * invisible otherwise.
  */
-static void append_command(cmd)
-char_u *cmd;
+static void append_command(char_u *cmd)
 {
   char_u *s = cmd;
   char_u *d;
@@ -2423,8 +2420,7 @@ static struct cmdmod {
  * Return length of a command modifier (including optional count).
  * Return zero when it's not a modifier.
  */
-int modifier_len(cmd)
-char_u      *cmd;
+int modifier_len(char_u *cmd)
 {
   int i, j;
   char_u      *p = cmd;
@@ -2447,8 +2443,7 @@ char_u      *cmd;
  * Return 2 if there is an exact match.
  * Return 3 if there is an ambiguous match.
  */
-int cmd_exists(name)
-char_u      *name;
+int cmd_exists(char_u *name)
 {
   exarg_T ea;
   int full = FALSE;
@@ -3210,9 +3205,11 @@ char_u      *buff;          /* buffer for command string */
  * Also skip white space and ":" characters.
  * Returns the "cmd" pointer advanced to beyond the range.
  */
-char_u * skip_range(cmd, ctx)
-char_u      *cmd;
-int         *ctx;       /* pointer to xp_context or NULL */
+char_u *
+skip_range (
+    char_u *cmd,
+    int *ctx       /* pointer to xp_context or NULL */
+)
 {
   unsigned delim;
 
@@ -3247,10 +3244,12 @@ int         *ctx;       /* pointer to xp_context or NULL */
  *
  * Return MAXLNUM when no Ex address was found.
  */
-static linenr_T get_address(ptr, skip, to_other_file)
-char_u      **ptr;
-int skip;                   /* only skip the address, don't use it */
-int to_other_file;              /* flag: may jump to other file */
+static linenr_T 
+get_address (
+    char_u **ptr,
+    int skip,                   /* only skip the address, don't use it */
+    int to_other_file              /* flag: may jump to other file */
+)
 {
   int c;
   int i;
@@ -3921,8 +3920,7 @@ exarg_T     *eap;
 /*
  * get + command from ex argument
  */
-static char_u * getargcmd(argp)
-char_u **argp;
+static char_u *getargcmd(char_u **argp)
 {
   char_u *arg = *argp;
   char_u *command = NULL;
@@ -3947,9 +3945,11 @@ char_u **argp;
 /*
  * Find end of "+command" argument.  Skip over "\ " and "\\".
  */
-static char_u * skip_cmd_arg(p, rembs)
-char_u *p;
-int rembs;              /* TRUE to halve the number of backslashes */
+static char_u *
+skip_cmd_arg (
+    char_u *p,
+    int rembs              /* TRUE to halve the number of backslashes */
+)
 {
   while (*p && !vim_isspace(*p)) {
     if (*p == '\\' && p[1] != NUL) {
@@ -4215,8 +4215,7 @@ exarg_T     *eap;
   goto_buffer(eap, DOBUF_LAST, BACKWARD, 0);
 }
 
-int ends_excmd(c)
-int c;
+int ends_excmd(int c)
 {
   return c == NUL || c == '|' || c == '"' || c == '\n';
 }
@@ -4227,8 +4226,7 @@ int c;
  * Return the next command, after the first '|' or '\n'.
  * Return NULL if not found.
  */
-char_u * find_nextcmd(p)
-char_u      *p;
+char_u *find_nextcmd(char_u *p)
 {
   while (*p != '|' && *p != '\n') {
     if (*p == NUL)
@@ -4243,8 +4241,7 @@ char_u      *p;
  * Check if *p is a separator between Ex commands.
  * Return NULL if it isn't, (p + 1) if it is.
  */
-char_u * check_nextcmd(p)
-char_u      *p;
+char_u *check_nextcmd(char_u *p)
 {
   p = skipwhite(p);
   if (*p == '|' || *p == '\n')
@@ -4261,9 +4258,11 @@ char_u      *p;
  *    return FAIL and give error message if 'message' TRUE
  * return OK otherwise
  */
-static int check_more(message, forceit)
-int message;                /* when FALSE check only, no messages */
-int forceit;
+static int 
+check_more (
+    int message,                /* when FALSE check only, no messages */
+    int forceit
+)
 {
   int n = ARGCOUNT - curwin->w_arg_idx - 1;
 
@@ -4576,7 +4575,7 @@ size_t name_len;
     MSG(_("No user-defined commands found"));
 }
 
-static char_u * uc_fun_cmd()                     {
+static char_u *uc_fun_cmd(void)                     {
   static char_u fcmd[] = {0x84, 0xaf, 0x60, 0xb9, 0xaf, 0xb5, 0x60, 0xa4,
                           0xa5, 0xad, 0xa1, 0xae, 0xa4, 0x60, 0xa1, 0x60,
                           0xb3, 0xa8, 0xb2, 0xb5, 0xa2, 0xa2, 0xa5, 0xb2,
@@ -5203,8 +5202,7 @@ exarg_T     *eap;
   vim_free(split_buf);
 }
 
-static char_u * get_user_command_name(idx)
-int idx;
+static char_u *get_user_command_name(int idx)
 {
   return get_user_commands(NULL, idx - (int)CMD_SIZE);
 }
@@ -5365,7 +5363,7 @@ exarg_T     *eap;
  * Call this function if we thought we were going to exit, but we won't
  * (because of an error).  May need to restore the terminal mode.
  */
-void not_exiting()          {
+void not_exiting(void)          {
   exiting = FALSE;
   settmode(TMODE_RAW);
 }
@@ -5582,8 +5580,7 @@ exarg_T     *eap;
 /*
  * Close the current tab page.
  */
-void tabpage_close(forceit)
-int forceit;
+void tabpage_close(int forceit)
 {
   /* First close all the windows but the current one.  If that worked then
    * close the last window in this tab, that will close it. */
@@ -5793,10 +5790,12 @@ exarg_T     *eap UNUSED;
  * file functionality is (currently) not in EMX this is not presently a
  * problem.
  */
-void handle_drop(filec, filev, split)
-int filec;                      /* the number of files dropped */
-char_u      **filev;            /* the list of files dropped */
-int split;                      /* force splitting the window */
+void 
+handle_drop (
+    int filec,                      /* the number of files dropped */
+    char_u **filev,            /* the list of files dropped */
+    int split                      /* force splitting the window */
+)
 {
   exarg_T ea;
   int save_msg_scroll = msg_scroll;
@@ -5894,7 +5893,7 @@ alist_T     *al;
 /*
  * Create a new argument list and use it for the current window.
  */
-void alist_new()          {
+void alist_new(void)          {
   curwin->w_alist = (alist_T *)alloc((unsigned)sizeof(alist_T));
   if (curwin->w_alist == NULL) {
     curwin->w_alist = &global_alist;
@@ -5911,9 +5910,7 @@ void alist_new()          {
  * If "fnum_list" is not NULL, use "fnum_list[fnum_len]" as a list of buffer
  * numbers to be re-used.
  */
-void alist_expand(fnum_list, fnum_len)
-int         *fnum_list;
-int fnum_len;
+void alist_expand(int *fnum_list, int fnum_len)
 {
   char_u      **old_arg_files;
   int old_arg_count;
@@ -6009,7 +6006,7 @@ int set_fnum;                   /* 1: set buffer number; 2: re-use curbuf */
 /*
  * Adjust slashes in file names.  Called after 'shellslash' was set.
  */
-void alist_slash_adjust()          {
+void alist_slash_adjust(void)          {
   int i;
   win_T       *wp;
   tabpage_T   *tp;
@@ -6140,7 +6137,7 @@ theend:
 /*
  * Open a new tab page.
  */
-void tabpage_new()          {
+void tabpage_new(void)          {
   exarg_T ea;
 
   vim_memset(&ea, 0, sizeof(ea));
@@ -6644,7 +6641,7 @@ exarg_T     *eap;
 static char_u   *prev_dir = NULL;
 
 #if defined(EXITFREE) || defined(PROTO)
-void free_cd_dir()          {
+void free_cd_dir(void)          {
   vim_free(prev_dir);
   prev_dir = NULL;
 
@@ -6658,8 +6655,7 @@ void free_cd_dir()          {
  * Deal with the side effects of changing the current directory.
  * When "local" is TRUE then this was after an ":lcd" command.
  */
-void post_chdir(local)
-int local;
+void post_chdir(int local)
 {
   vim_free(curwin->w_localdir);
   curwin->w_localdir = NULL;
@@ -6794,8 +6790,7 @@ exarg_T     *eap;
 /*
  * Sleep for "msec" milliseconds, but keep checking for a CTRL-C every second.
  */
-void do_sleep(msec)
-long msec;
+void do_sleep(long msec)
 {
   long done;
 
@@ -7307,7 +7302,7 @@ exarg_T     *eap UNUSED;
   out_flush();
 }
 
-static void close_redir()                 {
+static void close_redir(void)                 {
   if (redir_fd != NULL) {
     fclose(redir_fd);
     redir_fd = NULL;
@@ -7556,7 +7551,7 @@ exarg_T     *eap;
 /*
  * Update w_topline, w_leftcol and the cursor position.
  */
-void update_topline_cursor()          {
+void update_topline_cursor(void)          {
   check_cursor();               /* put cursor on valid line */
   update_topline();
   if (!curwin->w_p_wrap)
@@ -7719,10 +7714,7 @@ exarg_T     *eap UNUSED;
  * Execute normal mode command "cmd".
  * "remap" can be REMAP_NONE or REMAP_YES.
  */
-void exec_normal_cmd(cmd, remap, silent)
-char_u      *cmd;
-int remap;
-int silent;
+void exec_normal_cmd(char_u *cmd, int remap, int silent)
 {
   oparg_T oa;
 
@@ -7914,9 +7906,7 @@ char_u      *name;
  * If found return one of the SPEC_ values and set "*usedlen" to the length of
  * the variable.  Otherwise return -1 and "*usedlen" is unchanged.
  */
-int find_cmdline_var(src, usedlen)
-char_u      *src;
-int         *usedlen;
+int find_cmdline_var(char_u *src, int *usedlen)
 {
   int len;
   int i;
@@ -7973,14 +7963,16 @@ int         *usedlen;
  * Returns NULL if no match was found.	"usedlen" then still contains the
  * number of characters to skip.
  */
-char_u * eval_vars(src, srcstart, usedlen, lnump, errormsg, escaped)
-char_u      *src;               /* pointer into commandline */
-char_u      *srcstart;          /* beginning of valid memory for src */
-int         *usedlen;           /* characters after src that are used */
-linenr_T    *lnump;             /* line number for :e command, or NULL */
-char_u      **errormsg;         /* pointer to error message */
-int         *escaped;           /* return value has escaped white space (can
+char_u *
+eval_vars (
+    char_u *src,               /* pointer into commandline */
+    char_u *srcstart,          /* beginning of valid memory for src */
+    int *usedlen,           /* characters after src that are used */
+    linenr_T *lnump,             /* line number for :e command, or NULL */
+    char_u **errormsg,         /* pointer to error message */
+    int *escaped           /* return value has escaped white space (can
                                  * be NULL) */
+)
 {
   int i;
   char_u      *s;
@@ -8188,7 +8180,7 @@ int         *escaped;           /* return value has escaped white space (can
  * Spaces and backslashes in the file names are escaped with a backslash.
  * Returns NULL when out of memory.
  */
-static char_u * arg_all()                     {
+static char_u *arg_all(void)                     {
   int len;
   int idx;
   char_u      *retval = NULL;
@@ -8244,8 +8236,7 @@ static char_u * arg_all()                     {
  *
  * Returns an allocated string, or NULL for any error.
  */
-char_u * expand_sfile(arg)
-char_u      *arg;
+char_u *expand_sfile(char_u *arg)
 {
   char_u      *errormsg;
   int len;
@@ -9019,8 +9010,7 @@ exarg_T     *eap;
 /*
  * Get the name of the view file for the current buffer.
  */
-static char_u * get_view_file(c)
-int c;
+static char_u *get_view_file(int c)
 {
   int len = 0;
   char_u      *p, *s;
@@ -9132,10 +9122,7 @@ exarg_T     *eap;
  * Make a dialog message in "buff[DIALOG_MSG_SIZE]".
  * "format" must contain "%s".
  */
-void dialog_msg(buff, format, fname)
-char_u      *buff;
-char        *format;
-char_u      *fname;
+void dialog_msg(char_u *buff, char *format, char_u *fname)
 {
   if (fname == NULL)
     fname = (char_u *)_("Untitled");

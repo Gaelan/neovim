@@ -163,8 +163,7 @@ static int screen_char_attr = 0;
  * Set must_redraw only if not already set to a higher value.
  * e.g. if must_redraw is CLEAR, type NOT_VALID will do nothing.
  */
-void redraw_later(type)
-int type;
+void redraw_later(int type)
 {
   redraw_win_later(curwin, type);
 }
@@ -186,7 +185,7 @@ int type;
  * Force a complete redraw later.  Also resets the highlighting.  To be used
  * after executing a shell command that messes up the screen.
  */
-void redraw_later_clear()          {
+void redraw_later_clear(void)          {
   redraw_all_later(CLEAR);
   /* Use attributes that is very unlikely to appear in text. */
   screen_attr = HL_BOLD | HL_UNDERLINE | HL_INVERSE;
@@ -195,8 +194,7 @@ void redraw_later_clear()          {
 /*
  * Mark all windows to be redrawn later.
  */
-void redraw_all_later(type)
-int type;
+void redraw_all_later(int type)
 {
   win_T       *wp;
 
@@ -209,8 +207,7 @@ int type;
 /*
  * Mark all windows that are editing the current buffer to be updated later.
  */
-void redraw_curbuf_later(type)
-int type;
+void redraw_curbuf_later(int type)
 {
   redraw_buf_later(curbuf, type);
 }
@@ -233,8 +230,7 @@ int type;
  * right away and restore what was on the command line.
  * Return a code indicating what happened.
  */
-int redraw_asap(type)
-int type;
+int redraw_asap(int type)
 {
   int rows;
   int r;
@@ -385,8 +381,7 @@ int invalid UNUSED;             /* window line height is invalid now */
 /*
  * update all windows that are editing the current buffer
  */
-void update_curbuf(type)
-int type;
+void update_curbuf(int type)
 {
   redraw_curbuf_later(type);
   update_screen(type);
@@ -399,8 +394,7 @@ int type;
  * Based on the current value of curwin->w_topline, transfer a screenfull
  * of stuff from Filemem to ScreenLines[], and update curwin->w_botline.
  */
-void update_screen(type)
-int type;
+void update_screen(int type)
 {
   win_T       *wp;
   static int did_intro = FALSE;
@@ -614,7 +608,7 @@ win_T       *wp;
 /*
  * Check if the cursor line needs to be redrawn because of 'concealcursor'.
  */
-void conceal_check_cursur_line()          {
+void conceal_check_cursur_line(void)          {
   if (curwin->w_p_cole > 0 && conceal_cursor_line(curwin)) {
     need_cursor_line_redraw = TRUE;
     /* Need to recompute cursor column, e.g., when starting Visual mode
@@ -1695,9 +1689,7 @@ static int advance_color_col __ARGS((int vcol, int **color_cols));
 /*
  * Advance **color_cols and return TRUE when there are columns to draw.
  */
-static int advance_color_col(vcol, color_cols)
-int vcol;
-int     **color_cols;
+static int advance_color_col(int vcol, int **color_cols)
 {
   while (**color_cols >= 0 && vcol > **color_cols)
     ++*color_cols;
@@ -2018,11 +2010,7 @@ int row;
 /*
  * Copy "buf[len]" to ScreenLines["off"] and set attributes to "attr".
  */
-static void copy_text_attr(off, buf, len, attr)
-int off;
-char_u      *buf;
-int len;
-int attr;
+static void copy_text_attr(int off, char_u *buf, int len, int attr)
 {
   int i;
 
@@ -4056,9 +4044,7 @@ static int comp_char_differs __ARGS((int, int));
  * Return if the composing characters at "off_from" and "off_to" differ.
  * Only to be used when ScreenLinesUC[off_from] != 0.
  */
-static int comp_char_differs(off_from, off_to)
-int off_from;
-int off_to;
+static int comp_char_differs(int off_from, int off_to)
 {
   int i;
 
@@ -4078,10 +4064,7 @@ int off_to;
  * - the character is multi-byte and the next byte is different
  * - the character is two cells wide and the second cell differs.
  */
-static int char_needs_redraw(off_from, off_to, cols)
-int off_from;
-int off_to;
-int cols;
+static int char_needs_redraw(int off_from, int off_to, int cols)
 {
   if (cols > 0
       && ((ScreenLines[off_from] != ScreenLines[off_to]
@@ -4116,13 +4099,7 @@ int cols;
  *    When TRUE and "clear_width" > 0, clear columns 0 to "endcol"
  *    When FALSE and "clear_width" > 0, clear columns "endcol" to "clear_width"
  */
-static void screen_line(row, coloff, endcol, clear_width
-    , rlflag    )
-int row;
-int coloff;
-int endcol;
-int clear_width;
-int rlflag;
+static void screen_line(int row, int coloff, int endcol, int clear_width, int rlflag)
 {
   unsigned off_from;
   unsigned off_to;
@@ -4376,8 +4353,7 @@ int rlflag;
  * Mirror text "str" for right-left displaying.
  * Only works for single-byte characters (e.g., numbers).
  */
-void rl_mirror(str)
-char_u      *str;
+void rl_mirror(char_u *str)
 {
   char_u      *p1, *p2;
   int t;
@@ -4392,7 +4368,7 @@ char_u      *str;
 /*
  * mark all status lines for redraw; used after first :cd
  */
-void status_redraw_all()          {
+void status_redraw_all(void)          {
   win_T       *wp;
 
   for (wp = firstwin; wp; wp = wp->w_next)
@@ -4405,7 +4381,7 @@ void status_redraw_all()          {
 /*
  * mark all status lines of the current buffer for redraw
  */
-void status_redraw_curbuf()          {
+void status_redraw_curbuf(void)          {
   win_T       *wp;
 
   for (wp = firstwin; wp; wp = wp->w_next)
@@ -4418,7 +4394,7 @@ void status_redraw_curbuf()          {
 /*
  * Redraw all status lines that need to be redrawn.
  */
-void redraw_statuslines()          {
+void redraw_statuslines(void)          {
   win_T       *wp;
 
   for (wp = firstwin; wp; wp = wp->w_next)
@@ -5079,10 +5055,7 @@ theend:
 /*
  * Output a single character directly to the screen and update ScreenLines.
  */
-void screen_putchar(c, row, col, attr)
-int c;
-int row, col;
-int attr;
+void screen_putchar(int c, int row, int col, int attr)
 {
   char_u buf[MB_MAXBYTES + 1];
 
@@ -5099,10 +5072,7 @@ int attr;
  * Get a single character directly from ScreenLines into "bytes[]".
  * Also return its attribute in *attrp;
  */
-void screen_getbytes(row, col, bytes, attrp)
-int row, col;
-char_u  *bytes;
-int     *attrp;
+void screen_getbytes(int row, int col, char_u *bytes, int *attrp)
 {
   unsigned off;
 
@@ -5133,9 +5103,7 @@ static int screen_comp_differs __ARGS((int, int*));
  * composing characters in "u8cc".
  * Only to be used when ScreenLinesUC[off] != 0.
  */
-static int screen_comp_differs(off, u8cc)
-int off;
-int     *u8cc;
+static int screen_comp_differs(int off, int *u8cc)
 {
   int i;
 
@@ -5154,11 +5122,7 @@ int     *u8cc;
  * Note: only outputs within one row, message is truncated at screen boundary!
  * Note: if ScreenLines[], row and/or col is invalid, nothing is done.
  */
-void screen_puts(text, row, col, attr)
-char_u      *text;
-int row;
-int col;
-int attr;
+void screen_puts(char_u *text, int row, int col, int attr)
 {
   screen_puts_len(text, -1, row, col, attr);
 }
@@ -5167,12 +5131,7 @@ int attr;
  * Like screen_puts(), but output "text[len]".  When "len" is -1 output up to
  * a NUL.
  */
-void screen_puts_len(text, len, row, col, attr)
-char_u      *text;
-int len;
-int row;
-int col;
-int attr;
+void screen_puts_len(char_u *text, int len, int row, int col, int attr)
 {
   unsigned off;
   char_u      *ptr = text;
@@ -5383,7 +5342,7 @@ int attr;
 /*
  * Prepare for 'hlsearch' highlighting.
  */
-static void start_search_hl()                 {
+static void start_search_hl(void)                 {
   if (p_hls && !no_hlsearch) {
     last_pat_prog(&search_hl.rm);
     search_hl.attr = hl_attr(HLF_L);
@@ -5395,7 +5354,7 @@ static void start_search_hl()                 {
 /*
  * Clean up for 'hlsearch' highlighting.
  */
-static void end_search_hl()                 {
+static void end_search_hl(void)                 {
   if (search_hl.rm.regprog != NULL) {
     vim_regfree(search_hl.rm.regprog);
     search_hl.rm.regprog = NULL;
@@ -5586,8 +5545,7 @@ colnr_T mincol;                 /* minimal column for a match */
   }
 }
 
-static void screen_start_highlight(attr)
-int attr;
+static void screen_start_highlight(int attr)
 {
   attrentry_T *aep = NULL;
 
@@ -5641,7 +5599,7 @@ int attr;
   }
 }
 
-void screen_stop_highlight()            {
+void screen_stop_highlight(void)            {
   int do_ME = FALSE;                /* output T_ME code */
 
   if (screen_attr != 0
@@ -5716,7 +5674,7 @@ void screen_stop_highlight()            {
  * Reset the colors for a cterm.  Used when leaving Vim.
  * The machine specific code may override this again.
  */
-void reset_cterm_colors()          {
+void reset_cterm_colors(void)          {
   if (t_colors > 1) {
     /* set Normal cterm colors */
     if (cterm_normal_fg_color > 0 || cterm_normal_bg_color > 0) {
@@ -5734,10 +5692,7 @@ void reset_cterm_colors()          {
  * Put character ScreenLines["off"] on the screen at position "row" and "col",
  * using the attributes from ScreenAttrs["off"].
  */
-static void screen_char(off, row, col)
-unsigned off;
-int row;
-int col;
+static void screen_char(unsigned off, int row, int col)
 {
   int attr;
 
@@ -5799,10 +5754,7 @@ int col;
  * The attributes of the first byte is used for all.  This is required to
  * output the two bytes of a double-byte character with nothing in between.
  */
-static void screen_char_2(off, row, col)
-unsigned off;
-int row;
-int col;
+static void screen_char_2(unsigned off, int row, int col)
 {
   /* Check for illegal values (could be wrong when screen was resized). */
   if (off + 1 >= (unsigned)(screen_Rows * screen_Columns))
@@ -5826,12 +5778,7 @@ int col;
  * Draw a rectangle of the screen, inverted when "invert" is TRUE.
  * This uses the contents of ScreenLines[] and doesn't change it.
  */
-void screen_draw_rectangle(row, col, height, width, invert)
-int row;
-int col;
-int height;
-int width;
-int invert;
+void screen_draw_rectangle(int row, int col, int height, int width, int invert)
 {
   int r, c;
   int off;
@@ -5887,11 +5834,7 @@ win_T       *wp;
  * with character 'c1' in first column followed by 'c2' in the other columns.
  * Use attributes 'attr'.
  */
-void screen_fill(start_row, end_row, start_col, end_col, c1, c2, attr)
-int start_row, end_row;
-int start_col, end_col;
-int c1, c2;
-int attr;
+void screen_fill(int start_row, int end_row, int start_col, int end_col, int c1, int c2, int attr)
 {
   int row;
   int col;
@@ -6042,8 +5985,7 @@ int attr;
  * Check if there should be a delay.  Used before clearing or redrawing the
  * screen or the command line.
  */
-void check_for_delay(check_msg_scroll)
-int check_msg_scroll;
+void check_for_delay(int check_msg_scroll)
 {
   if ((emsg_on_display || (check_msg_scroll && msg_scroll))
       && !did_wait_return
@@ -6062,8 +6004,7 @@ int check_msg_scroll;
  *	Returns TRUE if there is a valid screen to write to.
  *	Returns FALSE when starting up and screen not initialized yet.
  */
-int screen_valid(doclear)
-int doclear;
+int screen_valid(int doclear)
 {
   screenalloc(doclear);            /* allocate screen buffers if size changed */
   return ScreenLines != NULL;
@@ -6079,8 +6020,7 @@ int doclear;
  * in ScreenLines[].  Use Rows and Columns for positioning text etc. where the
  * final size of the shell is needed.
  */
-void screenalloc(doclear)
-int doclear;
+void screenalloc(int doclear)
 {
   int new_row, old_row;
   win_T           *wp;
@@ -6327,7 +6267,7 @@ give_up:
   }
 }
 
-void free_screenlines()          {
+void free_screenlines(void)          {
   int i;
 
   vim_free(ScreenLinesUC);
@@ -6341,13 +6281,13 @@ void free_screenlines()          {
   vim_free(TabPageIdxs);
 }
 
-void screenclear()          {
+void screenclear(void)          {
   check_for_delay(FALSE);
   screenalloc(FALSE);       /* allocate screen buffers if size changed */
   screenclear2();           /* clear the screen */
 }
 
-static void screenclear2()                 {
+static void screenclear2(void)                 {
   int i;
 
   if (starting == NO_SCREEN || ScreenLines == NULL
@@ -6394,9 +6334,7 @@ static void screenclear2()                 {
 /*
  * Clear one line in ScreenLines.
  */
-static void lineclear(off, width)
-unsigned off;
-int width;
+static void lineclear(unsigned off, int width)
 {
   (void)vim_memset(ScreenLines + off, ' ', (size_t)width * sizeof(schar_T));
   if (enc_utf8)
@@ -6409,9 +6347,7 @@ int width;
  * Mark one line in ScreenLines invalid by setting the attributes to an
  * invalid value.
  */
-static void lineinvalid(off, width)
-unsigned off;
-int width;
+static void lineinvalid(unsigned off, int width)
 {
   (void)vim_memset(ScreenAttrs + off, -1, (size_t)width * sizeof(sattr_T));
 }
@@ -6449,8 +6385,7 @@ win_T       *wp;
  * Return TRUE if clearing with term string "p" would work.
  * It can't work when the string is empty or it won't set the right background.
  */
-int can_clear(p)
-char_u      *p;
+int can_clear(char_u *p)
 {
   return *p != NUL && (t_colors <= 1
                        || cterm_normal_bg_color == 0 || *T_UT != NUL);
@@ -6461,7 +6396,7 @@ char_u      *p;
  * something directly to the screen (shell commands) or a terminal control
  * code.
  */
-void screen_start()          {
+void screen_start(void)          {
   screen_cur_row = screen_cur_col = 9999;
 }
 
@@ -6470,9 +6405,7 @@ void screen_start()          {
  * This tries to find the most efficient way to move, minimizing the number of
  * characters sent to the terminal.
  */
-void windgoto(row, col)
-int row;
-int col;
+void windgoto(int row, int col)
 {
   sattr_T         *p;
   int i;
@@ -6685,7 +6618,7 @@ int col;
 /*
  * Set cursor to its position in the current window.
  */
-void setcursor()          {
+void setcursor(void)          {
   if (redrawing()) {
     validate_cursor();
     windgoto(W_WINROW(curwin) + curwin->w_wrow,
@@ -7292,7 +7225,7 @@ win_T       *wp UNUSED;         /* NULL or window to use width from */
  * cleared only if a mode is shown.
  * Return the length of the message (0 if no message).
  */
-int showmode()         {
+int showmode(void)         {
   int need_clear;
   int length = 0;
   int do_mode;
@@ -7443,7 +7376,7 @@ int showmode()         {
 /*
  * Position for a mode message.
  */
-static void msg_pos_mode()                 {
+static void msg_pos_mode(void)                 {
   msg_col = 0;
   msg_row = Rows - 1;
 }
@@ -7453,8 +7386,7 @@ static void msg_pos_mode()                 {
  * Insert mode (but Insert mode didn't end yet!).
  * Caller should check "mode_displayed".
  */
-void unshowmode(force)
-int force;
+void unshowmode(int force)
 {
   /*
    * Don't delete it right now, when not redrawing or inside a mapping.
@@ -7472,7 +7404,7 @@ int force;
 /*
  * Draw the tab pages line at the top of the Vim window.
  */
-static void draw_tabline()                 {
+static void draw_tabline(void)                 {
   int tabcount = 0;
   tabpage_T   *tp;
   int tabwidth;
@@ -7635,9 +7567,7 @@ buf_T       *buf;
 /*
  * Get the character to use in a status line.  Get its attributes in "*attr".
  */
-static int fillchar_status(attr, is_curwin)
-int         *attr;
-int is_curwin;
+static int fillchar_status(int *attr, int is_curwin)
 {
   int fill;
   if (is_curwin) {
@@ -7663,8 +7593,7 @@ int is_curwin;
  * Get the character to use in a separator between vertically split windows.
  * Get its attributes in "*attr".
  */
-static int fillchar_vsep(attr)
-int     *attr;
+static int fillchar_vsep(int *attr)
 {
   *attr = hl_attr(HLF_C);
   if (*attr == 0 && fill_vert == ' ')
@@ -7676,7 +7605,7 @@ int     *attr;
 /*
  * Return TRUE if redrawing should currently be done.
  */
-int redrawing()         {
+int redrawing(void)         {
   return !RedrawingDisabled
          && !(p_lz && char_avail() && !KeyTyped && !do_redraw);
 }
@@ -7684,7 +7613,7 @@ int redrawing()         {
 /*
  * Return TRUE if printing messages should currently be done.
  */
-int messaging()         {
+int messaging(void)         {
   return !(p_lz && char_avail() && !KeyTyped);
 }
 
@@ -7692,8 +7621,7 @@ int messaging()         {
  * Show current status info in ruler and various other places
  * If always is FALSE, only show ruler if position has changed.
  */
-void showruler(always)
-int always;
+void showruler(int always)
 {
   if (!always && !redrawing())
     return;
@@ -7922,7 +7850,7 @@ win_T       *wp;
  * Return the current cursor column. This is the actual position on the
  * screen. First column is 0.
  */
-int screen_screencol()         {
+int screen_screencol(void)         {
   return screen_cur_col;
 }
 
@@ -7930,7 +7858,7 @@ int screen_screencol()         {
  * Return the current cursor row. This is the actual position on the screen.
  * First row is 0.
  */
-int screen_screenrow()         {
+int screen_screenrow(void)         {
   return screen_cur_row;
 }
 

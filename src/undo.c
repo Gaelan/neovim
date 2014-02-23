@@ -210,7 +210,7 @@ static void u_check(int newhead_may_be_NULL)                 {
  * Careful: may trigger autocommands that reload the buffer.
  * Returns OK or FAIL.
  */
-int u_save_cursor()         {
+int u_save_cursor(void)         {
   return u_save((linenr_T)(curwin->w_cursor.lnum - 1),
       (linenr_T)(curwin->w_cursor.lnum + 1));
 }
@@ -221,8 +221,7 @@ int u_save_cursor()         {
  * Careful: may trigger autocommands that reload the buffer.
  * Returns FAIL when lines could not be saved, OK otherwise.
  */
-int u_save(top, bot)
-linenr_T top, bot;
+int u_save(linenr_T top, linenr_T bot)
 {
   if (undo_off)
     return OK;
@@ -244,8 +243,7 @@ linenr_T top, bot;
  * Careful: may trigger autocommands that reload the buffer.
  * Returns FAIL when lines could not be saved, OK otherwise.
  */
-int u_savesub(lnum)
-linenr_T lnum;
+int u_savesub(linenr_T lnum)
 {
   if (undo_off)
     return OK;
@@ -259,8 +257,7 @@ linenr_T lnum;
  * Careful: may trigger autocommands that reload the buffer.
  * Returns FAIL when lines could not be saved, OK otherwise.
  */
-int u_inssub(lnum)
-linenr_T lnum;
+int u_inssub(linenr_T lnum)
 {
   if (undo_off)
     return OK;
@@ -275,9 +272,7 @@ linenr_T lnum;
  * Careful: may trigger autocommands that reload the buffer.
  * Returns FAIL when lines could not be saved, OK otherwise.
  */
-int u_savedel(lnum, nlines)
-linenr_T lnum;
-long nlines;
+int u_savedel(linenr_T lnum, long nlines)
 {
   if (undo_off)
     return OK;
@@ -290,7 +285,7 @@ long nlines;
  * Return TRUE when undo is allowed.  Otherwise give an error message and
  * return FALSE.
  */
-int undo_allowed()         {
+int undo_allowed(void)         {
   /* Don't allow changes when 'modifiable' is off.  */
   if (!curbuf->b_p_ma) {
     EMSG(_(e_modifiable));
@@ -318,7 +313,7 @@ int undo_allowed()         {
 /*
  * Get the undolevle value for the current buffer.
  */
-static long get_undolevel()                 {
+static long get_undolevel(void)                 {
   if (curbuf->b_p_ul == NO_LOCAL_UNDOLEVEL)
     return p_ul;
   return curbuf->b_p_ul;
@@ -333,10 +328,7 @@ static long get_undolevel()                 {
  * Careful: may trigger autocommands that reload the buffer.
  * Returns FAIL when lines could not be saved, OK otherwise.
  */
-int u_savecommon(top, bot, newbot, reload)
-linenr_T top, bot;
-linenr_T newbot;
-int reload;
+int u_savecommon(linenr_T top, linenr_T bot, linenr_T newbot, int reload)
 {
   linenr_T lnum;
   long i;
@@ -647,8 +639,7 @@ static char_u e_not_open[] = N_("E828: Cannot open undo file for writing: %s");
 /*
  * Compute the hash for the current buffer text into hash[UNDO_HASH_SIZE].
  */
-void u_compute_hash(hash)
-char_u *hash;
+void u_compute_hash(char_u *hash)
 {
   context_sha256_T ctx;
   linenr_T lnum;
@@ -669,9 +660,7 @@ char_u *hash;
  * When "reading" is FALSE use the first name where the directory exists.
  * Returns NULL when there is no place to write or no file to read.
  */
-char_u * u_get_undo_file_name(buf_ffname, reading)
-char_u      *buf_ffname;
-int reading;
+char_u *u_get_undo_file_name(char_u *buf_ffname, int reading)
 {
   char_u      *dirp;
   char_u dir_name[IOSIZE + 1];
@@ -738,9 +727,7 @@ int reading;
   return undo_file_name;
 }
 
-static void corruption_error(mesg, file_name)
-char *mesg;
-char_u *file_name;
+static void corruption_error(char *mesg, char_u *file_name)
 {
   EMSG3(_("E825: Corrupted undo file (%s): %s"), mesg, file_name);
 }
@@ -1378,10 +1365,7 @@ theend:
  * Otherwise use curbuf->b_ffname to generate the undo file name.
  * "hash[UNDO_HASH_SIZE]" must be the hash value of the buffer text.
  */
-void u_read_undo(name, hash, orig_name)
-char_u *name;
-char_u *hash;
-char_u *orig_name;
+void u_read_undo(char_u *name, char_u *hash, char_u *orig_name)
 {
   char_u      *file_name;
   FILE        *fp;
@@ -1684,8 +1668,7 @@ theend:
  * If 'cpoptions' contains 'u': Undo the previous undo or redo (vi compatible).
  * If 'cpoptions' does not contain 'u': Always undo.
  */
-void u_undo(count)
-int count;
+void u_undo(int count)
 {
   /*
    * If we get an undo command while executing a macro, we behave like the
@@ -1708,8 +1691,7 @@ int count;
  * If 'cpoptions' contains 'u': Repeat the previous undo or redo.
  * If 'cpoptions' does not contain 'u': Always redo.
  */
-void u_redo(count)
-int count;
+void u_redo(int count)
 {
   if (vim_strchr(p_cpo, CPO_UNDO) == NULL)
     undo_undoes = FALSE;
@@ -1719,8 +1701,7 @@ int count;
 /*
  * Undo or redo, depending on 'undo_undoes', 'count' times.
  */
-static void u_doit(startcount)
-int startcount;
+static void u_doit(int startcount)
 {
   int count = startcount;
 
@@ -1788,11 +1769,7 @@ int startcount;
  * When "absolute" is TRUE use "step" as the sequence number to jump to.
  * "sec" must be FALSE then.
  */
-void undo_time(step, sec, file, absolute)
-long step;
-int sec;
-int file;
-int absolute;
+void undo_time(long step, int sec, int file, int absolute)
 {
   long target;
   long closest;
@@ -2099,8 +2076,7 @@ int absolute;
  *
  * When "undo" is TRUE we go up in the tree, when FALSE we go down.
  */
-static void u_undoredo(undo)
-int undo;
+static void u_undoredo(int undo)
 {
   char_u      **newarray = NULL;
   linenr_T oldsize;
@@ -2344,9 +2320,11 @@ int undo;
  * Otherwise, report the number of changes (this may be incorrect
  * in some cases, but it's better than nothing).
  */
-static void u_undo_end(did_undo, absolute)
-int did_undo;                   /* just did an undo */
-int absolute;                   /* used ":undo N" */
+static void 
+u_undo_end (
+    int did_undo,                   /* just did an undo */
+    int absolute                   /* used ":undo N" */
+)
 {
   char        *msgstr;
   u_header_T  *uhp;
@@ -2417,8 +2395,10 @@ int absolute;                   /* used ":undo N" */
 /*
  * u_sync: stop adding to the current entry list
  */
-void u_sync(force)
-int force;              /* Also sync when no_u_sync is set. */
+void 
+u_sync (
+    int force              /* Also sync when no_u_sync is set. */
+)
 {
   /* Skip it when already synced or syncing is disabled. */
   if (curbuf->b_u_synced || (!force && no_u_sync > 0))
@@ -2588,7 +2568,7 @@ buf_T       *buf;
  * After reloading a buffer which was saved for 'undoreload': Find the first
  * line that was changed and set the cursor there.
  */
-void u_find_first_changed()          {
+void u_find_first_changed(void)          {
   u_header_T  *uhp = curbuf->b_u_newhead;
   u_entry_T   *uep;
   linenr_T lnum;
@@ -2664,7 +2644,7 @@ static u_entry_T * u_get_headentry()                        {
  * u_getbot(): compute the line number of the previous u_save
  *		It is called only when b_u_synced is FALSE.
  */
-static void u_getbot()                 {
+static void u_getbot(void)                 {
   u_entry_T   *uep;
   linenr_T extra;
 
@@ -2823,8 +2803,7 @@ buf_T       *buf;
 /*
  * save the line "lnum" for the "U" command
  */
-void u_saveline(lnum)
-linenr_T lnum;
+void u_saveline(linenr_T lnum)
 {
   if (lnum == curbuf->b_u_line_lnum)        /* line is already saved */
     return;
@@ -2844,7 +2823,7 @@ linenr_T lnum;
  * clear the line saved for the "U" command
  * (this is used externally for crossing a line while in insert mode)
  */
-void u_clearline()          {
+void u_clearline(void)          {
   if (curbuf->b_u_line_ptr != NULL) {
     vim_free(curbuf->b_u_line_ptr);
     curbuf->b_u_line_ptr = NULL;
@@ -2858,7 +2837,7 @@ void u_clearline()          {
  * We also allow the cursor to be in another line.
  * Careful: may trigger autocommands that reload the buffer.
  */
-void u_undoline()          {
+void u_undoline(void)          {
   colnr_T t;
   char_u  *oldp;
 
@@ -2908,8 +2887,7 @@ buf_T       *buf;
  * u_save_line(): allocate memory and copy line 'lnum' into it.
  * Returns NULL when out of memory.
  */
-static char_u * u_save_line(lnum)
-linenr_T lnum;
+static char_u *u_save_line(linenr_T lnum)
 {
   return vim_strsave(ml_get(lnum));
 }
@@ -2927,7 +2905,7 @@ buf_T       *buf;
     (buf->b_changed || file_ff_differs(buf, TRUE));
 }
 
-int curbufIsChanged()         {
+int curbufIsChanged(void)         {
   return
     !bt_dontwrite(curbuf) &&
     (curbuf->b_changed || file_ff_differs(curbuf, TRUE));

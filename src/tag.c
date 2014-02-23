@@ -107,12 +107,14 @@ static taggy_T ptag_entry = {NULL, {INIT_POS_T(0, 0, 0), 0}, 0, 0};
  *
  * for cscope, returns TRUE if we jumped to tag or aborted, FALSE otherwise
  */
-int do_tag(tag, type, count, forceit, verbose)
-char_u      *tag;               /* tag (pattern) to jump to */
-int type;
-int count;
-int forceit;                    /* :ta with ! */
-int verbose;                    /* print "tag not found" message */
+int 
+do_tag (
+    char_u *tag,               /* tag (pattern) to jump to */
+    int type,
+    int count,
+    int forceit,                    /* :ta with ! */
+    int verbose                    /* print "tag not found" message */
+)
 {
   taggy_T     *tagstack = curwin->w_tagstack;
   int tagstackidx = curwin->w_tagstackidx;
@@ -910,13 +912,12 @@ end_do_tag:
 /*
  * Free cached tags.
  */
-void tag_freematch()          {
+void tag_freematch(void)          {
   vim_free(tagmatchname);
   tagmatchname = NULL;
 }
 
-static void taglen_advance(l)
-int l;
+static void taglen_advance(int l)
 {
   if (l == MAXCOL) {
     msg_putchar('\n');
@@ -1014,9 +1015,7 @@ static void prepare_pats __ARGS((pat_T *pats, int has_re));
 /*
  * Extract info from the tag search pattern "pats->pat".
  */
-static void prepare_pats(pats, has_re)
-pat_T       *pats;
-int has_re;
+static void prepare_pats(pat_T *pats, int has_re)
 {
   pats->head = pats->pat;
   pats->headlen = pats->len;
@@ -1070,14 +1069,16 @@ int has_re;
  * TAG_NOIC	  don't always ignore case
  * TAG_KEEP_LANG  keep language
  */
-int find_tags(pat, num_matches, matchesp, flags, mincount, buf_ffname)
-char_u      *pat;                       /* pattern to search for */
-int         *num_matches;               /* return: number of matches found */
-char_u      ***matchesp;                /* return: array of matches found */
-int flags;
-int mincount;                           /*  MAXCOL: find all matches
+int 
+find_tags (
+    char_u *pat,                       /* pattern to search for */
+    int *num_matches,               /* return: number of matches found */
+    char_u ***matchesp,                /* return: array of matches found */
+    int flags,
+    int mincount,                           /*  MAXCOL: find all matches
                                              other: minimal number of matches */
-char_u      *buf_ffname;                /* name of buffer for priority */
+    char_u *buf_ffname                /* name of buffer for priority */
+)
 {
   FILE       *fp;
   char_u     *lbuf;                     /* line buffer */
@@ -2030,7 +2031,7 @@ void        *cookie UNUSED;
 }
 
 #if defined(EXITFREE) || defined(PROTO)
-void free_tag_stuff()          {
+void free_tag_stuff(void)          {
   ga_clear_strings(&tag_fnames);
   do_tag(NULL, DT_FREE, 0, 0, 0);
   tag_freematch();
@@ -2169,10 +2170,11 @@ tagname_T   *tnp;
  *
  * Return FAIL if there is a format error in this line, OK otherwise.
  */
-static int parse_tag_line(lbuf,
-    tagp)
-char_u      *lbuf;              /* line to be parsed */
-tagptrs_T   *tagp;
+static int 
+parse_tag_line (
+    char_u *lbuf,              /* line to be parsed */
+    tagptrs_T *tagp
+)
 {
   char_u      *p;
 
@@ -2232,8 +2234,7 @@ tagptrs_T   *tagp;
  * Return TRUE if it is a static tag and adjust *tagname to the real tag.
  * Return FALSE if it is not a static tag.
  */
-static int test_for_static(tagp)
-tagptrs_T   *tagp;
+static int test_for_static(tagptrs_T *tagp)
 {
   char_u      *p;
 
@@ -2274,9 +2275,11 @@ tagptrs_T   *tagp;
  *
  * Return OK or FAIL.
  */
-static int parse_match(lbuf, tagp)
-char_u      *lbuf;          /* input: matching line */
-tagptrs_T   *tagp;          /* output: pointers into the line */
+static int 
+parse_match (
+    char_u *lbuf,          /* input: matching line */
+    tagptrs_T *tagp          /* output: pointers into the line */
+)
 {
   int retval;
   char_u      *p;
@@ -2330,8 +2333,7 @@ tagptrs_T   *tagp;          /* output: pointers into the line */
  * with the matching tag file name.
  * Returns an allocated string or NULL (out of memory).
  */
-static char_u * tag_full_fname(tagp)
-tagptrs_T   *tagp;
+static char_u *tag_full_fname(tagptrs_T *tagp)
 {
   char_u      *fullname;
   int c;
@@ -2352,10 +2354,12 @@ tagptrs_T   *tagp;
  *
  * returns OK for success, NOTAGFILE when file not found, FAIL otherwise.
  */
-static int jumpto_tag(lbuf, forceit, keep_help)
-char_u      *lbuf;              /* line from the tags file for this tag */
-int forceit;                    /* :ta with ! */
-int keep_help;                  /* keep help flag (FALSE for cscope) */
+static int 
+jumpto_tag (
+    char_u *lbuf,              /* line from the tags file for this tag */
+    int forceit,                    /* :ta with ! */
+    int keep_help                  /* keep help flag (FALSE for cscope) */
+)
 {
   int save_secure;
   int save_magic;
@@ -2647,10 +2651,7 @@ erret:
  * according to tag_fname (name of tag file containing fname).
  * Returns a pointer to allocated memory (or NULL when out of memory).
  */
-static char_u * expand_tag_fname(fname, tag_fname, expand)
-char_u      *fname;
-char_u      *tag_fname;
-int expand;
+static char_u *expand_tag_fname(char_u *fname, char_u *tag_fname, int expand)
 {
   char_u      *p;
   char_u      *retval;
@@ -2696,8 +2697,7 @@ int expand;
  * resulting file name is simplified in place and will either be the same
  * length as that supplied, or shorter.
  */
-void simplify_filename(filename)
-char_u      *filename;
+void simplify_filename(char_u *filename)
 {
   int components = 0;
   char_u      *p, *tail, *start;
@@ -2866,11 +2866,7 @@ char_u      *filename;
  * Return TRUE if tag for file "fname" if tag file "tag_fname" is for current
  * file.
  */
-static int test_for_current(fname, fname_end, tag_fname, buf_ffname)
-char_u  *fname;
-char_u  *fname_end;
-char_u  *tag_fname;
-char_u  *buf_ffname;
+static int test_for_current(char_u *fname, char_u *fname_end, char_u *tag_fname, char_u *buf_ffname)
 {
   int c;
   int retval = FALSE;
@@ -2896,8 +2892,7 @@ char_u  *buf_ffname;
  * Find the end of the tagaddress.
  * Return OK if ";\"" is following, FAIL otherwise.
  */
-static int find_extra(pp)
-char_u      **pp;
+static int find_extra(char_u **pp)
 {
   char_u      *str = *pp;
 
@@ -2926,11 +2921,13 @@ char_u      **pp;
   return FAIL;
 }
 
-int expand_tags(tagnames, pat, num_file, file)
-int tagnames;                   /* expand tag names */
-char_u      *pat;
-int         *num_file;
-char_u      ***file;
+int 
+expand_tags (
+    int tagnames,                   /* expand tag names */
+    char_u *pat,
+    int *num_file,
+    char_u ***file
+)
 {
   int i;
   int c;

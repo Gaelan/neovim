@@ -190,7 +190,7 @@ regmmatch_T *regmatch;          /* return: pattern and ignore-case flag */
 /*
  * Get search pattern used by search_regcomp().
  */
-char_u * get_search_pat()              {
+char_u *get_search_pat(void)              {
   return mr_pattern;
 }
 
@@ -198,8 +198,7 @@ char_u * get_search_pat()              {
  * Reverse text into allocated memory.
  * Returns the allocated string, NULL when out of memory.
  */
-char_u * reverse_text(s)
-char_u *s;
+char_u *reverse_text(char_u *s)
 {
   unsigned len;
   unsigned s_i, rev_i;
@@ -229,10 +228,7 @@ char_u *s;
   return rev;
 }
 
-static void save_re_pat(idx, pat, magic)
-int idx;
-char_u      *pat;
-int magic;
+static void save_re_pat(int idx, char_u *pat, int magic)
 {
   if (spats[idx].pat != pat) {
     vim_free(spats[idx].pat);
@@ -253,7 +249,7 @@ int magic;
  */
 static int save_level = 0;
 
-void save_search_patterns()          {
+void save_search_patterns(void)          {
   if (save_level++ == 0) {
     saved_spats[0] = spats[0];
     if (spats[0].pat != NULL)
@@ -266,7 +262,7 @@ void save_search_patterns()          {
   }
 }
 
-void restore_search_patterns()          {
+void restore_search_patterns(void)          {
   if (--save_level == 0) {
     vim_free(spats[0].pat);
     spats[0] = saved_spats[0];
@@ -279,7 +275,7 @@ void restore_search_patterns()          {
 }
 
 #if defined(EXITFREE) || defined(PROTO)
-void free_search_patterns()          {
+void free_search_patterns(void)          {
   vim_free(spats[0].pat);
   vim_free(spats[1].pat);
 
@@ -296,8 +292,7 @@ void free_search_patterns()          {
  * Return TRUE when case should be ignored for search pattern "pat".
  * Uses the 'ignorecase' and 'smartcase' options.
  */
-int ignorecase(pat)
-char_u      *pat;
+int ignorecase(char_u *pat)
 {
   int ic = p_ic;
 
@@ -313,8 +308,7 @@ char_u      *pat;
 /*
  * Return TRUE if patter "pat" has an uppercase character.
  */
-int pat_has_uppercase(pat)
-char_u      *pat;
+int pat_has_uppercase(char_u *pat)
 {
   char_u *p = pat;
 
@@ -342,14 +336,14 @@ char_u      *pat;
   return FALSE;
 }
 
-char_u * last_search_pat()              {
+char_u *last_search_pat(void)              {
   return spats[last_idx].pat;
 }
 
 /*
  * Reset search direction to forward.  For "gd" and "gD" commands.
  */
-void reset_search_dir()          {
+void reset_search_dir(void)          {
   spats[0].off.dir = '/';
   set_vv_searchforward();
 }
@@ -358,11 +352,7 @@ void reset_search_dir()          {
  * Set the last search pattern.  For ":let @/ =" and viminfo.
  * Also set the saved search pattern, so that this works in an autocommand.
  */
-void set_last_search_pat(s, idx, magic, setlast)
-char_u      *s;
-int idx;
-int magic;
-int setlast;
+void set_last_search_pat(char_u *s, int idx, int magic, int setlast)
 {
   vim_free(spats[idx].pat);
   /* An empty string means that nothing should be matched. */
@@ -827,13 +817,12 @@ proftime_T  *tm UNUSED;         /* timeout limit or NULL */
   return submatch + 1;
 }
 
-void set_search_direction(cdir)
-int cdir;
+void set_search_direction(int cdir)
 {
   spats[0].off.dir = cdir;
 }
 
-static void set_vv_searchforward()                 {
+static void set_vv_searchforward(void)                 {
   set_vim_var_nr(VV_SEARCHFORWARD, (long)(spats[0].off.dir == '/'));
 }
 
@@ -1403,11 +1392,7 @@ int initc;
  * is NULL.
  * Handles multibyte string correctly.
  */
-static int check_prevcol(linep, col, ch, prevcol)
-char_u      *linep;
-int col;
-int ch;
-int         *prevcol;
+static int check_prevcol(char_u *linep, int col, int ch, int *prevcol)
 {
   --col;
   if (col > 0 && has_mbyte)
@@ -1945,8 +1930,7 @@ int maxtravel;
  * Return MAXCOL if not, otherwise return the column.
  * TODO: skip strings.
  */
-static int check_linecomment(line)
-char_u      *line;
+static int check_linecomment(char_u *line)
 {
   char_u  *p;
 
@@ -1993,8 +1977,10 @@ char_u      *line;
  * Show the match only if it is visible on the screen.
  * If there isn't a match, then beep.
  */
-void showmatch(c)
-int c;                      /* char to show match for */
+void 
+showmatch (
+    int c                      /* char to show match for */
+)
 {
   pos_T       *lpos, save_cursor;
   pos_T mpos;
@@ -2085,9 +2071,7 @@ int c;                      /* char to show match for */
  * space or a line break. Also stop at an empty line.
  * Return OK if the next sentence was found.
  */
-int findsent(dir, count)
-int dir;
-long count;
+int findsent(int dir, long count)
 {
   pos_T pos, tpos;
   int c;
@@ -2201,12 +2185,14 @@ found:
  * If 'both' is TRUE also stop at '}'.
  * Return TRUE if the next paragraph or section was found.
  */
-int findpar(pincl, dir, count, what, both)
-int         *pincl;         /* Return: TRUE if last char is to be included */
-int dir;
-long count;
-int what;
-int both;
+int 
+findpar (
+    int *pincl,         /* Return: TRUE if last char is to be included */
+    int dir,
+    long count,
+    int what,
+    int both
+)
 {
   linenr_T curr;
   int did_skip;             /* TRUE after separating lines have been skipped */
@@ -2267,9 +2253,7 @@ int both;
 /*
  * check if the string 's' is a nroff macro that is in option 'opt'
  */
-static int inmacro(opt, s)
-char_u      *opt;
-char_u      *s;
+static int inmacro(char_u *opt, char_u *s)
 {
   char_u      *macro;
 
@@ -2296,10 +2280,7 @@ char_u      *s;
  * If 'para' is '{' or '}' only check for sections.
  * If 'both' is TRUE also stop at '}'
  */
-int startPS(lnum, para, both)
-linenr_T lnum;
-int para;
-int both;
+int startPS(linenr_T lnum, int para, int both)
 {
   char_u      *s;
 
@@ -2337,7 +2318,7 @@ static int cls_bigword;         /* TRUE for "W", "B" or "E" */
  * from class 2 and higher are reported as class 1 since only white space
  * boundaries are of interest.
  */
-static int cls()                {
+static int cls(void)                {
   int c;
 
   c = gchar_cursor();
@@ -2375,10 +2356,12 @@ static int cls()                {
  * Returns FAIL if the cursor was already at the end of the file.
  * If eol is TRUE, last word stops at end of line (for operators).
  */
-int fwd_word(count, bigword, eol)
-long count;
-int bigword;                /* "W", "E" or "B" */
-int eol;
+int 
+fwd_word (
+    long count,
+    int bigword,                /* "W", "E" or "B" */
+    int eol
+)
 {
   int sclass;               /* starting class */
   int i;
@@ -2439,10 +2422,7 @@ int eol;
  *
  * Returns FAIL if top of the file was reached.
  */
-int bck_word(count, bigword, stop)
-long count;
-int bigword;
-int stop;
+int bck_word(long count, int bigword, int stop)
 {
   int sclass;               /* starting class */
 
@@ -2499,11 +2479,7 @@ finished:
  * If stop is TRUE and we are already on the end of a word, move one less.
  * If empty is TRUE stop on an empty line.
  */
-int end_word(count, bigword, stop, empty)
-long count;
-int bigword;
-int stop;
-int empty;
+int end_word(long count, int bigword, int stop, int empty)
 {
   int sclass;               /* starting class */
 
@@ -2559,10 +2535,12 @@ finished:
  *
  * Returns FAIL if start of the file was reached.
  */
-int bckend_word(count, bigword, eol)
-long count;
-int bigword;                /* TRUE for "B" */
-int eol;                    /* TRUE: stop at end of line. */
+int 
+bckend_word (
+    long count,
+    int bigword,                /* TRUE for "B" */
+    int eol                    /* TRUE: stop at end of line. */
+)
 {
   int sclass;               /* starting class */
   int i;
@@ -2602,9 +2580,7 @@ int eol;                    /* TRUE: stop at end of line. */
  * Skip a row of characters of the same class.
  * Return TRUE when end-of-file reached, FALSE otherwise.
  */
-static int skip_chars(cclass, dir)
-int cclass;
-int dir;
+static int skip_chars(int cclass, int dir)
 {
   while (cls() == cclass)
     if ((dir == FORWARD ? inc_cursor() : dec_cursor()) == -1)
@@ -2615,7 +2591,7 @@ int dir;
 /*
  * Go back to the start of the word or the start of white space
  */
-static void back_in_line()                 {
+static void back_in_line(void)                 {
   int sclass;                       /* starting class */
 
   sclass = cls();
@@ -2647,9 +2623,11 @@ pos_T    *posp;
 /*
  * Skip count/2 sentences and count/2 separating white spaces.
  */
-static void findsent_forward(count, at_start_sent)
-long count;
-int at_start_sent;              /* cursor is at start of sentence */
+static void 
+findsent_forward (
+    long count,
+    int at_start_sent              /* cursor is at start of sentence */
+)
 {
   while (count--) {
     findsent(FORWARD, 1L);
@@ -3106,8 +3084,7 @@ static int in_html_tag __ARGS((int));
  * Return TRUE if the cursor is on a "<aaa>" tag.  Ignore "<aaa/>".
  * When "end_tag" is TRUE return TRUE if the cursor is on "</aaa>".
  */
-static int in_html_tag(end_tag)
-int end_tag;
+static int in_html_tag(int end_tag)
 {
   char_u      *line = ml_get_curline();
   char_u      *p;
@@ -3509,11 +3486,13 @@ static int find_prev_quote __ARGS((char_u *line, int col_start, int quotechar,
  * as a quote.
  * Returns column number of "quotechar" or -1 when not found.
  */
-static int find_next_quote(line, col, quotechar, escape)
-char_u      *line;
-int col;
-int quotechar;
-char_u      *escape;            /* escape characters, can be NULL */
+static int 
+find_next_quote (
+    char_u *line,
+    int col,
+    int quotechar,
+    char_u *escape            /* escape characters, can be NULL */
+)
 {
   int c;
 
@@ -3539,11 +3518,13 @@ char_u      *escape;            /* escape characters, can be NULL */
  * as a quote.
  * Return the found column or zero.
  */
-static int find_prev_quote(line, col_start, quotechar, escape)
-char_u      *line;
-int col_start;
-int quotechar;
-char_u      *escape;            /* escape characters, can be NULL */
+static int 
+find_prev_quote (
+    char_u *line,
+    int col_start,
+    int quotechar,
+    char_u *escape            /* escape characters, can be NULL */
+)
 {
   int n;
 
@@ -3779,9 +3760,11 @@ static int is_one_char __ARGS((char_u *pattern));
  * Used while an operator is pending, and in Visual mode.
  * TODO: redo only works when used in operator pending mode
  */
-int current_search(count, forward)
-long count;
-int forward;                    /* move forward or backwards */
+int 
+current_search (
+    long count,
+    int forward                    /* move forward or backwards */
+)
 {
   pos_T start_pos;              /* position before the pattern */
   pos_T orig_pos;               /* position of the cursor at beginning */
@@ -3909,8 +3892,7 @@ int forward;                    /* move forward or backwards */
  * Check if the pattern is one character or zero-width.
  * Returns TRUE, FALSE or -1 for failure.
  */
-static int is_one_char(pattern)
-char_u      *pattern;
+static int is_one_char(char_u *pattern)
 {
   regmmatch_T regmatch;
   int nmatched = 0;
@@ -3951,8 +3933,7 @@ char_u      *pattern;
 /*
  * return TRUE if line 'lnum' is empty or has white chars only.
  */
-int linewhite(lnum)
-linenr_T lnum;
+int linewhite(linenr_T lnum)
 {
   char_u  *p;
 

@@ -1087,9 +1087,7 @@ win_T       *to;
 /*
  * get buffer number for file "dir.name"
  */
-static int qf_get_fnum(directory, fname)
-char_u   *directory;
-char_u   *fname;
+static int qf_get_fnum(char_u *directory, char_u *fname)
 {
   if (fname == NULL || *fname == NUL)           /* no file name */
     return 0;
@@ -1131,9 +1129,7 @@ char_u   *fname;
  * push dirbuf onto the directory stack and return pointer to actual dir or
  * NULL on error
  */
-static char_u * qf_push_dir(dirbuf, stackptr)
-char_u              *dirbuf;
-struct dir_stack_T  **stackptr;
+static char_u *qf_push_dir(char_u *dirbuf, struct dir_stack_T **stackptr)
 {
   struct dir_stack_T  *ds_new;
   struct dir_stack_T  *ds_ptr;
@@ -1198,8 +1194,7 @@ struct dir_stack_T  **stackptr;
  * pop dirbuf from the directory stack and return previous directory or NULL if
  * stack is empty
  */
-static char_u * qf_pop_dir(stackptr)
-struct dir_stack_T  **stackptr;
+static char_u *qf_pop_dir(struct dir_stack_T **stackptr)
 {
   struct dir_stack_T  *ds_ptr;
 
@@ -1221,8 +1216,7 @@ struct dir_stack_T  **stackptr;
 /*
  * clean up directory stack
  */
-static void qf_clean_dir_stack(stackptr)
-struct dir_stack_T  **stackptr;
+static void qf_clean_dir_stack(struct dir_stack_T **stackptr)
 {
   struct dir_stack_T  *ds_ptr;
 
@@ -1253,8 +1247,7 @@ struct dir_stack_T  **stackptr;
  * Then qf_push_dir thinks we are in ./aa/bb, but we are in ./bb.
  * qf_guess_filepath will return NULL.
  */
-static char_u * qf_guess_filepath(filename)
-char_u *filename;
+static char_u *qf_guess_filepath(char_u *filename)
 {
   struct dir_stack_T     *ds_ptr;
   struct dir_stack_T     *ds_tmp;
@@ -1831,10 +1824,7 @@ exarg_T     *eap;
  * Remove newlines and leading whitespace from an error message.
  * Put the result in "buf[bufsize]".
  */
-static void qf_fmt_text(text, buf, bufsize)
-char_u      *text;
-char_u      *buf;
-int bufsize;
+static void qf_fmt_text(char_u *text, char_u *buf, int bufsize)
 {
   int i;
   char_u      *p = text;
@@ -1983,8 +1973,7 @@ long amount_after;
  *  other     n		" c n"
  *  1	      x		""	:helpgrep
  */
-static char_u * qf_types(c, nr)
-int c, nr;
+static char_u *qf_types(int c, int nr)
 {
   static char_u buf[20];
   static char_u cc[3];
@@ -2591,7 +2580,7 @@ exarg_T     *eap;
  * Find a new unique name when 'makeef' contains "##".
  * Returns NULL for error.
  */
-static char_u * get_mef_name()                     {
+static char_u *get_mef_name(void)                     {
   char_u      *p;
   char_u      *name;
   static int start = -1;
@@ -3103,10 +3092,7 @@ theend:
  * If "s" is not NULL terminate the pattern with a NUL.
  * Return a pointer to the char just past the pattern plus flags.
  */
-char_u * skip_vimgrep_pat(p, s, flags)
-char_u  *p;
-char_u  **s;
-int     *flags;
+char_u *skip_vimgrep_pat(char_u *p, char_u **s, int *flags)
 {
   int c;
 
@@ -3149,8 +3135,7 @@ int     *flags;
  * Restore current working directory to "dirname_start" if they differ, taking
  * into account whether it is set locally or globally.
  */
-static void restore_start_dir(dirname_start)
-char_u      *dirname_start;
+static void restore_start_dir(char_u *dirname_start)
 {
   char_u *dirname_now = alloc(MAXPATHL);
 

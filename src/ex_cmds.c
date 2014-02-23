@@ -204,8 +204,7 @@ exarg_T     *eap;
 /*
  * Get the length of the current line, excluding trailing white space.
  */
-static int linelen(has_tab)
-int     *has_tab;
+static int linelen(int *has_tab)
 {
   char_u  *line;
   char_u  *first;
@@ -252,9 +251,7 @@ typedef struct {
 static int
 sort_compare __ARGS((const void *s1, const void *s2));
 
-static int sort_compare(s1, s2)
-const void  *s1;
-const void  *s2;
+static int sort_compare(const void *s1, const void *s2)
 {
   sorti_T l1 = *(sorti_T *)s1;
   sorti_T l2 = *(sorti_T *)s2;
@@ -642,10 +639,7 @@ exarg_T     *eap;
  *
  * return FAIL for failure, OK otherwise
  */
-int do_move(line1, line2, dest)
-linenr_T line1;
-linenr_T line2;
-linenr_T dest;
+int do_move(linenr_T line1, linenr_T line2, linenr_T dest)
 {
   char_u      *str;
   linenr_T l;
@@ -747,10 +741,7 @@ linenr_T dest;
 /*
  * ":copy"
  */
-void ex_copy(line1, line2, n)
-linenr_T line1;
-linenr_T line2;
-linenr_T n;
+void ex_copy(linenr_T line1, linenr_T line2, linenr_T n)
 {
   linenr_T count;
   char_u      *p;
@@ -802,7 +793,7 @@ linenr_T n;
 static char_u   *prevcmd = NULL;        /* the previous command */
 
 #if defined(EXITFREE) || defined(PROTO)
-void free_prev_shellcmd()          {
+void free_prev_shellcmd(void)          {
   vim_free(prevcmd);
 }
 
@@ -1164,9 +1155,11 @@ filterend:
  * Call a shell to execute a command.
  * When "cmd" is NULL start an interactive shell.
  */
-void do_shell(cmd, flags)
-char_u      *cmd;
-int flags;              /* may be SHELL_DOOUT when output is redirected */
+void 
+do_shell (
+    char_u *cmd,
+    int flags              /* may be SHELL_DOOUT when output is redirected */
+)
 {
   buf_T       *buf;
   int save_nwr;
@@ -1269,10 +1262,12 @@ int flags;              /* may be SHELL_DOOUT when output is redirected */
  * output redirection file.
  * Returns an allocated string with the shell command, or NULL for failure.
  */
-char_u * make_filter_cmd(cmd, itmp, otmp)
-char_u      *cmd;               /* command */
-char_u      *itmp;              /* NULL or name of input file */
-char_u      *otmp;              /* NULL or name of output file */
+char_u *
+make_filter_cmd (
+    char_u *cmd,               /* command */
+    char_u *itmp,              /* NULL or name of input file */
+    char_u *otmp              /* NULL or name of output file */
+)
 {
   char_u      *buf;
   long_u len;
@@ -1342,11 +1337,7 @@ char_u      *otmp;              /* NULL or name of output file */
  * The caller should make sure that there is enough room:
  *	STRLEN(opt) + STRLEN(fname) + 3
  */
-void append_redir(buf, buflen, opt, fname)
-char_u      *buf;
-int buflen;
-char_u      *opt;
-char_u      *fname;
+void append_redir(char_u *buf, int buflen, char_u *opt, char_u *fname)
 {
   char_u      *p;
   char_u      *end;
@@ -1373,7 +1364,7 @@ char_u      *fname;
 static int no_viminfo __ARGS((void));
 static int viminfo_errcnt;
 
-static int no_viminfo()                {
+static int no_viminfo(void)                {
   /* "vim -i NONE" does not read or write a viminfo file */
   return use_viminfo != NULL && STRCMP(use_viminfo, "NONE") == 0;
 }
@@ -1382,10 +1373,7 @@ static int no_viminfo()                {
  * Report an error for reading a viminfo file.
  * Count the number of errors.	When there are more than 10, return TRUE.
  */
-int viminfo_error(errnum, message, line)
-char    *errnum;
-char    *message;
-char_u  *line;
+int viminfo_error(char *errnum, char *message, char_u *line)
 {
   vim_snprintf((char *)IObuff, IOSIZE, _("%sviminfo: %s in line: "),
       errnum, message);
@@ -1404,9 +1392,11 @@ char_u  *line;
  * read_viminfo() -- Read the viminfo file.  Registers etc. which are already
  * set are not over-written unless "flags" includes VIF_FORCEIT. -- webb
  */
-int read_viminfo(file, flags)
-char_u      *file;          /* file name or NULL to use default name */
-int flags;                  /* VIF_WANT_INFO et al. */
+int 
+read_viminfo (
+    char_u *file,          /* file name or NULL to use default name */
+    int flags                  /* VIF_WANT_INFO et al. */
+)
 {
   FILE        *fp;
   char_u      *fname;
@@ -1448,9 +1438,7 @@ int flags;                  /* VIF_WANT_INFO et al. */
  * If "forceit" is TRUE, then the old file is not read in, and only internal
  * info is written to the file.
  */
-void write_viminfo(file, forceit)
-char_u      *file;
-int forceit;
+void write_viminfo(char_u *file, int forceit)
 {
   char_u      *fname;
   FILE        *fp_in = NULL;    /* input viminfo file, if any */
@@ -1678,8 +1666,7 @@ end:
  * expand environment variables.
  * Returns an allocated string.  NULL when out of memory.
  */
-static char_u * viminfo_filename(file)
-char_u      *file;
+static char_u *viminfo_filename(char_u *file)
 {
   if (file == NULL || *file == NUL) {
     if (use_viminfo != NULL)
@@ -1993,10 +1980,7 @@ exarg_T     *eap UNUSED;
       && *p == DEL ? (char_u *)CTRL_H_STR : DEL_STR, FALSE);
 }
 
-void print_line_no_prefix(lnum, use_number, list)
-linenr_T lnum;
-int use_number;
-int list;
+void print_line_no_prefix(linenr_T lnum, int use_number, int list)
 {
   char_u numbuf[30];
 
@@ -2011,10 +1995,7 @@ int list;
 /*
  * Print a text line.  Also in silent mode ("ex -s").
  */
-void print_line(lnum, use_number, list)
-linenr_T lnum;
-int use_number;
-int list;
+void print_line(linenr_T lnum, int use_number, int list)
 {
   int save_silent = silent_mode;
 
@@ -2031,8 +2012,7 @@ int list;
   info_message = FALSE;
 }
 
-int rename_buffer(new_fname)
-char_u      *new_fname;
+int rename_buffer(char_u *new_fname)
 {
   char_u      *fname, *sfname, *xfname;
   buf_T       *buf;
@@ -2453,7 +2433,7 @@ exarg_T     *eap;
  * Check the 'write' option.
  * Return TRUE and give a message when it's not st.
  */
-int not_writing()         {
+int not_writing(void)         {
   if (p_write)
     return FALSE;
   EMSG(_("E142: File not written: Writing is disabled by 'write' option"));
@@ -2517,13 +2497,7 @@ buf_T       *buf;
  * -1 for successfully opening another file.
  * 'lnum' is the line number for the cursor in the new file (if non-zero).
  */
-int getfile(fnum, ffname, sfname, setpm, lnum, forceit)
-int fnum;
-char_u      *ffname;
-char_u      *sfname;
-int setpm;
-linenr_T lnum;
-int forceit;
+int getfile(int fnum, char_u *ffname, char_u *sfname, int setpm, linenr_T lnum, int forceit)
 {
   int other;
   int retval;
@@ -3173,8 +3147,7 @@ theend:
   return retval;
 }
 
-static void delbuf_msg(name)
-char_u      *name;
+static void delbuf_msg(char_u *name)
 {
   EMSG2(_("E143: Autocommands unexpectedly deleted new buffer %s"),
       name == NULL ? (char_u *)"" : name);
@@ -3460,7 +3433,7 @@ exarg_T     *eap;
  * If so, give an error message and return TRUE.
  * Otherwise, return FALSE.
  */
-int check_restricted()         {
+int check_restricted(void)         {
   if (restricted) {
     EMSG(_("E145: Shell commands not allowed in rvim"));
     return TRUE;
@@ -3473,7 +3446,7 @@ int check_restricted()         {
  * If so, give an error message and return TRUE.
  * Otherwise, return FALSE.
  */
-int check_secure()         {
+int check_secure(void)         {
   if (secure) {
     secure = 2;
     EMSG(_(e_curdir));
@@ -4416,8 +4389,10 @@ outofmem:
  * Can also be used after a ":global" command.
  * Return TRUE if a message was given.
  */
-int do_sub_msg(count_only)
-int count_only;                 /* used 'n' flag for ":s" */
+int 
+do_sub_msg (
+    int count_only                 /* used 'n' flag for ":s" */
+)
 {
   /*
    * Only report substitutions when:
@@ -4571,8 +4546,7 @@ exarg_T     *eap;
 /*
  * Execute "cmd" on lines marked with ml_setmarked().
  */
-void global_exe(cmd)
-char_u      *cmd;
+void global_exe(char_u *cmd)
 {
   linenr_T old_lcount;          /* b_ml.ml_line_count before the command */
   buf_T    *old_buf = curbuf;   /* remember what buffer we started in */
@@ -4647,7 +4621,7 @@ FILE    *fp;
 }
 
 #if defined(EXITFREE) || defined(PROTO)
-void free_old_sub()          {
+void free_old_sub(void)          {
   vim_free(old_sub);
 }
 
@@ -4657,8 +4631,10 @@ void free_old_sub()          {
  * Set up for a tagpreview.
  * Return TRUE when it was created.
  */
-int prepare_tagpreview(undo_sync)
-int undo_sync;                  /* sync undo when leaving the window */
+int 
+prepare_tagpreview (
+    int undo_sync                  /* sync undo when leaving the window */
+)
 {
   win_T       *wp;
 
@@ -4870,8 +4846,7 @@ erret:
  * Changes the "@" to NUL if found, and returns a pointer to "xx".
  * Returns NULL if not found.
  */
-char_u * check_help_lang(arg)
-char_u *arg;
+char_u *check_help_lang(char_u *arg)
 {
   int len = (int)STRLEN(arg);
 
@@ -4894,10 +4869,12 @@ char_u *arg;
  * Assumption is made that the matched_string passed has already been found to
  * match some string for which help is requested.  webb.
  */
-int help_heuristic(matched_string, offset, wrong_case)
-char_u      *matched_string;
-int offset;                             /* offset for match */
-int wrong_case;                         /* no matching case */
+int 
+help_heuristic (
+    char_u *matched_string,
+    int offset,                             /* offset for match */
+    int wrong_case                         /* no matching case */
+)
 {
   int num_letters;
   char_u      *p;
@@ -4934,9 +4911,7 @@ int wrong_case;                         /* no matching case */
  * Compare functions for qsort() below, that checks the help heuristics number
  * that has been put after the tagname by find_tags().
  */
-static int help_compare(s1, s2)
-const void  *s1;
-const void  *s2;
+static int help_compare(const void *s1, const void *s2)
 {
   char    *p1;
   char    *p2;
@@ -4952,11 +4927,7 @@ const void  *s2;
  * The matches will be sorted with a "best" match algorithm.
  * When "keep_lang" is TRUE try keeping the language of the current buffer.
  */
-int find_help_tags(arg, num_matches, matches, keep_lang)
-char_u      *arg;
-int         *num_matches;
-char_u      ***matches;
-int keep_lang;
+int find_help_tags(char_u *arg, int *num_matches, char_u ***matches, int keep_lang)
 {
   char_u      *s, *d;
   int i;
@@ -5135,7 +5106,7 @@ int keep_lang;
  * After reading a help file: May cleanup a help buffer when syntax
  * highlighting is not used.
  */
-void fix_help_buffer()          {
+void fix_help_buffer(void)          {
   linenr_T lnum;
   char_u      *line;
   int in_example = FALSE;
@@ -5454,11 +5425,13 @@ exarg_T     *eap;
   vim_free(dirname);
 }
 
-static void helptags_one(dir, ext, tagfname, add_help_tags)
-char_u      *dir;               /* doc directory */
-char_u      *ext;               /* suffix, ".txt", ".itx", ".frx", etc. */
-char_u      *tagfname;          /* "tags" for English, "tags-fr" for French. */
-int add_help_tags;              /* add "help-tags" tag */
+static void 
+helptags_one (
+    char_u *dir,               /* doc directory */
+    char_u *ext,               /* suffix, ".txt", ".itx", ".frx", etc. */
+    char_u *tagfname,          /* "tags" for English, "tags-fr" for French. */
+    int add_help_tags              /* add "help-tags" tag */
+)
 {
   FILE        *fd_tags;
   FILE        *fd;

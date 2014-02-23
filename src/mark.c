@@ -38,8 +38,7 @@ static void write_one_filemark __ARGS((FILE *fp, xfmark_T *fm, int c1, int c2));
  * Set named mark "c" at current cursor position.
  * Returns OK on success, FAIL if bad name given.
  */
-int setmark(c)
-int c;
+int setmark(int c)
 {
   return setmark_pos(c, &curwin->w_cursor, curbuf->b_fnum);
 }
@@ -120,7 +119,7 @@ int fnum;
  * Set the previous context mark to the current position and add it to the
  * jump list.
  */
-void setpcmark()          {
+void setpcmark(void)          {
   int i;
   xfmark_T    *fm;
 #ifdef JUMPLIST_ROTATE
@@ -172,7 +171,7 @@ void setpcmark()          {
  * context will only be changed if the cursor moved to a different line.
  * If pcmark was deleted (with "dG") the previous mark is restored.
  */
-void checkpcmark()          {
+void checkpcmark(void)          {
   if (curwin->w_prev_pcmark.lnum != 0
       && (equalpos(curwin->w_pcmark, curwin->w_cursor)
           || curwin->w_pcmark.lnum == 0)) {
@@ -896,11 +895,7 @@ exarg_T     *eap UNUSED;
  * Example: Insert two lines below 55: mark_adjust(56, MAXLNUM, 2, 0);
  *				   or: mark_adjust(56, 55, MAXLNUM, 2);
  */
-void mark_adjust(line1, line2, amount, amount_after)
-linenr_T line1;
-linenr_T line2;
-long amount;
-long amount_after;
+void mark_adjust(linenr_T line1, linenr_T line2, long amount, long amount_after)
 {
   int i;
   int fnum = curbuf->b_fnum;
@@ -1043,11 +1038,7 @@ long amount_after;
  * "lnum_amount" to the line number and add "col_amount" to the column
  * position.
  */
-void mark_col_adjust(lnum, mincol, lnum_amount, col_amount)
-linenr_T lnum;
-colnr_T mincol;
-long lnum_amount;
-long col_amount;
+void mark_col_adjust(linenr_T lnum, colnr_T mincol, long lnum_amount, long col_amount)
 {
   int i;
   int fnum = curbuf->b_fnum;
@@ -1118,7 +1109,7 @@ long col_amount;
  * When deleting lines, this may create duplicate marks in the
  * jumplist. They will be removed here for the current window.
  */
-static void cleanup_jumplist()                 {
+static void cleanup_jumplist(void)                 {
   int i;
   int from, to;
 
@@ -1181,7 +1172,7 @@ win_T       *win;
 }
 
 #if defined(EXITFREE) || defined(PROTO)
-void free_all_marks()          {
+void free_all_marks(void)          {
   int i;
 
   for (i = 0; i < NMARKS + EXTRA_MARKS; i++)
@@ -1323,8 +1314,7 @@ int c2;
 /*
  * Return TRUE if "name" is on removable media (depending on 'viminfo').
  */
-int removable(name)
-char_u  *name;
+int removable(char_u *name)
 {
   char_u  *p;
   char_u part[51];

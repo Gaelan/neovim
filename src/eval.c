@@ -816,7 +816,7 @@ static void setwinvar __ARGS((typval_T *argvars, typval_T *rettv, int off));
 /*
  * Initialize the global and v: variables.
  */
-void eval_init()          {
+void eval_init(void)          {
   int i;
   struct vimvar   *p;
 
@@ -850,7 +850,7 @@ void eval_init()          {
 }
 
 #if defined(EXITFREE) || defined(PROTO)
-void eval_clear()          {
+void eval_clear(void)          {
   int i;
   struct vimvar   *p;
 
@@ -899,8 +899,7 @@ void eval_clear()          {
 /*
  * Return the name of the executed function.
  */
-char_u * func_name(cookie)
-void *cookie;
+char_u *func_name(void *cookie)
 {
   return ((funccall_T *)cookie)->func->uf_name;
 }
@@ -908,8 +907,7 @@ void *cookie;
 /*
  * Return the address holding the next breakpoint line for a funccall cookie.
  */
-linenr_T * func_breakpoint(cookie)
-void *cookie;
+linenr_T *func_breakpoint(void *cookie)
 {
   return &((funccall_T *)cookie)->breakpoint;
 }
@@ -917,8 +915,7 @@ void *cookie;
 /*
  * Return the address holding the debug tick for a funccall cookie.
  */
-int * func_dbg_tick(cookie)
-void *cookie;
+int *func_dbg_tick(void *cookie)
 {
   return &((funccall_T *)cookie)->dbg_tick;
 }
@@ -926,8 +923,7 @@ void *cookie;
 /*
  * Return the nesting level for a funccall cookie.
  */
-int func_level(cookie)
-void *cookie;
+int func_level(void *cookie)
 {
   return ((funccall_T *)cookie)->level;
 }
@@ -942,7 +938,7 @@ funccall_T *previous_funccal = NULL;
 /*
  * Return TRUE when a function was ended by a ":return" command.
  */
-int current_func_returned()         {
+int current_func_returned(void)         {
   return current_funccal->returned;
 }
 
@@ -950,9 +946,7 @@ int current_func_returned()         {
  * Set an internal variable to a string value. Creates the variable if it does
  * not already exist.
  */
-void set_internal_string_var(name, value)
-char_u      *name;
-char_u      *value;
+void set_internal_string_var(char_u *name, char_u *value)
 {
   char_u      *val;
   typval_T    *tvp;
@@ -976,9 +970,11 @@ static char_u   *redir_varname = NULL;
  * Start recording command output to a variable
  * Returns OK if successfully completed the setup.  FAIL otherwise.
  */
-int var_redir_start(name, append)
-char_u      *name;
-int append;                     /* append to an existing variable */
+int 
+var_redir_start (
+    char_u *name,
+    int append                     /* append to an existing variable */
+)
 {
   int save_emsg;
   int err;
@@ -1051,9 +1047,7 @@ int append;                     /* append to an existing variable */
  *   :let foo
  *   :redir END
  */
-void var_redir_str(value, value_len)
-char_u      *value;
-int value_len;
+void var_redir_str(char_u *value, int value_len)
 {
   int len;
 
@@ -1076,7 +1070,7 @@ int value_len;
  * Stop redirecting command output to a variable.
  * Frees the allocated memory.
  */
-void var_redir_stop()          {
+void var_redir_stop(void)          {
   typval_T tv;
 
   if (redir_lval != NULL) {
@@ -1105,11 +1099,7 @@ void var_redir_stop()          {
   redir_varname = NULL;
 }
 
-int eval_charconvert(enc_from, enc_to, fname_from, fname_to)
-char_u      *enc_from;
-char_u      *enc_to;
-char_u      *fname_from;
-char_u      *fname_to;
+int eval_charconvert(char_u *enc_from, char_u *enc_to, char_u *fname_from, char_u *fname_to)
 {
   int err = FALSE;
 
@@ -1129,9 +1119,7 @@ char_u      *fname_to;
   return OK;
 }
 
-int eval_printexpr(fname, args)
-char_u      *fname;
-char_u      *args;
+int eval_printexpr(char_u *fname, char_u *args)
 {
   int err = FALSE;
 
@@ -1149,10 +1137,7 @@ char_u      *args;
   return OK;
 }
 
-void eval_diff(origfile, newfile, outfile)
-char_u      *origfile;
-char_u      *newfile;
-char_u      *outfile;
+void eval_diff(char_u *origfile, char_u *newfile, char_u *outfile)
 {
   int err = FALSE;
 
@@ -1165,10 +1150,7 @@ char_u      *outfile;
   set_vim_var_string(VV_FNAME_OUT, NULL, -1);
 }
 
-void eval_patch(origfile, difffile, outfile)
-char_u      *origfile;
-char_u      *difffile;
-char_u      *outfile;
+void eval_patch(char_u *origfile, char_u *difffile, char_u *outfile)
 {
   int err;
 
@@ -1186,11 +1168,13 @@ char_u      *outfile;
  * Sets "error" to TRUE if there was an error.
  * Return TRUE or FALSE.
  */
-int eval_to_bool(arg, error, nextcmd, skip)
-char_u      *arg;
-int         *error;
-char_u      **nextcmd;
-int skip;                   /* only parse, don't execute */
+int 
+eval_to_bool (
+    char_u *arg,
+    int *error,
+    char_u **nextcmd,
+    int skip                   /* only parse, don't execute */
+)
 {
   typval_T tv;
   int retval = FALSE;
@@ -1217,10 +1201,12 @@ int skip;                   /* only parse, don't execute */
  * only parsing to "nextcmd" is done, without reporting errors.  Return
  * pointer to allocated memory, or NULL for failure or when "skip" is TRUE.
  */
-char_u * eval_to_string_skip(arg, nextcmd, skip)
-char_u      *arg;
-char_u      **nextcmd;
-int skip;                   /* only parse, don't execute */
+char_u *
+eval_to_string_skip (
+    char_u *arg,
+    char_u **nextcmd,
+    int skip                   /* only parse, don't execute */
+)
 {
   typval_T tv;
   char_u      *retval;
@@ -1243,8 +1229,7 @@ int skip;                   /* only parse, don't execute */
  * Skip over an expression at "*pp".
  * Return FAIL for an error, OK otherwise.
  */
-int skip_expr(pp)
-char_u      **pp;
+int skip_expr(char_u **pp)
 {
   typval_T rettv;
 
@@ -1258,10 +1243,7 @@ char_u      **pp;
  * a Float to a String.
  * Return pointer to allocated memory, or NULL for failure.
  */
-char_u * eval_to_string(arg, nextcmd, convert)
-char_u      *arg;
-char_u      **nextcmd;
-int convert;
+char_u *eval_to_string(char_u *arg, char_u **nextcmd, int convert)
 {
   typval_T tv;
   char_u      *retval;
@@ -1295,10 +1277,7 @@ int convert;
  * Call eval_to_string() without using current local variables and using
  * textlock.  When "use_sandbox" is TRUE use the sandbox.
  */
-char_u * eval_to_string_safe(arg, nextcmd, use_sandbox)
-char_u      *arg;
-char_u      **nextcmd;
-int use_sandbox;
+char_u *eval_to_string_safe(char_u *arg, char_u **nextcmd, int use_sandbox)
 {
   char_u      *retval;
   void        *save_funccalp;
@@ -1320,8 +1299,7 @@ int use_sandbox;
  * Evaluates "expr" silently.
  * Returns -1 for an error.
  */
-int eval_to_number(expr)
-char_u      *expr;
+int eval_to_number(char_u *expr)
 {
   typval_T rettv;
   int retval;
@@ -1527,11 +1505,13 @@ typval_T    *rettv;
  * Returns -1 when calling the function fails.
  * Uses argv[argc] for the function arguments.
  */
-long call_func_retnr(func, argc, argv, safe)
-char_u      *func;
-int argc;
-char_u      **argv;
-int safe;                       /* use the sandbox */
+long 
+call_func_retnr (
+    char_u *func,
+    int argc,
+    char_u **argv,
+    int safe                       /* use the sandbox */
+)
 {
   typval_T rettv;
   long retval;
@@ -1553,11 +1533,13 @@ int safe;                       /* use the sandbox */
  * Returns NULL when calling the function fails.
  * Uses argv[argc] for the function arguments.
  */
-void * call_func_retstr(func, argc, argv, safe)
-char_u      *func;
-int argc;
-char_u      **argv;
-int safe;                       /* use the sandbox */
+void *
+call_func_retstr (
+    char_u *func,
+    int argc,
+    char_u **argv,
+    int safe                       /* use the sandbox */
+)
 {
   typval_T rettv;
   char_u      *retval;
@@ -1576,11 +1558,13 @@ int safe;                       /* use the sandbox */
  * Uses argv[argc] for the function arguments.
  * Returns NULL when there is something wrong.
  */
-void * call_func_retlist(func, argc, argv, safe)
-char_u      *func;
-int argc;
-char_u      **argv;
-int safe;                       /* use the sandbox */
+void *
+call_func_retlist (
+    char_u *func,
+    int argc,
+    char_u **argv,
+    int safe                       /* use the sandbox */
+)
 {
   typval_T rettv;
 
@@ -1601,15 +1585,14 @@ int safe;                       /* use the sandbox */
  * Save the current function call pointer, and set it to NULL.
  * Used when executing autocommands and for ":source".
  */
-void * save_funccal()            {
+void *save_funccal(void)            {
   funccall_T *fc = current_funccal;
 
   current_funccal = NULL;
   return (void *)fc;
 }
 
-void restore_funccal(vfc)
-void *vfc;
+void restore_funccal(void *vfc)
 {
   funccall_T *fc = (funccall_T *)vfc;
 
@@ -1654,9 +1637,7 @@ proftime_T *tm;         /* where waittime was stored */
  * Evaluate 'foldexpr'.  Returns the foldlevel, and any character preceding
  * it in "*cp".  Doesn't give error messages.
  */
-int eval_foldexpr(arg, cp)
-char_u      *arg;
-int         *cp;
+int eval_foldexpr(char_u *arg, int *cp)
 {
   typval_T tv;
   int retval;
@@ -1863,10 +1844,7 @@ char_u      *nextchars;
  * for "[var, var; var]" set "semicolon".
  * Return NULL for an error.
  */
-static char_u * skip_var_list(arg, var_count, semicolon)
-char_u      *arg;
-int         *var_count;
-int         *semicolon;
+static char_u *skip_var_list(char_u *arg, int *var_count, int *semicolon)
 {
   char_u      *p, *s;
 
@@ -1905,8 +1883,7 @@ int         *semicolon;
  * Skip one (assignable) variable name, including @r, $VAR, &option, d.key,
  * l[idx].
  */
-static char_u * skip_var_one(arg)
-char_u      *arg;
+static char_u *skip_var_one(char_u *arg)
 {
   if (*arg == '@' && arg[1] != NUL)
     return arg + 2;
@@ -1943,8 +1920,7 @@ int         *first;
 /*
  * List global variables.
  */
-static void list_glob_vars(first)
-int *first;
+static void list_glob_vars(int *first)
 {
   list_hashtable_vars(&globvarht, (char_u *)"", TRUE, first);
 }
@@ -1952,8 +1928,7 @@ int *first;
 /*
  * List buffer variables.
  */
-static void list_buf_vars(first)
-int *first;
+static void list_buf_vars(int *first)
 {
   char_u numbuf[NUMBUFLEN];
 
@@ -1968,8 +1943,7 @@ int *first;
 /*
  * List window variables.
  */
-static void list_win_vars(first)
-int *first;
+static void list_win_vars(int *first)
 {
   list_hashtable_vars(&curwin->w_vars->dv_hashtab,
       (char_u *)"w:", TRUE, first);
@@ -1978,8 +1952,7 @@ int *first;
 /*
  * List tab page variables.
  */
-static void list_tab_vars(first)
-int *first;
+static void list_tab_vars(int *first)
 {
   list_hashtable_vars(&curtab->tp_vars->dv_hashtab,
       (char_u *)"t:", TRUE, first);
@@ -1988,8 +1961,7 @@ int *first;
 /*
  * List Vim variables.
  */
-static void list_vim_vars(first)
-int *first;
+static void list_vim_vars(int *first)
 {
   list_hashtable_vars(&vimvarht, (char_u *)"v:", FALSE, first);
 }
@@ -1997,8 +1969,7 @@ int *first;
 /*
  * List script-local variables, if there is a script.
  */
-static void list_script_vars(first)
-int *first;
+static void list_script_vars(int *first)
 {
   if (current_SID > 0 && current_SID <= ga_scripts.ga_len)
     list_hashtable_vars(&SCRIPT_VARS(current_SID),
@@ -2008,8 +1979,7 @@ int *first;
 /*
  * List function variables, if there is a function.
  */
-static void list_func_vars(first)
-int *first;
+static void list_func_vars(int *first)
 {
   if (current_funccal != NULL)
     list_hashtable_vars(&current_funccal->l_vars.dv_hashtab,
@@ -2278,8 +2248,7 @@ char_u      *op;                /* "+", "-", "."  or NULL*/
 /*
  * If "arg" is equal to "b:changedtick" give an error and return TRUE.
  */
-static int check_changedtick(arg)
-char_u      *arg;
+static int check_changedtick(char_u *arg)
 {
   if (STRNCMP(arg, "b:changedtick", 13) == 0 && !eval_isnamec(arg[13])) {
     EMSG2(_(e_readonlyvar), arg);
@@ -2608,8 +2577,7 @@ int fne_flags;              /* flags for find_name_end() */
 /*
  * Clear lval "lp" that was filled by get_lval().
  */
-static void clear_lval(lp)
-lval_T      *lp;
+static void clear_lval(lval_T *lp)
 {
   vim_free(lp->ll_exp_name);
   vim_free(lp->ll_newkey);
@@ -2865,11 +2833,7 @@ listitem_T  *item;
  * Set "*errp" to TRUE for an error, FALSE otherwise;
  * Return a pointer that holds the info.  Null when there is an error.
  */
-void * eval_for_line(arg, errp, nextcmdp, skip)
-char_u      *arg;
-int         *errp;
-char_u      **nextcmdp;
-int skip;
+void *eval_for_line(char_u *arg, int *errp, char_u **nextcmdp, int skip)
 {
   forinfo_T   *fi;
   char_u      *expr;
@@ -2922,9 +2886,7 @@ int skip;
  * Return TRUE when a valid item was found, FALSE when at end of list or
  * something wrong.
  */
-int next_for_item(fi_void, arg)
-void        *fi_void;
-char_u      *arg;
+int next_for_item(void *fi_void, char_u *arg)
 {
   forinfo_T   *fi = (forinfo_T *)fi_void;
   int result;
@@ -2944,8 +2906,7 @@ char_u      *arg;
 /*
  * Free the structure used to store info used by ":for".
  */
-void free_for_info(fi_void)
-void *fi_void;
+void free_for_info(void *fi_void)
 {
   forinfo_T    *fi = (forinfo_T *)fi_void;
 
@@ -3232,10 +3193,7 @@ int deep;
   eap->nextcmd = check_nextcmd(arg);
 }
 
-static int do_unlet_var(lp, name_end, forceit)
-lval_T      *lp;
-char_u      *name_end;
-int forceit;
+static int do_unlet_var(lval_T *lp, char_u *name_end, int forceit)
 {
   int ret = OK;
   int cc;
@@ -3278,9 +3236,7 @@ int forceit;
  * "unlet" a variable.  Return OK if it existed, FAIL if not.
  * When "forceit" is TRUE don't complain if the variable doesn't exist.
  */
-int do_unlet(name, forceit)
-char_u      *name;
-int forceit;
+int do_unlet(char_u *name, int forceit)
 {
   hashtab_T   *ht;
   hashitem_T  *hi;
@@ -3310,11 +3266,7 @@ int forceit;
  * "deep" is the levels to go (-1 for unlimited);
  * "lock" is TRUE for ":lockvar", FALSE for ":unlockvar".
  */
-static int do_lock_var(lp, name_end, deep, lock)
-lval_T      *lp;
-char_u      *name_end;
-int deep;
-int lock;
+static int do_lock_var(lval_T *lp, char_u *name_end, int deep, int lock)
 {
   int ret = OK;
   int cc;
@@ -3444,7 +3396,7 @@ typval_T    *tv;
 /*
  * Delete all "menutrans_" variables.
  */
-void del_menutrans_vars()          {
+void del_menutrans_vars(void)          {
   hashitem_T  *hi;
   int todo;
 
@@ -3474,9 +3426,7 @@ static int varnamebuflen = 0;
 /*
  * Function to concatenate a prefix and a variable name.
  */
-static char_u * cat_prefix_varname(prefix, name)
-int prefix;
-char_u      *name;
+static char_u *cat_prefix_varname(int prefix, char_u *name)
 {
   int len;
 
@@ -5988,7 +5938,7 @@ int copyID;
  * Do garbage collection for lists and dicts.
  * Return TRUE if some memory was freed.
  */
-int garbage_collect()         {
+int garbage_collect(void)         {
   int copyID;
   buf_T       *buf;
   win_T       *wp;
@@ -6083,8 +6033,7 @@ int garbage_collect()         {
 /*
  * Free lists and dictionaries that are no longer referenced.
  */
-static int free_unref_items(copyID)
-int copyID;
+static int free_unref_items(int copyID)
 {
   dict_T      *dd;
   list_T      *ll;
@@ -6842,9 +6791,7 @@ int copyID;
  * If "str" is NULL an empty string is assumed.
  * If "function" is TRUE make it function('string').
  */
-static char_u * string_quote(str, function)
-char_u      *str;
-int function;
+static char_u *string_quote(char_u *str, int function)
 {
   unsigned len;
   char_u      *p, *r, *s;
@@ -7286,8 +7233,10 @@ int idx;
  * Find internal function in table above.
  * Return index, or -1 if not found
  */
-static int find_internal_func(name)
-char_u      *name;              /* name of the function */
+static int 
+find_internal_func (
+    char_u *name              /* name of the function */
+)
 {
   int first = 0;
   int last = (int)(sizeof(functions) / sizeof(struct fst)) - 1;
@@ -7314,10 +7263,7 @@ char_u      *name;              /* name of the function */
  * Check if "name" is a variable of type VAR_FUNC.  If so, return the function
  * name it contains, otherwise return "name".
  */
-static char_u * deref_func_name(name, lenp, no_autoload)
-char_u      *name;
-int         *lenp;
-int no_autoload;
+static char_u *deref_func_name(char_u *name, int *lenp, int no_autoload)
 {
   dictitem_T  *v;
   int cc;
@@ -7606,9 +7552,7 @@ dict_T      *selfdict;          /* Dictionary for "self" */
  * Give an error message with a function name.  Handle <SNR> things.
  * "ermsg" is to be passed without translation, use N_() instead of _().
  */
-static void emsg_funcname(ermsg, name)
-char        *ermsg;
-char_u      *name;
+static void emsg_funcname(char *ermsg, char_u *name)
 {
   char_u      *p;
 
@@ -12147,9 +12091,7 @@ static int mkdir_recurse __ARGS((char_u *dir, int prot));
  * Create the directory in which "dir" is located, and higher levels when
  * needed.
  */
-static int mkdir_recurse(dir, prot)
-char_u      *dir;
-int prot;
+static int mkdir_recurse(char_u *dir, int prot)
 {
   char_u      *p;
   char_u      *updir;
@@ -14277,9 +14219,7 @@ static int item_compare_func_err;
 /*
  * Compare functions for f_sort() below.
  */
-static int item_compare(s1, s2)
-const void  *s1;
-const void  *s2;
+static int item_compare(const void *s1, const void *s2)
 {
   char_u      *p1, *p2;
   char_u      *tofree1, *tofree2;
@@ -14302,9 +14242,7 @@ const void  *s2;
   return res;
 }
 
-static int item_compare2(s1, s2)
-const void  *s1;
-const void  *s2;
+static int item_compare2(const void *s1, const void *s2)
 {
   int res;
   typval_T rettv;
@@ -16184,8 +16122,7 @@ int         *fnump;
  * Advance "arg" to the first character after the name.
  * Return 0 for error.
  */
-static int get_env_len(arg)
-char_u      **arg;
+static int get_env_len(char_u **arg)
 {
   char_u      *p;
   int len;
@@ -16205,8 +16142,7 @@ char_u      **arg;
  * "arg" is advanced to the first non-white character after the name.
  * Return 0 if something is wrong.
  */
-static int get_id_len(arg)
-char_u      **arg;
+static int get_id_len(char_u **arg)
 {
   char_u      *p;
   int len;
@@ -16232,11 +16168,7 @@ char_u      **arg;
  * If the name contains 'magic' {}'s, expand them and return the
  * expanded name in an allocated string via 'alias' - caller must free.
  */
-static int get_name_len(arg, alias, evaluate, verbose)
-char_u      **arg;
-char_u      **alias;
-int evaluate;
-int verbose;
+static int get_name_len(char_u **arg, char_u **alias, int evaluate, int verbose)
 {
   int len;
   char_u      *p;
@@ -16298,11 +16230,7 @@ int verbose;
  * Return a pointer to just after the name.  Equal to "arg" if there is no
  * valid name.
  */
-static char_u * find_name_end(arg, expr_start, expr_end, flags)
-char_u      *arg;
-char_u      **expr_start;
-char_u      **expr_end;
-int flags;
+static char_u *find_name_end(char_u *arg, char_u **expr_start, char_u **expr_end, int flags)
 {
   int mb_nest = 0;
   int br_nest = 0;
@@ -16374,11 +16302,7 @@ int flags;
  * Returns a new allocated string, which the caller must free.
  * Returns NULL for failure.
  */
-static char_u * make_expanded_name(in_start, expr_start, expr_end, in_end)
-char_u      *in_start;
-char_u      *expr_start;
-char_u      *expr_end;
-char_u      *in_end;
+static char_u *make_expanded_name(char_u *in_start, char_u *expr_start, char_u *expr_end, char_u *in_end)
 {
   char_u c1;
   char_u      *retval = NULL;
@@ -16426,8 +16350,7 @@ char_u      *in_end;
  * Return TRUE if character "c" can be used in a variable or function name.
  * Does not include '{' or '}' for magic braces.
  */
-static int eval_isnamec(c)
-int c;
+static int eval_isnamec(int c)
 {
   return ASCII_ISALNUM(c) || c == '_' || c == ':' || c == AUTOLOAD_CHAR;
 }
@@ -16436,8 +16359,7 @@ int c;
  * Return TRUE if character "c" can be used as the first character in a
  * variable or function name (excluding '{' and '}').
  */
-static int eval_isnamec1(c)
-int c;
+static int eval_isnamec1(int c)
 {
   return ASCII_ISALPHA(c) || c == '_';
 }
@@ -16445,9 +16367,7 @@ int c;
 /*
  * Set number v: variable to "val".
  */
-void set_vim_var_nr(idx, val)
-int idx;
-long val;
+void set_vim_var_nr(int idx, long val)
 {
   vimvars[idx].vv_nr = val;
 }
@@ -16455,8 +16375,7 @@ long val;
 /*
  * Get number v: variable value.
  */
-long get_vim_var_nr(idx)
-int idx;
+long get_vim_var_nr(int idx)
 {
   return vimvars[idx].vv_nr;
 }
@@ -16464,8 +16383,7 @@ int idx;
 /*
  * Get string v: variable value.  Uses a static buffer, can only be used once.
  */
-char_u * get_vim_var_str(idx)
-int idx;
+char_u *get_vim_var_str(int idx)
 {
   return get_tv_string(&vimvars[idx].vv_tv);
 }
@@ -16483,8 +16401,7 @@ int idx;
 /*
  * Set v:char to character "c".
  */
-void set_vim_var_char(c)
-int c;
+void set_vim_var_char(int c)
 {
   char_u buf[MB_MAXBYTES + 1];
 
@@ -16501,10 +16418,7 @@ int c;
  * Set v:count to "count" and v:count1 to "count1".
  * When "set_prevcount" is TRUE first set v:prevcount from v:count.
  */
-void set_vcount(count, count1, set_prevcount)
-long count;
-long count1;
-int set_prevcount;
+void set_vcount(long count, long count1, int set_prevcount)
 {
   if (set_prevcount)
     vimvars[VV_PREVCOUNT].vv_nr = vimvars[VV_COUNT].vv_nr;
@@ -16515,10 +16429,12 @@ int set_prevcount;
 /*
  * Set string v: variable to a copy of "val".
  */
-void set_vim_var_string(idx, val, len)
-int idx;
-char_u      *val;
-int len;                    /* length of "val" to use or -1 (whole string) */
+void 
+set_vim_var_string (
+    int idx,
+    char_u *val,
+    int len                    /* length of "val" to use or -1 (whole string) */
+)
 {
   /* Need to do this (at least) once, since we can't initialize a union.
    * Will always be invoked when "v:progname" is set. */
@@ -16549,8 +16465,7 @@ list_T      *val;
 /*
  * Set v:register if needed.
  */
-void set_reg_var(c)
-int c;
+void set_reg_var(int c)
 {
   char_u regname;
 
@@ -16569,8 +16484,7 @@ int c;
  * Must always be called in pairs to save and restore v:exception!  Does not
  * take care of memory allocations.
  */
-char_u * v_exception(oldval)
-char_u      *oldval;
+char_u *v_exception(char_u *oldval)
 {
   if (oldval == NULL)
     return vimvars[VV_EXCEPTION].vv_str;
@@ -16585,8 +16499,7 @@ char_u      *oldval;
  * Must always be called in pairs to save and restore v:throwpoint!  Does not
  * take care of memory allocations.
  */
-char_u * v_throwpoint(oldval)
-char_u      *oldval;
+char_u *v_throwpoint(char_u *oldval)
 {
   if (oldval == NULL)
     return vimvars[VV_THROWPOINT].vv_str;
@@ -17173,8 +17086,7 @@ char_u  **varname;
  * Note: see get_tv_string() for how long the pointer remains valid.
  * Returns NULL when it doesn't exist.
  */
-char_u * get_var_value(name)
-char_u      *name;
+char_u *get_var_value(char_u *name)
 {
   dictitem_T  *v;
 
@@ -17325,12 +17237,14 @@ int         *first;
   vim_free(tofree);
 }
 
-static void list_one_var_a(prefix, name, type, string, first)
-char_u      *prefix;
-char_u      *name;
-int type;
-char_u      *string;
-int         *first;      /* when TRUE clear rest of screen and set to FALSE */
+static void 
+list_one_var_a (
+    char_u *prefix,
+    char_u *name,
+    int type,
+    char_u *string,
+    int *first      /* when TRUE clear rest of screen and set to FALSE */
+)
 {
   /* don't use msg() or msg_attr() to avoid overwriting "v:statusmsg" */
   msg_start();
@@ -17472,9 +17386,7 @@ int copy;                   /* make copy of value in "tv" */
  * Return TRUE if di_flags "flags" indicates variable "name" is read-only.
  * Also give an error message.
  */
-static int var_check_ro(flags, name)
-int flags;
-char_u      *name;
+static int var_check_ro(int flags, char_u *name)
 {
   if (flags & DI_FLAGS_RO) {
     EMSG2(_(e_readonlyvar), name);
@@ -17491,9 +17403,7 @@ char_u      *name;
  * Return TRUE if di_flags "flags" indicates variable "name" is fixed.
  * Also give an error message.
  */
-static int var_check_fixed(flags, name)
-int flags;
-char_u      *name;
+static int var_check_fixed(int flags, char_u *name)
 {
   if (flags & DI_FLAGS_FIX) {
     EMSG2(_("E795: Cannot delete variable %s"), name);
@@ -17506,9 +17416,11 @@ char_u      *name;
  * Check if a funcref is assigned to a valid variable name.
  * Return TRUE and give an error if not.
  */
-static int var_check_func_name(name, new_var)
-char_u *name;        /* points to start of variable name */
-int new_var;         /* TRUE when creating the variable */
+static int 
+var_check_func_name (
+    char_u *name,        /* points to start of variable name */
+    int new_var         /* TRUE when creating the variable */
+)
 {
   if (!(vim_strchr((char_u *)"wbs", name[0]) != NULL && name[1] == ':')
       && !ASCII_ISUPPER((name[0] != NUL && name[1] == ':')
@@ -17532,8 +17444,7 @@ int new_var;         /* TRUE when creating the variable */
  * Check if a variable name is valid.
  * Return FALSE and give an error if not.
  */
-static int valid_varname(varname)
-char_u *varname;
+static int valid_varname(char_u *varname)
 {
   char_u *p;
 
@@ -17550,9 +17461,7 @@ char_u *varname;
  * Return TRUE if typeval "tv" is set to be locked (immutable).
  * Also give an error message, using "name".
  */
-static int tv_check_lock(lock, name)
-int lock;
-char_u      *name;
+static int tv_check_lock(int lock, char_u *name)
 {
   if (lock & VAR_LOCKED) {
     EMSG2(_("E741: Value is locked: %s"),
@@ -17872,9 +17781,7 @@ exarg_T     *eap;
  * Returns NULL when no option name found.  Otherwise pointer to the char
  * after the option name.
  */
-static char_u * find_option_end(arg, opt_flags)
-char_u      **arg;
-int         *opt_flags;
+static char_u *find_option_end(char_u **arg, int *opt_flags)
 {
   char_u      *p = *arg;
 
@@ -18496,11 +18403,13 @@ ret_free:
  * TFN_NO_AUTOLOAD: do not use script autoloading
  * Advances "pp" to just after the function name (if no error).
  */
-static char_u * trans_function_name(pp, skip, flags, fdp)
-char_u      **pp;
-int skip;                       /* only find the end, don't evaluate */
-int flags;
-funcdict_T  *fdp;               /* return: info about dictionary used */
+static char_u *
+trans_function_name (
+    char_u **pp,
+    int skip,                       /* only find the end, don't evaluate */
+    int flags,
+    funcdict_T *fdp               /* return: info about dictionary used */
+)
 {
   char_u      *name = NULL;
   char_u      *start;
@@ -18662,8 +18571,7 @@ theend:
  * Return 2 if "p" starts with "s:".
  * Return 0 otherwise.
  */
-static int eval_fname_script(p)
-char_u      *p;
+static int eval_fname_script(char_u *p)
 {
   if (p[0] == '<' && (STRNICMP(p + 1, "SID>", 4) == 0
                       || STRNICMP(p + 1, "SNR>", 4) == 0))
@@ -18677,8 +18585,7 @@ char_u      *p;
  * Return TRUE if "p" starts with "<SID>" or "s:".
  * Only works if eval_fname_script() returned non-zero for "p"!
  */
-static int eval_fname_sid(p)
-char_u      *p;
+static int eval_fname_sid(char_u *p)
 {
   return *p == 's' || TOUPPER_ASC(p[2]) == 'I';
 }
@@ -18686,9 +18593,7 @@ char_u      *p;
 /*
  * List the head of the function: "name(arg1, arg2)".
  */
-static void list_func_head(fp, indent)
-ufunc_T     *fp;
-int indent;
+static void list_func_head(ufunc_T *fp, int indent)
 {
   int j;
 
@@ -18728,8 +18633,7 @@ int indent;
  * Find a function by name, return pointer to it in ufuncs.
  * Return NULL for unknown function.
  */
-static ufunc_T * find_func(name)
-char_u      *name;
+static ufunc_T *find_func(char_u *name)
 {
   hashitem_T  *hi;
 
@@ -18740,7 +18644,7 @@ char_u      *name;
 }
 
 #if defined(EXITFREE) || defined(PROTO)
-void free_all_functions()          {
+void free_all_functions(void)          {
   hashitem_T  *hi;
 
   /* Need to start all over every time, because func_free() may change the
@@ -18755,8 +18659,7 @@ void free_all_functions()          {
 
 #endif
 
-int translated_function_exists(name)
-char_u      *name;
+int translated_function_exists(char_u *name)
 {
   if (builtin_function(name))
     return find_internal_func(name) >= 0;
@@ -18766,8 +18669,7 @@ char_u      *name;
 /*
  * Return TRUE if a function "name" exists.
  */
-static int function_exists(name)
-char_u *name;
+static int function_exists(char_u *name)
 {
   char_u  *nm = name;
   char_u  *p;
@@ -18785,9 +18687,7 @@ char_u *name;
   return n;
 }
 
-char_u * get_expanded_name(name, check)
-char_u      *name;
-int check;
+char_u *get_expanded_name(char_u *name, int check)
 {
   char_u      *nm = name;
   char_u      *p;
@@ -18806,8 +18706,7 @@ int check;
  * Return TRUE if "name" looks like a builtin function name: starts with a
  * lower case letter and doesn't contain a ':' or AUTOLOAD_CHAR.
  */
-static int builtin_function(name)
-char_u *name;
+static int builtin_function(char_u *name)
 {
   return ASCII_ISLOWER(name[0]) && vim_strchr(name, ':') == NULL
          && vim_strchr(name, AUTOLOAD_CHAR) == NULL;
@@ -18816,8 +18715,7 @@ char_u *name;
 /*
  * Start profiling function "fp".
  */
-static void func_do_profile(fp)
-ufunc_T     *fp;
+static void func_do_profile(ufunc_T *fp)
 {
   int len = fp->uf_lines.ga_len;
 
@@ -18957,9 +18855,7 @@ int prefer_self;                /* when equal print only self time */
 /*
  * Compare function for total time sorting.
  */
-static int prof_total_cmp(s1, s2)
-const void  *s1;
-const void  *s2;
+static int prof_total_cmp(const void *s1, const void *s2)
 {
   ufunc_T     *p1, *p2;
 
@@ -18971,9 +18867,7 @@ const void  *s2;
 /*
  * Compare function for self time sorting.
  */
-static int prof_self_cmp(s1, s2)
-const void  *s1;
-const void  *s2;
+static int prof_self_cmp(const void *s1, const void *s2)
 {
   ufunc_T     *p1, *p2;
 
@@ -18987,9 +18881,11 @@ const void  *s2;
  * If "name" has a package name try autoloading the script for it.
  * Return TRUE if a package was loaded.
  */
-static int script_autoload(name, reload)
-char_u      *name;
-int reload;                 /* load script again when already loaded */
+static int 
+script_autoload (
+    char_u *name,
+    int reload                 /* load script again when already loaded */
+)
 {
   char_u      *p;
   char_u      *scriptname, *tofree;
@@ -19030,8 +18926,7 @@ int reload;                 /* load script again when already loaded */
  * Return the autoload script name for a function or variable name.
  * Returns NULL when out of memory.
  */
-static char_u * autoload_name(name)
-char_u      *name;
+static char_u *autoload_name(char_u *name)
 {
   char_u      *p;
   char_u      *scriptname;
@@ -19096,9 +18991,7 @@ int idx;
  * "buf" must be able to hold the function name plus three bytes.
  * Takes care of script-local function names.
  */
-static void cat_func_name(buf, fp)
-char_u      *buf;
-ufunc_T     *fp;
+static void cat_func_name(char_u *buf, ufunc_T *fp)
 {
   if (fp->uf_name[0] == K_SPECIAL) {
     STRCPY(buf, "<SNR>");
@@ -19161,8 +19054,7 @@ exarg_T     *eap;
 /*
  * Free a function and remove it from the list of functions.
  */
-static void func_free(fp)
-ufunc_T *fp;
+static void func_free(ufunc_T *fp)
 {
   hashitem_T  *hi;
 
@@ -19187,8 +19079,7 @@ ufunc_T *fp;
  * Unreference a Function: decrement the reference count and free it when it
  * becomes zero.  Only for numbered functions.
  */
-void func_unref(name)
-char_u      *name;
+void func_unref(char_u *name)
 {
   ufunc_T *fp;
 
@@ -19208,8 +19099,7 @@ char_u      *name;
 /*
  * Count a reference to a Function.
  */
-void func_ref(name)
-char_u      *name;
+void func_ref(char_u *name)
 {
   ufunc_T *fp;
 
@@ -19554,9 +19444,7 @@ dict_T      *selfdict;          /* Dictionary for "self" */
  * Return TRUE if items in "fc" do not have "copyID".  That means they are not
  * referenced from anywhere that is in use.
  */
-static int can_free_funccal(fc, copyID)
-funccall_T  *fc;
-int copyID;
+static int can_free_funccal(funccall_T *fc, int copyID)
 {
   return fc->l_varlist.lv_copyID != copyID
          && fc->l_vars.dv_copyID != copyID
@@ -19566,9 +19454,11 @@ int copyID;
 /*
  * Free "fc" and what it contains.
  */
-static void free_funccal(fc, free_val)
-funccall_T  *fc;
-int free_val;              /* a: vars were allocated */
+static void 
+free_funccal (
+    funccall_T *fc,
+    int free_val              /* a: vars were allocated */
+)
 {
   listitem_T  *li;
 
@@ -19732,8 +19622,7 @@ void        *rettv;
 /*
  * Free the variable with a pending return value.
  */
-void discard_pending_return(rettv)
-void        *rettv;
+void discard_pending_return(void *rettv)
 {
   free_tv((typval_T *)rettv);
 }
@@ -19742,8 +19631,7 @@ void        *rettv;
  * Generate a return command for producing the value of "rettv".  The result
  * is an allocated string.  Used by report_pending() for verbose messages.
  */
-char_u * get_return_cmd(rettv)
-void        *rettv;
+char_u *get_return_cmd(void *rettv)
 {
   char_u      *s = NULL;
   char_u      *tofree = NULL;
@@ -19823,8 +19711,7 @@ int indent UNUSED;
  * When skipping lines it may not actually be executed, but we won't find out
  * until later and we need to store the time now.
  */
-void func_line_start(cookie)
-void    *cookie;
+void func_line_start(void *cookie)
 {
   funccall_T  *fcp = (funccall_T *)cookie;
   ufunc_T     *fp = fcp->func;
@@ -19845,8 +19732,7 @@ void    *cookie;
 /*
  * Called when actually executing a function line.
  */
-void func_line_exec(cookie)
-void    *cookie;
+void func_line_exec(void *cookie)
 {
   funccall_T  *fcp = (funccall_T *)cookie;
   ufunc_T     *fp = fcp->func;
@@ -19858,8 +19744,7 @@ void    *cookie;
 /*
  * Called when done with a function line.
  */
-void func_line_end(cookie)
-void    *cookie;
+void func_line_end(void *cookie)
 {
   funccall_T  *fcp = (funccall_T *)cookie;
   ufunc_T     *fp = fcp->func;
@@ -19881,8 +19766,7 @@ void    *cookie;
  * Return TRUE if the currently active function should be ended, because a
  * return was encountered or an error occurred.  Used inside a ":while".
  */
-int func_has_ended(cookie)
-void    *cookie;
+int func_has_ended(void *cookie)
 {
   funccall_T  *fcp = (funccall_T *)cookie;
 
@@ -19895,8 +19779,7 @@ void    *cookie;
 /*
  * return TRUE if cookie indicates a function which "abort"s on errors.
  */
-int func_has_abort(cookie)
-void    *cookie;
+int func_has_abort(void *cookie)
 {
   return ((funccall_T *)cookie)->func->uf_flags & FC_ABORT;
 }
@@ -19909,8 +19792,7 @@ typedef enum {
 
 static var_flavour_T var_flavour __ARGS((char_u *varname));
 
-static var_flavour_T var_flavour(varname)
-char_u *varname;
+static var_flavour_T var_flavour(char_u *varname)
 {
   char_u *p = varname;
 
@@ -20144,12 +20026,14 @@ exarg_T     *eap UNUSED;
  * Returns VALID_ flags or -1 for failure.
  * When there is an error, *fnamep is set to NULL.
  */
-int modify_fname(src, usedlen, fnamep, bufp, fnamelen)
-char_u      *src;               /* string with modifiers */
-int         *usedlen;           /* characters after src that are used */
-char_u      **fnamep;           /* file name so far */
-char_u      **bufp;             /* buffer for allocated file name or NULL */
-int         *fnamelen;          /* length of fnamep */
+int 
+modify_fname (
+    char_u *src,               /* string with modifiers */
+    int *usedlen,           /* characters after src that are used */
+    char_u **fnamep,           /* file name so far */
+    char_u **bufp,             /* buffer for allocated file name or NULL */
+    int *fnamelen          /* length of fnamep */
+)
 {
   int valid = 0;
   char_u      *tail;
@@ -20395,11 +20279,7 @@ repeat:
  * "flags" can be "g" to do a global substitute.
  * Returns an allocated string, NULL for error.
  */
-char_u * do_string_sub(str, pat, sub, flags)
-char_u      *str;
-char_u      *pat;
-char_u      *sub;
-char_u      *flags;
+char_u *do_string_sub(char_u *str, char_u *pat, char_u *sub, char_u *flags)
 {
   int sublen;
   regmatch_T regmatch;

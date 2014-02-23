@@ -99,7 +99,7 @@ win_T       *wp;
  * Update curwin->w_topline and redraw if necessary.
  * Used to update the screen before printing a message.
  */
-void update_topline_redraw()          {
+void update_topline_redraw(void)          {
   update_topline();
   if (must_redraw)
     update_screen(0);
@@ -108,7 +108,7 @@ void update_topline_redraw()          {
 /*
  * Update curwin->w_topline to move the cursor onto the screen.
  */
-void update_topline()          {
+void update_topline(void)          {
   long line_count;
   int halfheight;
   int n;
@@ -296,7 +296,7 @@ void update_topline()          {
  * When 'scrolljump' is positive use it as-is.
  * When 'scrolljump' is negative use it as a percentage of the window height.
  */
-static int scrolljump_value()                {
+static int scrolljump_value(void)                {
   if (p_sj >= 0)
     return (int)p_sj;
   return (curwin->w_height * -p_sj) / 100;
@@ -306,7 +306,7 @@ static int scrolljump_value()                {
  * Return TRUE when there are not 'scrolloff' lines above the cursor for the
  * current window.
  */
-static int check_top_offset()                {
+static int check_top_offset(void)                {
   lineoff_T loff;
   int n;
 
@@ -332,7 +332,7 @@ static int check_top_offset()                {
   return FALSE;
 }
 
-void update_curswant()          {
+void update_curswant(void)          {
   if (curwin->w_set_curswant) {
     validate_virtcol();
     curwin->w_curswant = curwin->w_virtcol;
@@ -367,7 +367,7 @@ win_T       *wp;
  * the cursor position, botline and topline to be recomputed and the window to
  * be redrawn.  E.g, when changing the 'wrap' option or folding.
  */
-void changed_window_setting()          {
+void changed_window_setting(void)          {
   changed_window_setting_win(curwin);
 }
 
@@ -404,7 +404,7 @@ linenr_T lnum;
  * characters) has changed, and the change is before the cursor.
  * Need to take care of w_botline separately!
  */
-void changed_cline_bef_curs()          {
+void changed_cline_bef_curs(void)          {
   curwin->w_valid &= ~(VALID_WROW|VALID_WCOL|VALID_VIRTCOL
                        |VALID_CHEIGHT|VALID_TOPLINE);
 }
@@ -421,7 +421,7 @@ win_T       *wp;
  * the cursor have changed.
  * Need to take care of w_botline separately!
  */
-void changed_line_abv_curs()          {
+void changed_line_abv_curs(void)          {
   curwin->w_valid &= ~(VALID_WROW|VALID_WCOL|VALID_VIRTCOL|VALID_CROW
                        |VALID_CHEIGHT|VALID_TOPLINE);
 }
@@ -436,7 +436,7 @@ win_T       *wp;
 /*
  * Make sure the value of curwin->w_botline is valid.
  */
-void validate_botline()          {
+void validate_botline(void)          {
   if (!(curwin->w_valid & VALID_BOTLINE))
     comp_botline(curwin);
 }
@@ -454,7 +454,7 @@ win_T       *wp;
 /*
  * Mark curwin->w_botline as invalid (because of some change in the buffer).
  */
-void invalidate_botline()          {
+void invalidate_botline(void)          {
   curwin->w_valid &= ~(VALID_BOTLINE|VALID_BOTLINE_AP);
 }
 
@@ -473,7 +473,7 @@ win_T       *wp;
 /*
  * Return TRUE if curwin->w_wrow and curwin->w_wcol are valid.
  */
-int cursor_valid()         {
+int cursor_valid(void)         {
   check_cursor_moved(curwin);
   return (curwin->w_valid & (VALID_WROW|VALID_WCOL)) ==
          (VALID_WROW|VALID_WCOL);
@@ -483,7 +483,7 @@ int cursor_valid()         {
  * Validate cursor position.  Makes sure w_wrow and w_wcol are valid.
  * w_topline must be valid, you may need to call update_topline() first!
  */
-void validate_cursor()          {
+void validate_cursor(void)          {
   check_cursor_moved(curwin);
   if ((curwin->w_valid & (VALID_WCOL|VALID_WROW)) != (VALID_WCOL|VALID_WROW))
     curs_columns(TRUE);
@@ -585,7 +585,7 @@ int do_botline;                         /* also compute w_botline */
 /*
  * Validate curwin->w_virtcol only.
  */
-void validate_virtcol()          {
+void validate_virtcol(void)          {
   validate_virtcol_win(curwin);
 }
 
@@ -609,7 +609,7 @@ win_T       *wp;
 /*
  * Validate curwin->w_cline_height only.
  */
-static void validate_cheight()                 {
+static void validate_cheight(void)                 {
   check_cursor_moved(curwin);
   if (!(curwin->w_valid & VALID_CHEIGHT)) {
     if (curwin->w_cursor.lnum == curwin->w_topline)
@@ -625,7 +625,7 @@ static void validate_cheight()                 {
 /*
  * Validate w_wcol and w_virtcol only.
  */
-void validate_cursor_col()          {
+void validate_cursor_col(void)          {
   colnr_T off;
   colnr_T col;
   int width;
@@ -666,7 +666,7 @@ win_T       *wp;
   ;
 }
 
-int curwin_col_off()         {
+int curwin_col_off(void)         {
   return win_col_off(curwin);
 }
 
@@ -683,7 +683,7 @@ win_T       *wp;
   return 0;
 }
 
-int curwin_col_off2()         {
+int curwin_col_off2(void)         {
   return win_col_off2(curwin);
 }
 
@@ -692,8 +692,10 @@ int curwin_col_off2()         {
  * Also updates curwin->w_wrow and curwin->w_cline_row.
  * Also updates curwin->w_leftcol.
  */
-void curs_columns(may_scroll)
-int may_scroll;                 /* when TRUE, may scroll horizontally */
+void 
+curs_columns (
+    int may_scroll                 /* when TRUE, may scroll horizontally */
+)
 {
   int diff;
   int extra;                    /* offset for first screen line */
@@ -1080,7 +1082,7 @@ int down;               /* when TRUE scroll down when not enough space */
  * Use as many filler lines as possible for w_topline.  Make sure w_topline
  * is still visible.
  */
-static void max_topfill()                 {
+static void max_topfill(void)                 {
   int n;
 
   n = plines_nofill(curwin->w_topline);
@@ -1097,7 +1099,7 @@ static void max_topfill()                 {
  * Scroll the screen one line down, but don't do it if it would move the
  * cursor off the screen.
  */
-void scrolldown_clamp()          {
+void scrolldown_clamp(void)          {
   int end_row;
   int can_fill = (curwin->w_topfill
                   < diff_check_fill(curwin, curwin->w_topline));
@@ -1145,7 +1147,7 @@ void scrolldown_clamp()          {
  * Scroll the screen one line up, but don't do it if it would move the cursor
  * off the screen.
  */
-void scrollup_clamp()          {
+void scrollup_clamp(void)          {
   int start_row;
 
   if (curwin->w_topline == curbuf->b_ml.ml_line_count
@@ -1186,8 +1188,7 @@ void scrollup_clamp()          {
  * Returns the height of the added line in "lp->height".
  * Lines above the first one are incredibly high: MAXCOL.
  */
-static void topline_back(lp)
-lineoff_T   *lp;
+static void topline_back(lineoff_T *lp)
 {
   if (lp->fill < diff_check_fill(curwin, lp->lnum)) {
     /* Add a filler line. */
@@ -1213,8 +1214,7 @@ lineoff_T   *lp;
  * Returns the height of the added line in "lp->height".
  * Lines below the last one are incredibly high.
  */
-static void botline_forw(lp)
-lineoff_T   *lp;
+static void botline_forw(lineoff_T *lp)
 {
   if (lp->fill < diff_check_fill(curwin, lp->lnum + 1)) {
     /* Add a filler line. */
@@ -1239,8 +1239,7 @@ lineoff_T   *lp;
  * lines above loff.lnum + 1.  This keeps pointing to the same line.
  * When there are no filler lines nothing changes.
  */
-static void botline_topline(lp)
-lineoff_T   *lp;
+static void botline_topline(lineoff_T *lp)
 {
   if (lp->fill > 0) {
     ++lp->lnum;
@@ -1253,8 +1252,7 @@ lineoff_T   *lp;
  * lines below loff.lnum - 1.  This keeps pointing to the same line.
  * When there are no filler lines nothing changes.
  */
-static void topline_botline(lp)
-lineoff_T   *lp;
+static void topline_botline(lineoff_T *lp)
 {
   if (lp->fill > 0) {
     lp->fill = diff_check_fill(curwin, lp->lnum) - lp->fill + 1;
@@ -1267,9 +1265,7 @@ lineoff_T   *lp;
  * Scroll at least "min_scroll" lines.
  * If "always" is TRUE, always set topline (for "zt").
  */
-void scroll_cursor_top(min_scroll, always)
-int min_scroll;
-int always;
+void scroll_cursor_top(int min_scroll, int always)
 {
   int scrolled = 0;
   int extra = 0;
@@ -1410,9 +1406,7 @@ int used;
  * If "set_topbot" is TRUE, set topline and botline first (for "zb").
  * This is messy stuff!!!
  */
-void scroll_cursor_bot(min_scroll, set_topbot)
-int min_scroll;
-int set_topbot;
+void scroll_cursor_bot(int min_scroll, int set_topbot)
 {
   int used;
   int scrolled = 0;
@@ -1586,8 +1580,7 @@ int set_topbot;
  * Recompute topline to put the cursor halfway the window
  * If "atend" is TRUE, also put it halfway at the end of the file.
  */
-void scroll_cursor_halfway(atend)
-int atend;
+void scroll_cursor_halfway(int atend)
 {
   int above = 0;
   linenr_T topline;
@@ -1645,7 +1638,7 @@ int atend;
  * If not possible, put it at the same position as scroll_cursor_halfway().
  * When called topline must be valid!
  */
-void cursor_correct()          {
+void cursor_correct(void)          {
   int above = 0;                    /* screen lines above topline */
   linenr_T topline;
   int below = 0;                    /* screen lines below botline */
@@ -1748,9 +1741,7 @@ static void get_scroll_overlap __ARGS((lineoff_T *lp, int dir));
  *
  * return FAIL for failure, OK otherwise
  */
-int onepage(dir, count)
-int dir;
-long count;
+int onepage(int dir, long count)
 {
   long n;
   int retval = OK;
@@ -1936,9 +1927,7 @@ long count;
  *  -------------		l3 second text line
  *  l3				   etc.
  */
-static void get_scroll_overlap(lp, dir)
-lineoff_T   *lp;
-int dir;
+static void get_scroll_overlap(lineoff_T *lp, int dir)
 {
   int h1, h2, h3, h4;
   int min_height = curwin->w_height - 2;
@@ -1991,9 +1980,7 @@ int dir;
 /*
  * Scroll 'scroll' lines up or down.
  */
-void halfpage(flag, Prenum)
-int flag;
-linenr_T Prenum;
+void halfpage(int flag, linenr_T Prenum)
 {
   long scrolled = 0;
   int i;
@@ -2153,7 +2140,7 @@ linenr_T Prenum;
   redraw_later(VALID);
 }
 
-void do_check_cursorbind()          {
+void do_check_cursorbind(void)          {
   linenr_T line = curwin->w_cursor.lnum;
   colnr_T col = curwin->w_cursor.col;
   colnr_T coladd = curwin->w_cursor.coladd;

@@ -130,9 +130,7 @@ static char opchars[][3] =
  * Translate a command name into an operator type.
  * Must only be called with a valid operator name!
  */
-int get_op_type(char1, char2)
-int char1;
-int char2;
+int get_op_type(int char1, int char2)
 {
   int i;
 
@@ -149,8 +147,7 @@ int char2;
 /*
  * Return TRUE if operator "op" always works on whole lines.
  */
-int op_on_lines(op)
-int op;
+int op_on_lines(int op)
 {
   return opchars[op][2];
 }
@@ -159,8 +156,7 @@ int op;
  * Get first operator command character.
  * Returns 'g' or 'z' if there is another command character.
  */
-int get_op_char(optype)
-int optype;
+int get_op_char(int optype)
 {
   return opchars[optype][0];
 }
@@ -168,8 +164,7 @@ int optype;
 /*
  * Get second operator command character.
  */
-int get_extra_op_char(optype)
-int optype;
+int get_extra_op_char(int optype)
 {
   return opchars[optype][1];
 }
@@ -257,11 +252,13 @@ int amount;
  * shift the current line one shiftwidth left (if left != 0) or right
  * leaves cursor on first blank in the line
  */
-void shift_line(left, round, amount, call_changed_bytes)
-int left;
-int round;
-int amount;
-int call_changed_bytes;         /* call changed_bytes() */
+void 
+shift_line (
+    int left,
+    int round,
+    int amount,
+    int call_changed_bytes         /* call changed_bytes() */
+)
 {
   int count;
   int i, j;
@@ -643,7 +640,7 @@ static char_u   *expr_line = NULL;
  * Get an expression for the "\"=expr1" or "CTRL-R =expr1"
  * Returns '=' when OK, NUL otherwise.
  */
-int get_expr_register()         {
+int get_expr_register(void)         {
   char_u      *new_line;
 
   new_line = getcmdline('=', 0L, 0);
@@ -660,8 +657,7 @@ int get_expr_register()         {
  * Set the expression for the '=' register.
  * Argument must be an allocated string.
  */
-void set_expr_line(new_line)
-char_u      *new_line;
+void set_expr_line(char_u *new_line)
 {
   vim_free(expr_line);
   expr_line = new_line;
@@ -671,7 +667,7 @@ char_u      *new_line;
  * Get the result of the '=' register expression.
  * Returns a pointer to allocated memory, or NULL for failure.
  */
-char_u * get_expr_line()              {
+char_u *get_expr_line(void)              {
   char_u      *expr_copy;
   char_u      *rv;
   static int nested = 0;
@@ -700,7 +696,7 @@ char_u * get_expr_line()              {
 /*
  * Get the '=' register expression itself, without evaluating it.
  */
-char_u * get_expr_line_src()              {
+char_u *get_expr_line_src(void)              {
   if (expr_line == NULL)
     return NULL;
   return vim_strsave(expr_line);
@@ -710,9 +706,11 @@ char_u * get_expr_line_src()              {
  * Check if 'regname' is a valid name of a yank register.
  * Note: There is no check for 0 (default register), caller should do this
  */
-int valid_yank_reg(regname, writing)
-int regname;
-int writing;                /* if TRUE check for writable registers */
+int 
+valid_yank_reg (
+    int regname,
+    int writing                /* if TRUE check for writable registers */
+)
 {
   if (       (regname > 0 && ASCII_ISALNUM(regname))
              || (!writing && vim_strchr((char_u *)
@@ -734,9 +732,7 @@ int writing;                /* if TRUE check for writable registers */
  * If regname is 0 and writing, use register 0
  * If regname is 0 and reading, use previous register
  */
-void get_yank_register(regname, writing)
-int regname;
-int writing;
+void get_yank_register(int regname, int writing)
 {
   int i;
 
@@ -767,9 +763,11 @@ int writing;
  * Obtain the contents of a "normal" register. The register is made empty.
  * The returned pointer has allocated memory, use put_register() later.
  */
-void * get_register(name, copy)
-int name;
-int copy;               /* make a copy, if FALSE make register empty. */
+void *
+get_register (
+    int name,
+    int copy               /* make a copy, if FALSE make register empty. */
+)
 {
   struct yankreg      *reg;
   int i;
@@ -799,9 +797,7 @@ int copy;               /* make a copy, if FALSE make register empty. */
 /*
  * Put "reg" into register "name".  Free any previous contents and "reg".
  */
-void put_register(name, reg)
-int name;
-void        *reg;
+void put_register(int name, void *reg)
 {
   get_yank_register(name, 0);
   free_yank_all();
@@ -810,8 +806,7 @@ void        *reg;
 
 }
 
-void free_register(reg)
-void        *reg;
+void free_register(void *reg)
 {
   struct yankreg tmp;
 
@@ -825,8 +820,7 @@ void        *reg;
 /*
  * return TRUE if the current yank register has type MLINE
  */
-int yank_register_mline(regname)
-int regname;
+int yank_register_mline(int regname)
 {
   if (regname != 0 && !valid_yank_reg(regname, FALSE))
     return FALSE;
@@ -841,8 +835,7 @@ int regname;
  *
  * Return FAIL for failure, OK otherwise.
  */
-int do_record(c)
-int c;
+int do_record(int c)
 {
   char_u          *p;
   static int regname;
@@ -896,9 +889,7 @@ int c;
  *
  * return FAIL for failure, OK otherwise
  */
-static int stuff_yank(regname, p)
-int regname;
-char_u      *p;
+static int stuff_yank(int regname, char_u *p)
 {
   char_u      *lp;
   char_u      **pp;
@@ -946,11 +937,13 @@ static int execreg_lastc = NUL;
  *
  * return FAIL for failure, OK otherwise
  */
-int do_execreg(regname, colon, addcr, silent)
-int regname;
-int colon;                      /* insert ':' before each line */
-int addcr;                      /* always add '\n' to end of line */
-int silent;                     /* set "silent" flag in typeahead buffer */
+int 
+do_execreg (
+    int regname,
+    int colon,                      /* insert ':' before each line */
+    int addcr,                      /* always add '\n' to end of line */
+    int silent                     /* set "silent" flag in typeahead buffer */
+)
 {
   long i;
   char_u      *p;
@@ -1052,8 +1045,7 @@ int silent;                     /* set "silent" flag in typeahead buffer */
  * If "restart_edit" is not zero, put it in the typeahead buffer, so that it's
  * used only after other typeahead has been processed.
  */
-static void put_reedit_in_typebuf(silent)
-int silent;
+static void put_reedit_in_typebuf(int silent)
 {
   char_u buf[3];
 
@@ -1077,11 +1069,13 @@ int silent;
  * When "esc" is TRUE it is to be taken literally: Escape CSI characters and
  * no remapping.
  */
-static int put_in_typebuf(s, esc, colon, silent)
-char_u      *s;
-int esc;
-int colon;                  /* add ':' before the line */
-int silent;
+static int 
+put_in_typebuf (
+    char_u *s,
+    int esc,
+    int colon,                  /* add ':' before the line */
+    int silent
+)
 {
   int retval = OK;
 
@@ -1114,9 +1108,11 @@ int silent;
  *
  * return FAIL for failure, OK otherwise
  */
-int insert_reg(regname, literally)
-int regname;
-int literally;                  /* insert literally, not as if typed */
+int 
+insert_reg (
+    int regname,
+    int literally                  /* insert literally, not as if typed */
+)
 {
   long i;
   int retval = OK;
@@ -1169,9 +1165,7 @@ int literally;                  /* insert literally, not as if typed */
  * Stuff a string into the typeahead buffer, such that edit() will insert it
  * literally ("literally" TRUE) or interpret is as typed characters.
  */
-static void stuffescaped(arg, literally)
-char_u      *arg;
-int literally;
+static void stuffescaped(char_u *arg, int literally)
 {
   int c;
   char_u      *start;
@@ -1206,11 +1200,13 @@ int literally;
  * If "regname" is a special register, return TRUE and store a pointer to its
  * value in "argp".
  */
-int get_spec_reg(regname, argp, allocated, errmsg)
-int regname;
-char_u      **argp;
-int         *allocated;         /* return: TRUE when value was allocated */
-int errmsg;                     /* give error message when failing */
+int 
+get_spec_reg (
+    int regname,
+    char_u **argp,
+    int *allocated,         /* return: TRUE when value was allocated */
+    int errmsg                     /* give error message when failing */
+)
 {
   int cnt;
 
@@ -1287,10 +1283,12 @@ int errmsg;                     /* give error message when failing */
  *
  * return FAIL for failure, OK otherwise
  */
-int cmdline_paste_reg(regname, literally, remcr)
-int regname;
-int literally;          /* Insert text literally instead of "as typed" */
-int remcr;              /* don't add trailing CR */
+int 
+cmdline_paste_reg (
+    int regname,
+    int literally,          /* Insert text literally instead of "as typed" */
+    int remcr              /* don't add trailing CR */
+)
 {
   long i;
 
@@ -2318,7 +2316,7 @@ oparg_T     *oap;
 /*
  * set all the yank registers to empty (called from main())
  */
-void init_yank()          {
+void init_yank(void)          {
   int i;
 
   for (i = 0; i < NUM_REGISTERS; ++i)
@@ -2326,7 +2324,7 @@ void init_yank()          {
 }
 
 #if defined(EXITFREE) || defined(PROTO)
-void clear_registers()          {
+void clear_registers(void)          {
   int i;
 
   for (i = 0; i < NUM_REGISTERS; ++i) {
@@ -2342,8 +2340,7 @@ void clear_registers()          {
  * Free "n" lines from the current yank register.
  * Called for normal freeing and in case of error.
  */
-static void free_yank(n)
-long n;
+static void free_yank(long n)
 {
   if (y_current->y_array != NULL) {
     long i;
@@ -2356,7 +2353,7 @@ long n;
   }
 }
 
-static void free_yank_all()                 {
+static void free_yank_all(void)                 {
   free_yank(y_current->y_size);
 }
 
@@ -2604,9 +2601,7 @@ fail:           /* free the allocated lines */
   return FAIL;
 }
 
-static int yank_copy_line(bd, y_idx)
-struct block_def    *bd;
-long y_idx;
+static int yank_copy_line(struct block_def *bd, long y_idx)
 {
   char_u      *pnew;
 
@@ -2632,11 +2627,13 @@ long y_idx;
  *	    PUT_CURSEND		leave cursor after end of new text
  *	    PUT_LINE		force linewise put (":put")
  */
-void do_put(regname, dir, count, flags)
-int regname;
-int dir;                        /* BACKWARD for 'P', FORWARD for 'p' */
-long count;
-int flags;
+void 
+do_put (
+    int regname,
+    int dir,                        /* BACKWARD for 'P', FORWARD for 'p' */
+    long count,
+    int flags
+)
 {
   char_u      *ptr;
   char_u      *newp, *oldp;
@@ -3197,7 +3194,7 @@ end:
  * When the cursor is on the NUL past the end of the line and it should not be
  * there move it left.
  */
-void adjust_cursor_eol()          {
+void adjust_cursor_eol(void)          {
   if (curwin->w_cursor.col > 0
       && gchar_cursor() == NUL
       && (ve_flags & VE_ONEMORE) == 0
@@ -3218,7 +3215,7 @@ void adjust_cursor_eol()          {
 /*
  * Return TRUE if lines starting with '#' should be left aligned.
  */
-int preprocs_left()         {
+int preprocs_left(void)         {
   return
     (curbuf->b_p_si && !curbuf->b_p_cin) ||
     (curbuf->b_p_cin && in_cinkeys('#', ' ', TRUE)
@@ -3227,8 +3224,7 @@ int preprocs_left()         {
 }
 
 /* Return the character name of the register with the given number */
-int get_register_name(num)
-int num;
+int get_register_name(int num)
 {
   if (num == -1)
     return '"';
@@ -3374,9 +3370,11 @@ exarg_T     *eap;
  * display a string for do_dis()
  * truncate at end of screen line
  */
-static void dis_msg(p, skip_esc)
-char_u      *p;
-int skip_esc;                       /* if TRUE, ignore trailing ESC */
+static void 
+dis_msg (
+    char_u *p,
+    int skip_esc                       /* if TRUE, ignore trailing ESC */
+)
 {
   int n;
   int l;
@@ -3406,11 +3404,7 @@ int skip_esc;                       /* if TRUE, ignore trailing ESC */
  * is_comment - will indicate whether the current line ends with an unclosed
  *		comment.
  */
-static char_u * skip_comment(line, process, include_space, is_comment)
-char_u   *line;
-int process;
-int include_space;
-int      *is_comment;
+static char_u *skip_comment(char_u *line, int process, int include_space, int *is_comment)
 {
   char_u *comment_flags = NULL;
   int lead_len;
@@ -3652,13 +3646,7 @@ theend:
  * the first line.  White-space is ignored.  Note that the whole of
  * 'leader1' must match 'leader2_len' characters from 'leader2' -- webb
  */
-static int same_leader(lnum, leader1_len, leader1_flags, leader2_len,
-    leader2_flags)
-linenr_T lnum;
-int leader1_len;
-char_u  *leader1_flags;
-int leader2_len;
-char_u  *leader2_flags;
+static int same_leader(linenr_T lnum, int leader1_len, char_u *leader1_flags, int leader2_len, char_u *leader2_flags)
 {
   int idx1 = 0, idx2 = 0;
   char_u  *p;
@@ -3800,10 +3788,12 @@ oparg_T     *oap;
     op_format(oap, FALSE);
 }
 
-int fex_format(lnum, count, c)
-linenr_T lnum;
-long count;
-int c;                  /* character to be inserted */
+int 
+fex_format (
+    linenr_T lnum,
+    long count,
+    int c                  /* character to be inserted */
+)
 {
   int use_sandbox = was_set_insecurely((char_u *)"formatexpr",
       OPT_LOCAL);
@@ -3837,9 +3827,11 @@ int c;                  /* character to be inserted */
  * Lines after the cursor line are saved for undo, caller must have saved the
  * first line.
  */
-void format_lines(line_count, avoid_fex)
-linenr_T line_count;
-int avoid_fex;                          /* don't use 'formatexpr' */
+void 
+format_lines (
+    linenr_T line_count,
+    int avoid_fex                          /* don't use 'formatexpr' */
+)
 {
   int max_len;
   int is_not_par;                       /* current line not part of parag. */
@@ -4056,8 +4048,7 @@ int avoid_fex;                          /* don't use 'formatexpr' */
 /*
  * Return TRUE if line "lnum" ends in a white character.
  */
-static int ends_in_white(lnum)
-linenr_T lnum;
+static int ends_in_white(linenr_T lnum)
 {
   char_u      *s = ml_get(lnum);
   size_t l;
@@ -4078,11 +4069,7 @@ linenr_T lnum;
  * previous line.  A new paragraph starts after a blank line, or when the
  * comment leader changes -- webb.
  */
-static int fmt_check_par(lnum, leader_len, leader_flags, do_comments)
-linenr_T lnum;
-int         *leader_len;
-char_u      **leader_flags;
-int do_comments;
+static int fmt_check_par(linenr_T lnum, int *leader_len, char_u **leader_flags, int do_comments)
 {
   char_u      *flags = NULL;        /* init for GCC */
   char_u      *ptr;
@@ -4111,8 +4098,7 @@ int do_comments;
  * Return TRUE when a paragraph starts in line "lnum".  Return FALSE when the
  * previous line is in the same paragraph.  Used for auto-formatting.
  */
-int paragraph_start(lnum)
-linenr_T lnum;
+int paragraph_start(linenr_T lnum)
 {
   char_u      *p;
   int leader_len = 0;                   /* leader len of current line */
@@ -4281,8 +4267,7 @@ int is_del;
 
 static void reverse_line __ARGS((char_u *s));
 
-static void reverse_line(s)
-char_u *s;
+static void reverse_line(char_u *s)
 {
   int i, j;
   char_u c;
@@ -4304,9 +4289,7 @@ char_u *s;
  *
  * return FAIL for failure, OK otherwise
  */
-int do_addsub(command, Prenum1)
-int command;
-linenr_T Prenum1;
+int do_addsub(int command, linenr_T Prenum1)
 {
   int col;
   char_u      *buf1;
@@ -4710,9 +4693,7 @@ FILE    *fp;
  * Used for getregtype()
  * Returns MAUTO for error.
  */
-char_u get_reg_type(regname, reglen)
-int regname;
-long    *reglen;
+char_u get_reg_type(int regname, long *reglen)
 {
   switch (regname) {
   case '%':                     /* file name */
@@ -4748,10 +4729,12 @@ long    *reglen;
  * Used for "@r" in expressions and for getreg().
  * Returns NULL for error.
  */
-char_u * get_reg_contents(regname, allowexpr, expr_src)
-int regname;
-int allowexpr;                  /* allow "=" register */
-int expr_src;                   /* get expression for "=" register */
+char_u *
+get_reg_contents (
+    int regname,
+    int allowexpr,                  /* allow "=" register */
+    int expr_src                   /* get expression for "=" register */
+)
 {
   long i;
   char_u      *retval;
@@ -4835,22 +4818,12 @@ int expr_src;                   /* get expression for "=" register */
  * Careful: 'str' is modified, you may have to use a copy!
  * If "str" ends in '\n' or '\r', use linewise, otherwise use characterwise.
  */
-void write_reg_contents(name, str, maxlen, must_append)
-int name;
-char_u      *str;
-int maxlen;
-int must_append;
+void write_reg_contents(int name, char_u *str, int maxlen, int must_append)
 {
   write_reg_contents_ex(name, str, maxlen, must_append, MAUTO, 0L);
 }
 
-void write_reg_contents_ex(name, str, maxlen, must_append, yank_type, block_len)
-int name;
-char_u      *str;
-int maxlen;
-int must_append;
-int yank_type;
-long block_len;
+void write_reg_contents_ex(int name, char_u *str, int maxlen, int must_append, int yank_type, long block_len)
 {
   struct yankreg  *old_y_previous, *old_y_current;
   long len;
@@ -4910,12 +4883,14 @@ long block_len;
  * Put a string into a register.  When the register is not empty, the string
  * is appended.
  */
-static void str_to_reg(y_ptr, yank_type, str, len, blocklen)
-struct yankreg      *y_ptr;             /* pointer to yank register */
-int yank_type;                          /* MCHAR, MLINE, MBLOCK, MAUTO */
-char_u              *str;               /* string to put in register */
-long len;                               /* length of string */
-long blocklen;                          /* width of Visual block */
+static void 
+str_to_reg (
+    struct yankreg *y_ptr,             /* pointer to yank register */
+    int yank_type,                          /* MCHAR, MLINE, MBLOCK, MAUTO */
+    char_u *str,               /* string to put in register */
+    long len,                               /* length of string */
+    long blocklen                          /* width of Visual block */
+)
 {
   int type;                             /* MCHAR, MLINE or MBLOCK */
   int lnum;
@@ -5034,12 +5009,7 @@ static long line_count_info __ARGS((char_u *line, long *wc, long *cc,
  *  case, eol_size will be added to the character count to account for
  *  the size of the EOL character.
  */
-static long line_count_info(line, wc, cc, limit, eol_size)
-char_u      *line;
-long        *wc;
-long        *cc;
-long limit;
-int eol_size;
+static long line_count_info(char_u *line, long *wc, long *cc, long limit, int eol_size)
 {
   long i;
   long words = 0;
@@ -5076,7 +5046,7 @@ int eol_size;
  * In Visual mode, give some info about the selected region.  (In this case,
  * the *_count_cursor variables store running totals for the selection.)
  */
-void cursor_pos_info()          {
+void cursor_pos_info(void)          {
   char_u      *p;
   char_u buf1[50];
   char_u buf2[40];

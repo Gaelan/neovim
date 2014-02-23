@@ -615,7 +615,7 @@ buf_T       *buf;
  * been modified.
  * Used when 'updatecount' changes from zero to non-zero.
  */
-void ml_open_files()          {
+void ml_open_files(void)          {
   buf_T       *buf;
 
   for (buf = firstbuf; buf != NULL; buf = buf->b_next)
@@ -696,8 +696,10 @@ buf_T       *buf;
  * If still need to create a swap file, and starting to edit a not-readonly
  * file, or reading into an existing buffer, create a swap file now.
  */
-void check_need_swap(newfile)
-int newfile;                    /* reading file into new buffer */
+void 
+check_need_swap (
+    int newfile                    /* reading file into new buffer */
+)
 {
   if (curbuf->b_may_swap && (!curbuf->b_p_ro || !newfile))
     ml_open_file(curbuf);
@@ -732,8 +734,7 @@ int del_file;
  * When 'del_file' is TRUE, delete the memfiles.
  * But don't delete files that were ":preserve"d when we are POSIX compatible.
  */
-void ml_close_all(del_file)
-int del_file;
+void ml_close_all(int del_file)
 {
   buf_T       *buf;
 
@@ -750,7 +751,7 @@ int del_file;
  * Close all memfiles for not modified buffers.
  * Only use just before exiting!
  */
-void ml_close_notmod()          {
+void ml_close_notmod(void)          {
   buf_T       *buf;
 
   for (buf = firstbuf; buf != NULL; buf = buf->b_next)
@@ -919,7 +920,7 @@ buf_T       *buf;
 /*
  * Try to recover curbuf from the .swp file.
  */
-void ml_recover()          {
+void ml_recover(void)          {
   buf_T       *buf = NULL;
   memfile_T   *mfp = NULL;
   char_u      *fname;
@@ -1490,11 +1491,13 @@ theend:
  * - list the swap files when recovering
  * - find the name of the n'th swap file when recovering
  */
-int recover_names(fname, list, nr, fname_out)
-char_u      *fname;             /* base for swap file name */
-int list;                       /* when TRUE, list the swap file names */
-int nr;                         /* when non-zero, return nr'th swap file name */
-char_u      **fname_out;        /* result when "nr" > 0 */
+int 
+recover_names (
+    char_u *fname,             /* base for swap file name */
+    int list,                       /* when TRUE, list the swap file names */
+    int nr,                         /* when non-zero, return nr'th swap file name */
+    char_u **fname_out        /* result when "nr" > 0 */
+)
 {
   int num_names;
   char_u      *(names[6]);
@@ -1694,9 +1697,7 @@ char_u      **fname_out;        /* result when "nr" > 0 */
  * Append the full path to name with path separators made into percent
  * signs, to dir. An unnamed buffer is handled as "" (<currentdir>/"")
  */
-static char_u * make_percent_swname(dir, name)
-char_u      *dir;
-char_u      *name;
+static char_u *make_percent_swname(char_u *dir, char_u *name)
 {
   char_u *d, *s, *f;
 
@@ -1727,8 +1728,7 @@ static int process_still_running;
  * Give information about an existing swap file.
  * Returns timestamp (0 when unknown).
  */
-static time_t swapfile_info(fname)
-char_u      *fname;
+static time_t swapfile_info(char_u *fname)
 {
   struct stat st;
   int fd;
@@ -1817,10 +1817,7 @@ char_u      *fname;
   return x;
 }
 
-static int recov_file_names(names, path, prepend_dot)
-char_u      **names;
-char_u      *path;
-int prepend_dot;
+static int recov_file_names(char_u **names, char_u *path, int prepend_dot)
 {
   int num_names;
 
@@ -1909,9 +1906,7 @@ end:
  * If 'check_char' is TRUE, stop syncing when character becomes available, but
  * always sync at least one block.
  */
-void ml_sync_all(check_file, check_char)
-int check_file;
-int check_char;
+void ml_sync_all(int check_file, int check_char)
 {
   buf_T               *buf;
   struct stat st;
@@ -2036,8 +2031,7 @@ theend:
  * On failure an error message is given and IObuff is returned (to avoid
  * having to check for error everywhere).
  */
-char_u  * ml_get(lnum)
-linenr_T lnum;
+char_u *ml_get(linenr_T lnum)
 {
   return ml_get_buf(curbuf, lnum, FALSE);
 }
@@ -2054,14 +2048,14 @@ pos_T       *pos;
 /*
  * Return pointer to cursor line.
  */
-char_u * ml_get_curline()              {
+char_u *ml_get_curline(void)              {
   return ml_get_buf(curbuf, curwin->w_cursor.lnum, FALSE);
 }
 
 /*
  * Return pointer to cursor position.
  */
-char_u * ml_get_cursor()              {
+char_u *ml_get_cursor(void)              {
   return ml_get_buf(curbuf, curwin->w_cursor.lnum, FALSE) +
          curwin->w_cursor.col;
 }
@@ -2143,7 +2137,7 @@ errorret:
  * Check if a line that was just obtained by a call to ml_get
  * is in allocated memory.
  */
-int ml_line_alloced()         {
+int ml_line_alloced(void)         {
   return curbuf->b_ml.ml_flags & ML_LINE_DIRTY;
 }
 
@@ -2159,11 +2153,13 @@ int ml_line_alloced()         {
  *
  * return FAIL for failure, OK otherwise
  */
-int ml_append(lnum, line, len, newfile)
-linenr_T lnum;                  /* append after this line (can be 0) */
-char_u      *line;              /* text of the new line */
-colnr_T len;                    /* length of new line, including NUL, or 0 */
-int newfile;                    /* flag, see above */
+int 
+ml_append (
+    linenr_T lnum,                  /* append after this line (can be 0) */
+    char_u *line,              /* text of the new line */
+    colnr_T len,                    /* length of new line, including NUL, or 0 */
+    int newfile                    /* flag, see above */
+)
 {
   /* When starting up, we might still need to create the memfile */
   if (curbuf->b_ml.ml_mfp == NULL && open_buffer(FALSE, NULL, 0) == FAIL)
@@ -2656,10 +2652,7 @@ int mark;                       /* mark the new line */
  *
  * return FAIL for failure, OK otherwise
  */
-int ml_replace(lnum, line, copy)
-linenr_T lnum;
-char_u      *line;
-int copy;
+int ml_replace(linenr_T lnum, char_u *line, int copy)
 {
   if (line == NULL)             /* just checking... */
     return FAIL;
@@ -2689,9 +2682,7 @@ int copy;
  *
  * return FAIL for failure, OK otherwise
  */
-int ml_delete(lnum, message)
-linenr_T lnum;
-int message;
+int ml_delete(linenr_T lnum, int message)
 {
   ml_flush_line(curbuf);
   return ml_delete_int(curbuf, lnum, message);
@@ -2842,8 +2833,7 @@ int message;
 /*
  * set the B_MARKED flag for line 'lnum'
  */
-void ml_setmarked(lnum)
-linenr_T lnum;
+void ml_setmarked(linenr_T lnum)
 {
   bhdr_T    *hp;
   DATA_BL *dp;
@@ -2871,7 +2861,7 @@ linenr_T lnum;
 /*
  * find the first line with its B_MARKED flag set
  */
-linenr_T ml_firstmarked()              {
+linenr_T ml_firstmarked(void)              {
   bhdr_T      *hp;
   DATA_BL     *dp;
   linenr_T lnum;
@@ -2911,7 +2901,7 @@ linenr_T ml_firstmarked()              {
 /*
  * clear all DB_MARKED flags
  */
-void ml_clearmarked()          {
+void ml_clearmarked(void)          {
   bhdr_T      *hp;
   DATA_BL     *dp;
   linenr_T lnum;
@@ -3357,9 +3347,7 @@ int count;
  * If it worked returns OK and the resolved link in "buf[MAXPATHL]".
  * Otherwise returns FAIL.
  */
-int resolve_symlink(fname, buf)
-char_u      *fname;
-char_u      *buf;
+int resolve_symlink(char_u *fname, char_u *buf)
 {
   char_u tmp[MAXPATHL];
   int ret;
@@ -3494,9 +3482,11 @@ char_u      *dir_name;
  *
  * The return value is an allocated string and can be NULL.
  */
-char_u * get_file_in_dir(fname, dname)
-char_u  *fname;
-char_u  *dname;         /* don't use "dirname", it is a global for Alpha */
+char_u *
+get_file_in_dir (
+    char_u *fname,
+    char_u *dname         /* don't use "dirname", it is a global for Alpha */
+)
 {
   char_u      *t;
   char_u      *tail;
@@ -4089,10 +4079,12 @@ ZERO_BL *b0p;
  * versions.
  */
 
-static int fnamecmp_ino(fname_c, fname_s, ino_block0)
-char_u      *fname_c;               /* current file name */
-char_u      *fname_s;               /* file name from swap file */
-long ino_block0;
+static int 
+fnamecmp_ino (
+    char_u *fname_c,               /* current file name */
+    char_u *fname_s,               /* file name from swap file */
+    long ino_block0
+)
 {
   struct stat st;
   ino_t ino_c = 0;                  /* ino of current file */
@@ -4141,9 +4133,7 @@ long ino_block0;
  * Move a long integer into a four byte character array.
  * Used for machine independency in block zero.
  */
-static void long_to_char(n, s)
-long n;
-char_u  *s;
+static void long_to_char(long n, char_u *s)
 {
   s[0] = (char_u)(n & 0xff);
   n = (unsigned)n >> 8;
@@ -4154,8 +4144,7 @@ char_u  *s;
   s[3] = (char_u)(n & 0xff);
 }
 
-static long char_to_long(s)
-char_u  *s;
+static long char_to_long(char_u *s)
 {
   long retval;
 
@@ -4652,8 +4641,7 @@ long        *offp;
 /*
  * Goto byte in buffer with offset 'cnt'.
  */
-void goto_byte(cnt)
-long cnt;
+void goto_byte(long cnt)
 {
   long boff = cnt;
   linenr_T lnum;

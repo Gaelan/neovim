@@ -384,9 +384,7 @@ static int nv_max_linear;
  * Compare functions for qsort() below, that checks the command character
  * through the index in nv_cmd_idx[].
  */
-static int nv_compare(s1, s2)
-const void  *s1;
-const void  *s2;
+static int nv_compare(const void *s1, const void *s2)
 {
   int c1, c2;
 
@@ -403,7 +401,7 @@ const void  *s2;
 /*
  * Initialize the nv_cmd_idx[] table.
  */
-void init_normal_cmds()          {
+void init_normal_cmds(void)          {
   int i;
 
   /* Fill the index table with a one to one relation. */
@@ -424,8 +422,7 @@ void init_normal_cmds()          {
  * Search for a command in the commands table.
  * Returns -1 for invalid command.
  */
-static int find_command(cmdchar)
-int cmdchar;
+static int find_command(int cmdchar)
 {
   int i;
   int idx;
@@ -2628,8 +2625,7 @@ pos_T       *pos;
  * 2: normal word character
  * >2: multi-byte word character.
  */
-static int get_mouse_class(p)
-char_u      *p;
+static int get_mouse_class(char_u *p)
 {
   int c;
 
@@ -2658,7 +2654,7 @@ char_u      *p;
  * Check if  highlighting for visual mode is possible, give a warning message
  * if not.
  */
-void check_visual_highlight()          {
+void check_visual_highlight(void)          {
   static int did_check = FALSE;
 
   if (full_screen) {
@@ -2673,7 +2669,7 @@ void check_visual_highlight()          {
  * This function should ALWAYS be called to end Visual mode, except from
  * do_pending_operator().
  */
-void end_visual_mode()          {
+void end_visual_mode(void)          {
 
   VIsual_active = FALSE;
   setmouse();
@@ -2699,7 +2695,7 @@ void end_visual_mode()          {
 /*
  * Reset VIsual_active and VIsual_reselect.
  */
-void reset_VIsual_and_resel()          {
+void reset_VIsual_and_resel(void)          {
   if (VIsual_active) {
     end_visual_mode();
     redraw_curbuf_later(INVERTED);      /* delete the inversion later */
@@ -2710,7 +2706,7 @@ void reset_VIsual_and_resel()          {
 /*
  * Reset VIsual_active and VIsual_reselect if it's set.
  */
-void reset_VIsual()          {
+void reset_VIsual(void)          {
   if (VIsual_active) {
     end_visual_mode();
     redraw_curbuf_later(INVERTED);      /* delete the inversion later */
@@ -2739,9 +2735,7 @@ void reset_VIsual()          {
  * If a string is found, a pointer to the string is put in "*string".  This
  * string is not always NUL terminated.
  */
-int find_ident_under_cursor(string, find_type)
-char_u      **string;
-int find_type;
+int find_ident_under_cursor(char_u **string, int find_type)
 {
   return find_ident_at_pos(curwin, curwin->w_cursor.lnum,
       curwin->w_cursor.col, string, find_type);
@@ -2881,14 +2875,7 @@ cmdarg_T  *cap;
  * Prepare for redo of any command.
  * Note that only the last argument can be a multi-byte char.
  */
-static void prep_redo(regname, num, cmd1, cmd2, cmd3, cmd4, cmd5)
-int regname;
-long num;
-int cmd1;
-int cmd2;
-int cmd3;
-int cmd4;
-int cmd5;
+static void prep_redo(int regname, long num, int cmd1, int cmd2, int cmd3, int cmd4, int cmd5)
 {
   ResetRedobuff();
   if (regname != 0) {   /* yank from specified buffer */
@@ -2985,7 +2972,7 @@ static int showcmd_visual = FALSE;
 
 static void display_showcmd __ARGS((void));
 
-void clear_showcmd()          {
+void clear_showcmd(void)          {
   if (!p_sc)
     return;
 
@@ -3066,8 +3053,7 @@ void clear_showcmd()          {
  * Add 'c' to string of shown command chars.
  * Return TRUE if output has been written (and setcursor() has been called).
  */
-int add_to_showcmd(c)
-int c;
+int add_to_showcmd(int c)
 {
   char_u      *p;
   int old_len;
@@ -3119,8 +3105,7 @@ int c;
   return TRUE;
 }
 
-void add_to_showcmd_c(c)
-int c;
+void add_to_showcmd_c(int c)
 {
   if (!add_to_showcmd(c))
     setcursor();
@@ -3129,8 +3114,7 @@ int c;
 /*
  * Delete 'len' characters from the end of the shown command.
  */
-static void del_from_showcmd(len)
-int len;
+static void del_from_showcmd(int len)
 {
   int old_len;
 
@@ -3150,12 +3134,12 @@ int len;
  * push_showcmd() and pop_showcmd() are used when waiting for the user to type
  * something and there is a partial mapping.
  */
-void push_showcmd()          {
+void push_showcmd(void)          {
   if (p_sc)
     STRCPY(old_showcmd_buf, showcmd_buf);
 }
 
-void pop_showcmd()          {
+void pop_showcmd(void)          {
   if (!p_sc)
     return;
 
@@ -3164,7 +3148,7 @@ void pop_showcmd()          {
   display_showcmd();
 }
 
-static void display_showcmd()                 {
+static void display_showcmd(void)                 {
   int len;
 
   cursor_off();
@@ -3191,8 +3175,7 @@ static void display_showcmd()                 {
  * When "check" is TRUE, take care of scroll-binding after the window has
  * scrolled.  Called from normal_cmd() and edit().
  */
-void do_check_scrollbind(check)
-int check;
+void do_check_scrollbind(int check)
 {
   static win_T        *old_curwin = NULL;
   static linenr_T old_topline = 0;
@@ -3248,9 +3231,7 @@ int check;
  * number of rows by which the current window has changed
  * (1998-11-02 16:21:01  R. Edward Ralston <eralston@computer.org>)
  */
-void check_scrollbind(topline_diff, leftcol_diff)
-linenr_T topline_diff;
-long leftcol_diff;
+void check_scrollbind(linenr_T topline_diff, long leftcol_diff)
 {
   int want_ver;
   int want_hor;
@@ -3415,12 +3396,14 @@ int thisblock;                  /* 1 for "1gd" and "1gD" */
  * When "thisblock" is TRUE check the {} block scope.
  * Return FAIL when not found.
  */
-int find_decl(ptr, len, locally, thisblock, searchflags)
-char_u      *ptr;
-int len;
-int locally;
-int thisblock;
-int searchflags;                /* flags passed to searchit() */
+int 
+find_decl (
+    char_u *ptr,
+    int len,
+    int locally,
+    int thisblock,
+    int searchflags                /* flags passed to searchit() */
+)
 {
   char_u      *pat;
   pos_T old_pos;
@@ -3715,9 +3698,7 @@ cmdarg_T    *cap;
 /*
  * Scroll "count" lines up or down, and redraw.
  */
-void scroll_redraw(up, count)
-int up;
-long count;
+void scroll_redraw(int up, long count)
 {
   linenr_T prev_topline = curwin->w_topline;
   int prev_topfill = curwin->w_topfill;
@@ -4353,9 +4334,7 @@ cmdarg_T *cap;
 /*
  * Call nv_ident() as if "c1" was used, with "c2" as next character.
  */
-void do_nv_ident(c1, c2)
-int c1;
-int c2;
+void do_nv_ident(int c1, int c2)
 {
   oparg_T oa;
   cmdarg_T ca;
@@ -5646,8 +5625,7 @@ cmdarg_T    *cap;
  * 'o': Exchange start and end of Visual area.
  * 'O': same, but in block mode exchange left and right corners.
  */
-static void v_swap_corners(cmdchar)
-int cmdchar;
+static void v_swap_corners(int cmdchar)
 {
   pos_T old_cursor;
   colnr_T left, right;
@@ -6095,7 +6073,7 @@ cmdarg_T    *cap;
 /*
  * Start selection for Shift-movement keys.
  */
-void start_selection()          {
+void start_selection(void)          {
   /* if 'selectmode' contains "key", start Select mode */
   may_start_select('k');
   n_start_visual_mode('v');
@@ -6104,8 +6082,7 @@ void start_selection()          {
 /*
  * Start Select mode, if "c" is in 'selectmode' and not in a mapping or menu.
  */
-void may_start_select(c)
-int c;
+void may_start_select(int c)
 {
   VIsual_select = (stuff_empty() && typebuf_typed()
                    && (vim_strchr(p_slm, c) != NULL));
@@ -6115,8 +6092,7 @@ int c;
  * Start Visual mode "c".
  * Should set VIsual_select before calling this.
  */
-static void n_start_visual_mode(c)
-int c;
+static void n_start_visual_mode(int c)
 {
   /* Check for redraw before changing the state. */
   conceal_check_cursur_line();
@@ -6811,8 +6787,7 @@ cmdarg_T    *cap;
 /*
  * Set v:operator to the characters for "optype".
  */
-static void set_op_var(optype)
-int optype;
+static void set_op_var(int optype)
 {
   char_u opchars[3];
 
@@ -7044,7 +7019,7 @@ cmdarg_T    *cap;
  * Should check VIsual_mode before calling this.
  * Returns TRUE when backed up to the previous line.
  */
-static int unadjust_for_sel()                {
+static int unadjust_for_sel(void)                {
   pos_T       *pp;
 
   if (*p_sel == 'e' && !equalpos(VIsual, curwin->w_cursor)) {

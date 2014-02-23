@@ -163,7 +163,7 @@ hash_T hash;
  * Useful when trying different hash algorithms.
  * Called when exiting.
  */
-void hash_debug_results()          {
+void hash_debug_results(void)          {
 #ifdef HT_DEBUG
   fprintf(stderr, "\r\n\r\n\r\n\r\n");
   fprintf(stderr, "Number of hashtable lookups: %ld\r\n", hash_count_lookup);

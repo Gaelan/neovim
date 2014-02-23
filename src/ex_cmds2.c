@@ -64,8 +64,7 @@ static int debug_greedy = FALSE;        /* batch mode debugging: don't save
  * do_debug(): Debug mode.
  * Repeatedly get Ex commands, until told to continue normal execution.
  */
-void do_debug(cmd)
-char_u      *cmd;
+void do_debug(char_u *cmd)
 {
   int save_msg_scroll = msg_scroll;
   int save_State = State;
@@ -602,10 +601,12 @@ exarg_T     *eap UNUSED;
  * Find a breakpoint for a function or sourced file.
  * Returns line number at which to break; zero when no matching breakpoint.
  */
-linenr_T dbg_find_breakpoint(file, fname, after)
-int file;                   /* TRUE for a file, FALSE for a function */
-char_u      *fname;         /* file or function name */
-linenr_T after;             /* after this line number */
+linenr_T 
+dbg_find_breakpoint (
+    int file,                   /* TRUE for a file, FALSE for a function */
+    char_u *fname,         /* file or function name */
+    linenr_T after             /* after this line number */
+)
 {
   return debuggy_find(file, fname, after, &dbg_breakp, NULL);
 }
@@ -613,10 +614,12 @@ linenr_T after;             /* after this line number */
 /*
  * Return TRUE if profiling is on for a function or sourced file.
  */
-int has_profiling(file, fname, fp)
-int file;                   /* TRUE for a file, FALSE for a function */
-char_u      *fname;         /* file or function name */
-int         *fp;            /* return: forceit */
+int 
+has_profiling (
+    int file,                   /* TRUE for a file, FALSE for a function */
+    char_u *fname,         /* file or function name */
+    int *fp            /* return: forceit */
+)
 {
   return debuggy_find(file, fname, (linenr_T)0, &prof_ga, fp)
          != (linenr_T)0;
@@ -687,9 +690,7 @@ int         *fp;            /* if not NULL: return forceit */
 /*
  * Called when a breakpoint was encountered.
  */
-void dbg_breakpoint(name, lnum)
-char_u      *name;
-linenr_T lnum;
+void dbg_breakpoint(char_u *name, linenr_T lnum)
 {
   /* We need to check if this line is actually executed in do_one_cmd() */
   debug_breakpoint_name = name;
@@ -1004,7 +1005,7 @@ char_u      *arg;
 /*
  * Dump the profiling info.
  */
-void profile_dump()          {
+void profile_dump(void)          {
   FILE        *fd;
 
   if (profile_fname != NULL) {
@@ -1022,8 +1023,7 @@ void profile_dump()          {
 /*
  * Start profiling script "fp".
  */
-static void script_do_profile(si)
-scriptitem_T    *si;
+static void script_do_profile(scriptitem_T *si)
 {
   si->sn_pr_count = 0;
   profile_zero(&si->sn_pr_total);
@@ -1075,14 +1075,14 @@ static proftime_T inchar_time;
 /*
  * Called when starting to wait for the user to type a character.
  */
-void prof_inchar_enter()          {
+void prof_inchar_enter(void)          {
   profile_start(&inchar_time);
 }
 
 /*
  * Called when finished waiting for the user to type a character.
  */
-void prof_inchar_exit()          {
+void prof_inchar_exit(void)          {
   profile_end(&inchar_time);
   profile_add(&prof_wait_time, &inchar_time);
 }
@@ -1142,7 +1142,7 @@ FILE    *fd;
  * Return TRUE when a function defined in the current script should be
  * profiled.
  */
-int prof_def_func()         {
+int prof_def_func(void)         {
   if (current_SID > 0)
     return SCRIPT_ITEM(current_SID).sn_pr_force;
   return FALSE;
@@ -1177,7 +1177,7 @@ int forceit;
 /*
  * flush all buffers, except the ones that are readonly
  */
-void autowrite_all()          {
+void autowrite_all(void)          {
   buf_T       *buf;
 
   if (!(p_aw || p_awa) || !p_write)
@@ -1316,10 +1316,7 @@ static void add_bufnum __ARGS((int *bufnrs, int *bufnump, int nr));
 /*
  * Add a buffer number to "bufnrs", unless it's already there.
  */
-static void add_bufnum(bufnrs, bufnump, nr)
-int     *bufnrs;
-int     *bufnump;
-int nr;
+static void add_bufnum(int *bufnrs, int *bufnump, int nr)
 {
   int i;
 
@@ -1334,8 +1331,10 @@ int nr;
  * Return TRUE if any buffer was changed and cannot be abandoned.
  * That changed buffer becomes the current buffer.
  */
-int check_changed_any(hidden)
-int hidden;                     /* Only check hidden buffers */
+int 
+check_changed_any (
+    int hidden                     /* Only check hidden buffers */
+)
 {
   int ret = FALSE;
   buf_T       *buf;
@@ -1440,7 +1439,7 @@ theend:
  * return FAIL if there is no file name, OK if there is one
  * give error message for FAIL
  */
-int check_fname()         {
+int check_fname(void)         {
   if (curbuf->b_ffname == NULL) {
     EMSG(_(e_noname));
     return FAIL;
@@ -1488,8 +1487,7 @@ static int alist_add_list __ARGS((int count, char_u **files, int after));
  * Changes the argument in-place, puts a NUL after it.  Backticks remain.
  * Return a pointer to the start of the next argument.
  */
-static char_u * do_one_arg(str)
-char_u *str;
+static char_u *do_one_arg(char_u *str)
 {
   char_u      *p;
   int inbacktick;
@@ -1543,11 +1541,7 @@ char_u      *str;
  * "fnames[fcountp]".  When "wig" is TRUE, removes files matching 'wildignore'.
  * Return FAIL or OK.
  */
-int get_arglist_exp(str, fcountp, fnamesp, wig)
-char_u      *str;
-int         *fcountp;
-char_u      ***fnamesp;
-int wig;
+int get_arglist_exp(char_u *str, int *fcountp, char_u ***fnamesp, int wig)
 {
   garray_T ga;
   int i;
@@ -1657,7 +1651,7 @@ int after UNUSED;                       /* 0 means before first one */
 /*
  * Check the validity of the arg_idx for each other window.
  */
-static void alist_check_arg_idx()                 {
+static void alist_check_arg_idx(void)                 {
   win_T       *win;
   tabpage_T   *tp;
 
@@ -2120,10 +2114,12 @@ exarg_T     *eap;
  * Files[] itself is not taken over.
  * Returns index of first added argument.  Returns -1 when failed (out of mem).
  */
-static int alist_add_list(count, files, after)
-int count;
-char_u      **files;
-int after;                  /* where to add: 0 = before first one */
+static int 
+alist_add_list (
+    int count,
+    char_u **files,
+    int after                  /* where to add: 0 = before first one */
+)
 {
   int i;
 
@@ -2237,9 +2233,7 @@ void        *cookie UNUSED;
  * When "all" is TRUE, source all files, otherwise only the first one.
  * return FAIL when no file could be sourced, OK otherwise.
  */
-int source_runtime(name, all)
-char_u      *name;
-int all;
+int source_runtime(char_u *name, int all)
 {
   return do_in_runtimepath(name, all, source_callback, NULL);
 }
@@ -2406,8 +2400,7 @@ struct source_cookie {
 /*
  * Return the address holding the next breakpoint line for a source cookie.
  */
-linenr_T * source_breakpoint(cookie)
-void *cookie;
+linenr_T *source_breakpoint(void *cookie)
 {
   return &((struct source_cookie *)cookie)->breakpoint;
 }
@@ -2415,8 +2408,7 @@ void *cookie;
 /*
  * Return the address holding the debug tick for a source cookie.
  */
-int * source_dbg_tick(cookie)
-void *cookie;
+int *source_dbg_tick(void *cookie)
 {
   return &((struct source_cookie *)cookie)->dbg_tick;
 }
@@ -2424,8 +2416,7 @@ void *cookie;
 /*
  * Return the nesting level for a source cookie.
  */
-int source_level(cookie)
-void *cookie;
+int source_level(void *cookie)
 {
   return ((struct source_cookie *)cookie)->level;
 }
@@ -2468,10 +2459,12 @@ char    *filename;
  *
  * return FAIL if file could not be opened, OK otherwise
  */
-int do_source(fname, check_other, is_vimrc)
-char_u      *fname;
-int check_other;                    /* check for .vimrc and _vimrc */
-int is_vimrc;                       /* DOSO_ value */
+int 
+do_source (
+    char_u *fname,
+    int check_other,                    /* check for .vimrc and _vimrc */
+    int is_vimrc                       /* DOSO_ value */
+)
 {
   struct source_cookie cookie;
   char_u                  *save_sourcing_name;
@@ -2790,7 +2783,7 @@ exarg_T     *eap UNUSED;
 /*
  * Fix slashes in the list of script names for 'shellslash'.
  */
-void scriptnames_slash_adjust()          {
+void scriptnames_slash_adjust(void)          {
   int i;
 
   for (i = 1; i <= script_items.ga_len; ++i)
@@ -2820,7 +2813,7 @@ scid_T id;
 }
 
 # if defined(EXITFREE) || defined(PROTO)
-void free_scriptnames()          {
+void free_scriptnames(void)          {
   int i;
 
   for (i = script_items.ga_len; i > 0; --i)
@@ -2987,8 +2980,7 @@ int indent UNUSED;
   return line;
 }
 
-static char_u * get_one_sourceline(sp)
-struct source_cookie    *sp;
+static char_u *get_one_sourceline(struct source_cookie *sp)
 {
   garray_T ga;
   int len;
@@ -3126,7 +3118,7 @@ struct source_cookie    *sp;
  * When skipping lines it may not actually be executed, but we won't find out
  * until later and we need to store the time now.
  */
-void script_line_start()          {
+void script_line_start(void)          {
   scriptitem_T    *si;
   sn_prl_T        *pp;
 
@@ -3157,7 +3149,7 @@ void script_line_start()          {
 /*
  * Called when actually executing a function line.
  */
-void script_line_exec()          {
+void script_line_exec(void)          {
   scriptitem_T    *si;
 
   if (current_SID <= 0 || current_SID > script_items.ga_len)
@@ -3170,7 +3162,7 @@ void script_line_exec()          {
 /*
  * Called when done with a function line.
  */
-void script_line_end()          {
+void script_line_end(void)          {
   scriptitem_T    *si;
   sn_prl_T        *pp;
 
@@ -3304,8 +3296,7 @@ exarg_T     *eap;
 # define HAVE_GET_LOCALE_VAL
 static char *get_locale_val __ARGS((int what));
 
-static char * get_locale_val(what)
-int what;
+static char *get_locale_val(int what)
 {
   char        *loc;
 
@@ -3324,7 +3315,7 @@ int what;
  * Obtain the current messages language.  Used to set the default for
  * 'helplang'.  May return NULL or an empty string.
  */
-char_u * get_mess_lang()              {
+char_u *get_mess_lang(void)              {
   char_u *p;
 
 # ifdef HAVE_GET_LOCALE_VAL
@@ -3355,7 +3346,7 @@ static char_u *get_mess_env __ARGS((void));
 /*
  * Get the language used for messages from the environment.
  */
-static char_u * get_mess_env()                     {
+static char_u *get_mess_env(void)                     {
   char_u      *p;
 
   p = mch_getenv((char_u *)"LC_ALL");
@@ -3381,7 +3372,7 @@ static char_u * get_mess_env()                     {
  * Set the "v:lang" variable according to the current locale setting.
  * Also do "v:lc_time"and "v:ctype".
  */
-void set_lang_var()          {
+void set_lang_var(void)          {
   char_u      *loc;
 
 # ifdef HAVE_GET_LOCALE_VAL
@@ -3519,7 +3510,7 @@ static char_u **find_locales __ARGS((void));
 /*
  * Lazy initialization of all available locales.
  */
-static void init_locales()                 {
+static void init_locales(void)                 {
   if (!did_init_locales) {
     did_init_locales = TRUE;
     locales = find_locales();
@@ -3528,7 +3519,7 @@ static void init_locales()                 {
 
 /* Return an array of strings for all available locales + NULL for the
  * last element.  Return NULL in case of error. */
-static char_u ** find_locales()                      {
+static char_u **find_locales(void)                      {
   garray_T locales_ga;
   char_u      *loc;
 
@@ -3564,7 +3555,7 @@ static char_u ** find_locales()                      {
 }
 
 #  if defined(EXITFREE) || defined(PROTO)
-void free_locales()          {
+void free_locales(void)          {
   int i;
   if (locales != NULL) {
     for (i = 0; locales[i] != NULL; i++)

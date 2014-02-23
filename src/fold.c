@@ -132,10 +132,7 @@ win_T       *win;
  * When returning TRUE, *firstp and *lastp are set to the first and last
  * lnum of the sequence of folded lines (skipped when NULL).
  */
-int hasFolding(lnum, firstp, lastp)
-linenr_T lnum;
-linenr_T    *firstp;
-linenr_T    *lastp;
+int hasFolding(linenr_T lnum, linenr_T *firstp, linenr_T *lastp)
 {
   return hasFoldingWin(curwin, lnum, firstp, lastp, TRUE, NULL);
 }
@@ -242,8 +239,7 @@ foldinfo_T  *infop;             /* where to store fold info */
 /*
  * Return fold level at line number "lnum" in the current window.
  */
-int foldLevel(lnum)
-linenr_T lnum;
+int foldLevel(linenr_T lnum)
 {
   /* While updating the folds lines between invalid_top and invalid_bot have
    * an undefined fold level.  Otherwise update the folds first. */
@@ -361,9 +357,7 @@ win_T       *wp;
  * Close fold for current window at line "lnum".
  * Repeat "count" times.
  */
-void closeFold(lnum, count)
-linenr_T lnum;
-long count;
+void closeFold(linenr_T lnum, long count)
 {
   setFoldRepeat(lnum, count, FALSE);
 }
@@ -372,8 +366,7 @@ long count;
 /*
  * Close fold for current window at line "lnum" recursively.
  */
-void closeFoldRecurse(lnum)
-linenr_T lnum;
+void closeFoldRecurse(linenr_T lnum)
 {
   (void)setManualFold(lnum, FALSE, TRUE, NULL);
 }
@@ -383,12 +376,14 @@ linenr_T lnum;
  * Open or Close folds for current window in lines "first" to "last".
  * Used for "zo", "zO", "zc" and "zC" in Visual mode.
  */
-void opFoldRange(first, last, opening, recurse, had_visual)
-linenr_T first;
-linenr_T last;
-int opening;                    /* TRUE to open, FALSE to close */
-int recurse;                    /* TRUE to do it recursively */
-int had_visual;                 /* TRUE when Visual selection used */
+void 
+opFoldRange (
+    linenr_T first,
+    linenr_T last,
+    int opening,                    /* TRUE to open, FALSE to close */
+    int recurse,                    /* TRUE to do it recursively */
+    int had_visual                 /* TRUE when Visual selection used */
+)
 {
   int done = DONE_NOTHING;              /* avoid error messages */
   linenr_T lnum;
@@ -418,9 +413,7 @@ int had_visual;                 /* TRUE when Visual selection used */
  * Open fold for current window at line "lnum".
  * Repeat "count" times.
  */
-void openFold(lnum, count)
-linenr_T lnum;
-long count;
+void openFold(linenr_T lnum, long count)
 {
   setFoldRepeat(lnum, count, TRUE);
 }
@@ -429,8 +422,7 @@ long count;
 /*
  * Open fold for current window at line "lnum" recursively.
  */
-void openFoldRecurse(lnum)
-linenr_T lnum;
+void openFoldRecurse(linenr_T lnum)
 {
   (void)setManualFold(lnum, TRUE, TRUE, NULL);
 }
@@ -439,7 +431,7 @@ linenr_T lnum;
 /*
  * Open folds until the cursor line is not in a closed fold.
  */
-void foldOpenCursor()          {
+void foldOpenCursor(void)          {
   int done;
 
   checkupdate(curwin);
@@ -456,7 +448,7 @@ void foldOpenCursor()          {
 /*
  * Set new foldlevel for current window.
  */
-void newFoldLevel()          {
+void newFoldLevel(void)          {
   newFoldLevelWin(curwin);
 
   if (foldmethodIsDiff(curwin) && curwin->w_p_scb) {
@@ -498,7 +490,7 @@ win_T       *wp;
 /*
  * Apply 'foldlevel' to all folds that don't contain the cursor.
  */
-void foldCheckClose()          {
+void foldCheckClose(void)          {
   if (*p_fcl != NUL) {  /* can only be "all" right now */
     checkupdate(curwin);
     if (checkCloseRec(&curwin->w_folds, curwin->w_cursor.lnum,
@@ -538,8 +530,7 @@ int level;
  * Return TRUE if it's allowed to manually create or delete a fold.
  * Give an error message and return FALSE if not.
  */
-int foldManualAllowed(create)
-int create;
+int foldManualAllowed(int create)
 {
   if (foldmethodIsManual(curwin) || foldmethodIsMarker(curwin))
     return TRUE;
@@ -555,9 +546,7 @@ int create;
  * Create a fold from line "start" to line "end" (inclusive) in the current
  * window.
  */
-void foldCreate(start, end)
-linenr_T start;
-linenr_T end;
+void foldCreate(linenr_T start, linenr_T end)
 {
   fold_T      *fp;
   garray_T    *gap;
@@ -671,11 +660,13 @@ linenr_T end;
  * When "end" is not 0, delete all folds from "start" to "end".
  * When "recursive" is TRUE delete recursively.
  */
-void deleteFold(start, end, recursive, had_visual)
-linenr_T start;
-linenr_T end;
-int recursive;
-int had_visual;                 /* TRUE when Visual selection used */
+void 
+deleteFold (
+    linenr_T start,
+    linenr_T end,
+    int recursive,
+    int had_visual                 /* TRUE when Visual selection used */
+)
 {
   garray_T    *gap;
   fold_T      *fp;
@@ -820,10 +811,12 @@ win_T       *win;
  * If "updown" is TRUE: move to fold at the same level.
  * If not moved return FAIL.
  */
-int foldMoveTo(updown, dir, count)
-int updown;
-int dir;                    /* FORWARD or BACKWARD */
-long count;
+int 
+foldMoveTo (
+    int updown,
+    int dir,                    /* FORWARD or BACKWARD */
+    long count
+)
 {
   long n;
   int retval = FAIL;
@@ -969,7 +962,7 @@ linenr_T lnum;
 /*
  * Adjust the Visual area to include any fold at the start or end completely.
  */
-void foldAdjustVisual()          {
+void foldAdjustVisual(void)          {
   pos_T       *start, *end;
   char_u      *ptr;
 
@@ -1000,7 +993,7 @@ void foldAdjustVisual()          {
 /*
  * Move the cursor to the first line of a closed fold.
  */
-void foldAdjustCursor()          {
+void foldAdjustCursor(void)          {
   (void)hasFolding(curwin->w_cursor.lnum, &curwin->w_cursor.lnum, NULL);
 }
 
@@ -1125,10 +1118,7 @@ win_T       *wp;
  * Open or close fold for current window at line "lnum".
  * Repeat "count" times.
  */
-static void setFoldRepeat(lnum, count, do_open)
-linenr_T lnum;
-long count;
-int do_open;
+static void setFoldRepeat(linenr_T lnum, long count, int do_open)
 {
   int done;
   long n;
@@ -1150,11 +1140,13 @@ int do_open;
  * Open or close the fold in the current window which contains "lnum".
  * Also does this for other windows in diff mode when needed.
  */
-static linenr_T setManualFold(lnum, opening, recurse, donep)
-linenr_T lnum;
-int opening;                /* TRUE when opening, FALSE when closing */
-int recurse;                /* TRUE when closing/opening recursive */
-int         *donep;
+static linenr_T 
+setManualFold (
+    linenr_T lnum,
+    int opening,                /* TRUE when opening, FALSE when closing */
+    int recurse,                /* TRUE when closing/opening recursive */
+    int *donep
+)
 {
   if (foldmethodIsDiff(curwin) && curwin->w_p_scb) {
     win_T       *wp;
@@ -1286,8 +1278,7 @@ int         *donep;
 /*
  * Open all nested folds in fold "fpr" recursively.
  */
-static void foldOpenNested(fpr)
-fold_T      *fpr;
+static void foldOpenNested(fold_T *fpr)
 {
   int i;
   fold_T      *fp;
@@ -1487,7 +1478,7 @@ long amount_after;
  * Get the lowest 'foldlevel' value that makes the deepest nested fold in the
  * current window open.
  */
-int getDeepestNesting()         {
+int getDeepestNesting(void)         {
   checkupdate(curwin);
   return getDeepestNestingRecurse(&curwin->w_folds);
 }
@@ -1598,9 +1589,7 @@ garray_T    *gap;
  * Create a fold from line "start" to line "end" (inclusive) in the current
  * window by adding markers.
  */
-static void foldCreateMarkers(start, end)
-linenr_T start;
-linenr_T end;
+static void foldCreateMarkers(linenr_T start, linenr_T end)
 {
   if (!curbuf->b_p_ma) {
     EMSG(_(e_modifiable));
@@ -1620,10 +1609,7 @@ linenr_T end;
 /*
  * Add "marker[markerlen]" in 'commentstring' to line "lnum".
  */
-static void foldAddMarker(lnum, marker, markerlen)
-linenr_T lnum;
-char_u      *marker;
-int markerlen;
+static void foldAddMarker(linenr_T lnum, char_u *marker, int markerlen)
 {
   char_u      *cms = curbuf->b_p_cms;
   char_u      *line;
@@ -1656,10 +1642,12 @@ int markerlen;
 /*
  * Delete the markers for a fold, causing it to be deleted.
  */
-static void deleteFoldMarkers(fp, recursive, lnum_off)
-fold_T      *fp;
-int recursive;
-linenr_T lnum_off;              /* offset for fp->fd_top */
+static void 
+deleteFoldMarkers (
+    fold_T *fp,
+    int recursive,
+    linenr_T lnum_off              /* offset for fp->fd_top */
+)
 {
   int i;
 
@@ -1679,10 +1667,7 @@ linenr_T lnum_off;              /* offset for fp->fd_top */
  * If the marker is not found, there is no error message.  Could a missing
  * close-marker.
  */
-static void foldDelMarker(lnum, marker, markerlen)
-linenr_T lnum;
-char_u      *marker;
-int markerlen;
+static void foldDelMarker(linenr_T lnum, char_u *marker, int markerlen)
 {
   char_u      *line;
   char_u      *newline;
@@ -1827,8 +1812,7 @@ char_u      *buf;
 /*
  * Remove 'foldmarker' and 'commentstring' from "str" (in-place).
  */
-void foldtext_cleanup(str)
-char_u      *str;
+void foldtext_cleanup(char_u *str)
 {
   char_u      *cms_start;       /* first part or the whole comment */
   int cms_slen = 0;             /* length of cms_start */
@@ -2730,8 +2714,7 @@ fold_T      *fp2;
  * Doesn't use any caching.
  * Returns a level of -1 if the foldlevel depends on surrounding lines.
  */
-static void foldlevelIndent(flp)
-fline_T     *flp;
+static void foldlevelIndent(fline_T *flp)
 {
   char_u      *s;
   buf_T       *buf;
@@ -2762,8 +2745,7 @@ fline_T     *flp;
  * Low level function to get the foldlevel for the "diff" method.
  * Doesn't use any caching.
  */
-static void foldlevelDiff(flp)
-fline_T     *flp;
+static void foldlevelDiff(fline_T *flp)
 {
   if (diff_infold(flp->wp, flp->lnum + flp->off))
     flp->lvl = 1;
@@ -2777,8 +2759,7 @@ fline_T     *flp;
  * Doesn't use any caching.
  * Returns a level of -1 if the foldlevel depends on surrounding lines.
  */
-static void foldlevelExpr(flp)
-fline_T     *flp;
+static void foldlevelExpr(fline_T *flp)
 {
   win_T       *win;
   int n;
@@ -2887,8 +2868,7 @@ win_T       *wp;
  * Doesn't use any caching.
  * Sets flp->start when a start marker was found.
  */
-static void foldlevelMarker(flp)
-fline_T     *flp;
+static void foldlevelMarker(fline_T *flp)
 {
   char_u      *startmarker;
   int cstart;
@@ -2958,8 +2938,7 @@ fline_T     *flp;
  * Low level function to get the foldlevel for the "syntax" method.
  * Doesn't use any caching.
  */
-static void foldlevelSyntax(flp)
-fline_T     *flp;
+static void foldlevelSyntax(fline_T *flp)
 {
   linenr_T lnum = flp->lnum + flp->off;
   int n;

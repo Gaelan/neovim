@@ -768,7 +768,7 @@ int page_count;
  *
  * return TRUE if any memory was released
  */
-int mf_release_all()         {
+int mf_release_all(void)         {
   buf_T       *buf;
   memfile_T   *mfp;
   bhdr_T      *hp;

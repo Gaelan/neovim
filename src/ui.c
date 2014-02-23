@@ -19,9 +19,7 @@
 #include "vim.h"
 
 
-void ui_write(s, len)
-char_u  *s;
-int len;
+void ui_write(char_u *s, int len)
 {
 #ifndef NO_CONSOLE
   /* Don't output anything in silent mode ("ex -s") unless 'verbose' set */
@@ -53,9 +51,7 @@ static char_u *ta_str = NULL;
 static int ta_off;      /* offset for next char to use when ta_str != NULL */
 static int ta_len;      /* length of ta_str when it's not NULL*/
 
-void ui_inchar_undo(s, len)
-char_u      *s;
-int len;
+void ui_inchar_undo(char_u *s, int len)
 {
   char_u  *new;
   int newlen;
@@ -91,11 +87,13 @@ int len;
  * from a remote client) "buf" can no longer be used.  "tb_change_cnt" is NULL
  * otherwise.
  */
-int ui_inchar(buf, maxlen, wtime, tb_change_cnt)
-char_u      *buf;
-int maxlen;
-long wtime;                 /* don't use "time", MIPS cannot handle it */
-int tb_change_cnt;
+int 
+ui_inchar (
+    char_u *buf,
+    int maxlen,
+    long wtime,                 /* don't use "time", MIPS cannot handle it */
+    int tb_change_cnt
+)
 {
   int retval = 0;
 
@@ -159,7 +157,7 @@ theend:
 /*
  * return non-zero if a character is available
  */
-int ui_char_avail()         {
+int ui_char_avail(void)         {
 #ifndef NO_CONSOLE
 # ifdef NO_CONSOLE_INPUT
   if (no_console_input())
@@ -175,9 +173,7 @@ int ui_char_avail()         {
  * Delay for the given number of milliseconds.	If ignoreinput is FALSE then we
  * cancel the delay if a key is hit.
  */
-void ui_delay(msec, ignoreinput)
-long msec;
-int ignoreinput;
+void ui_delay(long msec, int ignoreinput)
 {
   mch_delay(msec, ignoreinput);
 }
@@ -187,7 +183,7 @@ int ignoreinput;
  * otherwise fake it by starting a new shell.
  * When running the GUI iconify the window.
  */
-void ui_suspend()          {
+void ui_suspend(void)          {
   mch_suspend();
 }
 
@@ -196,7 +192,7 @@ void ui_suspend()          {
  * When the OS can't really suspend, call this function to start a shell.
  * This is never called in the GUI.
  */
-void suspend_shell()          {
+void suspend_shell(void)          {
   if (*p_sh == NUL)
     EMSG(_(e_shellempty));
   else {
@@ -212,7 +208,7 @@ void suspend_shell()          {
  * Use the new sizes as defaults for 'columns' and 'lines'.
  * Return OK when size could be determined, FAIL otherwise.
  */
-int ui_get_shellsize()         {
+int ui_get_shellsize(void)         {
   int retval;
 
   retval = mch_get_shellsize();
@@ -242,13 +238,13 @@ int mustset UNUSED;             /* set by the user */
  * Called when Rows and/or Columns changed.  Adjust scroll region and mouse
  * region.
  */
-void ui_new_shellsize()          {
+void ui_new_shellsize(void)          {
   if (full_screen && !exiting) {
     mch_new_shellsize();
   }
 }
 
-void ui_breakcheck()          {
+void ui_breakcheck(void)          {
   mch_breakcheck();
 }
 
@@ -305,16 +301,16 @@ static int inbufcount = 0;          /* number of chars in inbuf[] */
  * are used by the gui_* calls when a GUI is used to handle keyboard input.
  */
 
-int vim_is_input_buf_full()         {
+int vim_is_input_buf_full(void)         {
   return inbufcount >= INBUFLEN;
 }
 
-int vim_is_input_buf_empty()         {
+int vim_is_input_buf_empty(void)         {
   return inbufcount == 0;
 }
 
 #if defined(FEAT_OLE) || defined(PROTO)
-int vim_free_in_input_buf()         {
+int vim_free_in_input_buf(void)         {
   return INBUFLEN - inbufcount;
 }
 
@@ -325,7 +321,7 @@ int vim_free_in_input_buf()         {
  * Return the current contents of the input buffer and make it empty.
  * The returned pointer must be passed to set_input_buf() later.
  */
-char_u * get_input_buf()              {
+char_u *get_input_buf(void)              {
   garray_T    *gap;
 
   /* We use a growarray to store the data pointer and the length. */
@@ -345,8 +341,7 @@ char_u * get_input_buf()              {
  * Restore the input buffer with a pointer returned from get_input_buf().
  * The allocated memory is freed, this only works once!
  */
-void set_input_buf(p)
-char_u      *p;
+void set_input_buf(char_u *p)
 {
   garray_T    *gap = (garray_T *)p;
 
@@ -370,9 +365,7 @@ char_u      *p;
  * Special keys start with CSI.  A real CSI must have been translated to
  * CSI KS_EXTRA KE_CSI.  K_SPECIAL doesn't require translation.
  */
-void add_to_input_buf(s, len)
-char_u  *s;
-int len;
+void add_to_input_buf(char_u *s, int len)
 {
   if (inbufcount + len > INBUFLEN + MAX_KEY_CODE_LEN)
     return;         /* Shouldn't ever happen! */
@@ -413,9 +406,7 @@ void add_to_input_buf_csi(char_u *str, int len)          {
 
 #endif
 
-void push_raw_key(s, len)
-char_u  *s;
-int len;
+void push_raw_key(char_u *s, int len)
 {
   while (len--)
     inbuf[inbufcount++] = *s++;
@@ -424,7 +415,7 @@ int len;
 #if defined(FEAT_GUI) || defined(FEAT_EVAL) || defined(FEAT_EX_EXTRA) \
   || defined(PROTO)
 /* Remove everything from the input buffer.  Called when ^C is found */
-void trash_input_buf()          {
+void trash_input_buf(void)          {
   inbufcount = 0;
 }
 
@@ -435,9 +426,7 @@ void trash_input_buf()          {
  * it in buf.
  * Note: this function used to be Read() in unix.c
  */
-int read_from_input_buf(buf, maxlen)
-char_u  *buf;
-long maxlen;
+int read_from_input_buf(char_u *buf, long maxlen)
 {
   if (inbufcount == 0)          /* if the buffer is empty, fill it */
     fill_input_buf(TRUE);
@@ -567,7 +556,7 @@ int exit_on_error UNUSED;
 /*
  * Exit because of an input read error.
  */
-void read_error_exit()          {
+void read_error_exit(void)          {
   if (silent_mode)      /* Normal way to exit for "ex -s" */
     getout(0);
   STRCPY(IObuff, _("Vim: Error reading input, exiting...\n"));
@@ -578,7 +567,7 @@ void read_error_exit()          {
 /*
  * May update the shape of the cursor.
  */
-void ui_cursor_shape()          {
+void ui_cursor_shape(void)          {
   term_cursor_shape();
 
 
@@ -592,8 +581,7 @@ void ui_cursor_shape()          {
 /*
  * Check bounds for column number
  */
-int check_col(col)
-int col;
+int check_col(int col)
 {
   if (col < 0)
     return 0;
@@ -605,8 +593,7 @@ int col;
 /*
  * Check bounds for row number
  */
-int check_row(row)
-int row;
+int check_row(int row)
 {
   if (row < 0)
     return 0;
@@ -694,10 +681,12 @@ VimClipboard        *cbd;
  * If flags has MOUSE_SETPOS, nothing is done, only the current position is
  * remembered.
  */
-int jump_to_mouse(flags, inclusive, which_button)
-int flags;
-int         *inclusive;         /* used for inclusive operator, can be NULL */
-int which_button;               /* MOUSE_LEFT, MOUSE_RIGHT, MOUSE_MIDDLE */
+int 
+jump_to_mouse (
+    int flags,
+    int *inclusive,         /* used for inclusive operator, can be NULL */
+    int which_button               /* MOUSE_LEFT, MOUSE_RIGHT, MOUSE_MIDDLE */
+)
 {
   static int on_status_line = 0;        /* #lines below bottom of window */
   static int on_sep_line = 0;           /* on separator right of window */
@@ -1154,8 +1143,7 @@ int vcol;
 /*
  * Save current Input Method status to specified place.
  */
-void im_save_status(psave)
-long *psave;
+void im_save_status(long *psave)
 {
   /* Don't save when 'imdisable' is set or "xic" is NULL, IM is always
    * disabled then (but might start later).

@@ -659,13 +659,15 @@ buf_T       *old_curbuf;
  *
  * Returns error message or NULL
  */
-char_u * do_bufdel(command, arg, addr_count, start_bnr, end_bnr, forceit)
-int command;
-char_u      *arg;               /* pointer to extra arguments */
-int addr_count;
-int start_bnr;                  /* first buffer number in a range */
-int end_bnr;                    /* buffer nr or last buffer nr in a range */
-int forceit;
+char_u *
+do_bufdel (
+    int command,
+    char_u *arg,               /* pointer to extra arguments */
+    int addr_count,
+    int start_bnr,                  /* first buffer number in a range */
+    int end_bnr,                    /* buffer nr or last buffer nr in a range */
+    int forceit
+)
 {
   int do_current = 0;           /* delete current buffer? */
   int deleted = 0;              /* number of buffers deleted */
@@ -762,10 +764,7 @@ static int empty_curbuf __ARGS((int close_others, int forceit, int action));
  * Make the current buffer empty.
  * Used when it is wiped out and it's the last buffer.
  */
-static int empty_curbuf(close_others, forceit, action)
-int close_others;
-int forceit;
-int action;
+static int empty_curbuf(int close_others, int forceit, int action)
 {
   int retval;
   buf_T   *buf = curbuf;
@@ -811,12 +810,14 @@ int action;
  *
  * Return FAIL or OK.
  */
-int do_buffer(action, start, dir, count, forceit)
-int action;
-int start;
-int dir;                        /* FORWARD or BACKWARD */
-int count;                      /* buffer number or number of buffers */
-int forceit;                    /* TRUE for :...! */
+int 
+do_buffer (
+    int action,
+    int start,
+    int dir,                        /* FORWARD or BACKWARD */
+    int count,                      /* buffer number or number of buffers */
+    int forceit                    /* TRUE for :...! */
+)
 {
   buf_T       *buf;
   buf_T       *bp;
@@ -1237,7 +1238,7 @@ buf_T       *buf;
 /*
  * Change to the directory of the current buffer.
  */
-void do_autochdir()          {
+void do_autochdir(void)          {
   if (curbuf->b_ffname != NULL && vim_chdirfile(curbuf->b_ffname) == OK)
     shorten_fnames(TRUE);
 }
@@ -1516,11 +1517,7 @@ int free_p_ff;
  *
  * return FAIL for failure, OK for success
  */
-int buflist_getfile(n, lnum, options, forceit)
-int n;
-linenr_T lnum;
-int options;
-int forceit;
+int buflist_getfile(int n, linenr_T lnum, int options, int forceit)
 {
   buf_T       *buf;
   win_T       *wp = NULL;
@@ -1596,7 +1593,7 @@ int forceit;
 /*
  * go to the last know line number for the current buffer
  */
-void buflist_getfpos()          {
+void buflist_getfpos(void)          {
   pos_T       *fpos;
 
   fpos = buflist_findfpos(curbuf);
@@ -1794,11 +1791,7 @@ int curtab_only;                /* find buffers in current tab only */
  * For command line expansion of ":buf" and ":sbuf".
  * Return OK if matches found, FAIL otherwise.
  */
-int ExpandBufnames(pat, num_file, file, options)
-char_u      *pat;
-int         *num_file;
-char_u      ***file;
-int options;
+int ExpandBufnames(char_u *pat, int *num_file, char_u ***file, int options)
 {
   int count = 0;
   buf_T       *buf;
@@ -1952,10 +1945,12 @@ int nr;
  * home_replace() is used to shorten the file name (used for marks).
  * Returns a pointer to allocated memory, of NULL when failed.
  */
-char_u * buflist_nr2name(n, fullname, helptail)
-int n;
-int fullname;
-int helptail;                   /* for help buffers return tail only */
+char_u *
+buflist_nr2name (
+    int n,
+    int fullname,
+    int helptail                   /* for help buffers return tail only */
+)
 {
   buf_T       *buf;
 
@@ -2188,10 +2183,7 @@ exarg_T     *eap;
  * Used by insert_reg() and cmdline_paste() for '#' register.
  * Return FAIL if not found, OK for success.
  */
-int buflist_name_nr(fnum, fname, lnum)
-int fnum;
-char_u      **fname;
-linenr_T    *lnum;
+int buflist_name_nr(int fnum, char_u **fname, linenr_T *lnum)
 {
   buf_T       *buf;
 
@@ -2300,9 +2292,7 @@ int message;                    /* give message when buffer already exists */
  * Crude way of changing the name of a buffer.  Use with care!
  * The name should be relative to the current directory.
  */
-void buf_set_name(fnum, name)
-int fnum;
-char_u      *name;
+void buf_set_name(int fnum, char_u *name)
 {
   buf_T       *buf;
 
@@ -2364,8 +2354,10 @@ linenr_T lnum;
  * Get alternate file name for current window.
  * Return NULL if there isn't any, and give error message if requested.
  */
-char_u  * getaltfname(errmsg)
-int errmsg;                     /* give error message */
+char_u *
+getaltfname (
+    int errmsg                     /* give error message */
+)
 {
   char_u      *fname;
   linenr_T dummy;
@@ -2384,9 +2376,7 @@ int errmsg;                     /* give error message */
  *
  * used by qf_init(), main() and doarglist()
  */
-int buflist_add(fname, flags)
-char_u      *fname;
-int flags;
+int buflist_add(char_u *fname, int flags)
 {
   buf_T       *buf;
 
@@ -2400,7 +2390,7 @@ int flags;
 /*
  * Adjust slashes in file names.  Called after 'shellslash' was set.
  */
-void buflist_slash_adjust()          {
+void buflist_slash_adjust(void)          {
   buf_T       *bp;
 
   for (bp = firstbuf; bp != NULL; bp = bp->b_next) {
@@ -2427,8 +2417,7 @@ win_T *win;
  * Return TRUE if 'ffname' is not the same file as current file.
  * Fname must have a full path (expanded by mch_FullName()).
  */
-int otherfile(ffname)
-char_u      *ffname;
+int otherfile(char_u *ffname)
 {
   return otherfile_buf(curbuf, ffname
 #ifdef UNIX
@@ -2516,10 +2505,12 @@ struct stat *stp;
 /*
  * Print info about the current buffer.
  */
-void fileinfo(fullname, shorthelp, dont_truncate)
-int fullname;               /* when non-zero print full path */
-int shorthelp;
-int dont_truncate;
+void 
+fileinfo (
+    int fullname,               /* when non-zero print full path */
+    int shorthelp,
+    int dont_truncate
+)
 {
   char_u      *name;
   int n;
@@ -2636,7 +2627,7 @@ int vcol;
 static char_u *lasttitle = NULL;
 static char_u *lasticon = NULL;
 
-void maketitle()          {
+void maketitle(void)          {
   char_u      *p;
   char_u      *t_str = NULL;
   char_u      *i_name;
@@ -2803,9 +2794,7 @@ void maketitle()          {
  * from "str" if it does.
  * Return TRUE when "*last" changed.
  */
-static int ti_change(str, last)
-char_u      *str;
-char_u      **last;
+static int ti_change(char_u *str, char_u **last)
 {
   if ((str == NULL) != (*last == NULL)
       || (str != NULL && *last != NULL && STRCMP(str, *last) != 0)) {
@@ -2822,12 +2811,12 @@ char_u      **last;
 /*
  * Put current window title back (used after calling a shell)
  */
-void resettitle()          {
+void resettitle(void)          {
   mch_settitle(lasttitle, lasticon);
 }
 
 # if defined(EXITFREE) || defined(PROTO)
-void free_titles()          {
+void free_titles(void)          {
   vim_free(lasttitle);
   vim_free(lasticon);
 }
@@ -3631,8 +3620,7 @@ int add_file;                   /* Add "file" before the arg number */
  * If fname is not a full path, make it a full path.
  * Returns pointer to allocated memory (NULL for failure).
  */
-char_u  * fix_fname(fname)
-char_u  *fname;
+char_u *fix_fname(char_u *fname)
 {
   /*
    * Force expanding the path always for Unix, because symbolic links may
@@ -3718,10 +3706,12 @@ aentry_T    *aep;
 /*
  * do_arg_all(): Open up to 'count' windows, one for each argument.
  */
-void do_arg_all(count, forceit, keep_tabs)
-int count;
-int forceit;                    /* hide buffers in current windows */
-int keep_tabs;                  /* keep current tabs, for ":tab drop file" */
+void 
+do_arg_all (
+    int count,
+    int forceit,                    /* hide buffers in current windows */
+    int keep_tabs                  /* keep current tabs, for ":tab drop file" */
+)
 {
   int i;
   win_T       *wp, *wpnext;
@@ -4140,8 +4130,7 @@ static int chk_modeline __ARGS((linenr_T, int));
  *
  * Returns immediately if the "ml" option isn't set.
  */
-void do_modelines(flags)
-int flags;
+void do_modelines(int flags)
 {
   linenr_T lnum;
   int nmlines;
@@ -4174,9 +4163,11 @@ int flags;
  * chk_modeline() - check a single line for a mode string
  * Return FAIL if an error encountered.
  */
-static int chk_modeline(lnum, flags)
-linenr_T lnum;
-int flags;                      /* Same as for do_modelines(). */
+static int 
+chk_modeline (
+    linenr_T lnum,
+    int flags                      /* Same as for do_modelines(). */
+)
 {
   char_u      *s;
   char_u      *e;
@@ -4433,8 +4424,7 @@ win_found:
 /*
  * Set 'buflisted' for curbuf to "on" and trigger autocommands if it changed.
  */
-void set_buflisted(on)
-int on;
+void set_buflisted(int on)
 {
   if (on != curbuf->b_p_bl) {
     curbuf->b_p_bl = on;
