@@ -1,4 +1,536 @@
-__END_DECLS static void get_stack_limit(void)                 {
+/* vi:set ts=8 sts=4 sw=4:
+ *
+ * VIM - Vi IMproved	by Bram Moolenaar
+ *	      OS/2 port by Paul Slootman
+ *	      VMS merge by Zoltan Arpadffy
+ *
+ * Do ":help uganda"  in Vim to read copying and usage conditions.
+ * Do ":help credits" in Vim to see a list of people who contributed.
+ * See README.txt for an overview of the Vim source code.
+ */
+
+/*
+ * os_unix.c -- code for all flavors of Unix (BSD, SYSV, SVR4, POSIX, ...)
+ *	     Also for OS/2, using the excellent EMX package!!!
+ *	     Also for BeOS and Atari MiNT.
+ *
+ * A lot of this file was originally written by Juergen Weigert and later
+ * changed beyond recognition.
+ */
+
+/*
+ * Some systems have a prototype for select() that has (int *) instead of
+ * (fd_set *), which is wrong. This define removes that prototype. We define
+ * our own prototype below.
+ * Don't use it for the Mac, it causes a warning for precompiled headers.
+ * TODO: use a configure check for precompiled headers?
+ */
+# define select select_declared_wrong
+
+#include "vim.h"
+
+
+#include "os_unixx.h"       /* unix includes for os_unix.c only */
+
+
+#ifdef HAVE_SELINUX
+# include <selinux/selinux.h>
+static int selinux_enabled = -1;
+#endif
+
+/*
+ * Use this prototype for select, some include files have a wrong prototype
+ */
+# undef select
+
+
+#if defined(HAVE_SELECT)
+extern int select __ARGS((int, fd_set *, fd_set *, fd_set *, struct timeval *));
+#endif
+
+
+
+/*
+ * end of autoconf section. To be extended...
+ */
+
+/* Are the following #ifdefs still required? And why? Is that for X11? */
+
+#if defined(ESIX) || defined(M_UNIX) && !defined(SCO)
+# ifdef SIGWINCH
+#  undef SIGWINCH
+# endif
+# ifdef TIOCGWINSZ
+#  undef TIOCGWINSZ
+# endif
+#endif
+
+#if defined(SIGWINDOW) && !defined(SIGWINCH)    /* hpux 9.01 has it */
+# define SIGWINCH SIGWINDOW
+#endif
+
+
+static int get_x11_title __ARGS((int));
+static int get_x11_icon __ARGS((int));
+
+static char_u   *oldtitle = NULL;
+static int did_set_title = FALSE;
+static char_u   *oldicon = NULL;
+static int did_set_icon = FALSE;
+
+static void may_core_dump __ARGS((void));
+
+#ifdef HAVE_UNION_WAIT
+typedef union wait waitstatus;
+#else
+typedef int waitstatus;
+#endif
+static pid_t wait4pid __ARGS((pid_t, waitstatus *));
+
+static int WaitForChar __ARGS((long));
+static int RealWaitForChar __ARGS((int, long, int *));
+
+
+static void handle_resize __ARGS((void));
+
+#if defined(SIGWINCH)
+static RETSIGTYPE sig_winch __ARGS(SIGPROTOARG);
+#endif
+#if defined(SIGINT)
+static RETSIGTYPE catch_sigint __ARGS(SIGPROTOARG);
+#endif
+#if defined(SIGPWR)
+static RETSIGTYPE catch_sigpwr __ARGS(SIGPROTOARG);
+#endif
+static RETSIGTYPE deathtrap __ARGS(SIGPROTOARG);
+
+static void catch_int_signal __ARGS((void));
+static void set_signals __ARGS((void));
+static void catch_signals __ARGS(
+    (RETSIGTYPE (*func_deadly)(), RETSIGTYPE (*func_other)()));
+static int have_wildcard __ARGS((int, char_u **));
+static int have_dollars __ARGS((int, char_u **));
+
+static int save_patterns __ARGS((int num_pat, char_u **pat, int *num_file,
+                                 char_u ***file));
+
+#ifndef SIG_ERR
+# define SIG_ERR        ((RETSIGTYPE (*)())-1)
+#endif
+
+/* volatile because it is used in signal handler sig_winch(). */
+static volatile int do_resize = FALSE;
+static char_u   *extra_shell_arg = NULL;
+static int show_shell_mess = TRUE;
+/* volatile because it is used in signal handler deathtrap(). */
+static volatile int deadly_signal = 0;      /* The signal we caught */
+/* volatile because it is used in signal handler deathtrap(). */
+static volatile int in_mch_delay = FALSE;    /* sleeping in mch_delay() */
+
+static int curr_tmode = TMODE_COOK;     /* contains current terminal mode */
+
+
+#ifdef SYS_SIGLIST_DECLARED
+/*
+ * I have seen
+ *  extern char *_sys_siglist[NSIG];
+ * on Irix, Linux, NetBSD and Solaris. It contains a nice list of strings
+ * that describe the signals. That is nearly what we want here.  But
+ * autoconf does only check for sys_siglist (without the underscore), I
+ * do not want to change everything today.... jw.
+ * This is why AC_DECL_SYS_SIGLIST is commented out in configure.in
+ */
+#endif
+
+static struct signalinfo {
+  int sig;              /* Signal number, eg. SIGSEGV etc */
+  char    *name;        /* Signal name (not char_u!). */
+  char deadly;          /* Catch as a deadly signal? */
+} signal_info[] =
+{
+#ifdef SIGHUP
+  {SIGHUP,        "HUP",      TRUE},
+#endif
+#ifdef SIGQUIT
+  {SIGQUIT,       "QUIT",     TRUE},
+#endif
+#ifdef SIGILL
+  {SIGILL,        "ILL",      TRUE},
+#endif
+#ifdef SIGTRAP
+  {SIGTRAP,       "TRAP",     TRUE},
+#endif
+#ifdef SIGABRT
+  {SIGABRT,       "ABRT",     TRUE},
+#endif
+#ifdef SIGEMT
+  {SIGEMT,        "EMT",      TRUE},
+#endif
+#ifdef SIGFPE
+  {SIGFPE,        "FPE",      TRUE},
+#endif
+#ifdef SIGBUS
+  {SIGBUS,        "BUS",      TRUE},
+#endif
+#if defined(SIGSEGV)
+  /* MzScheme uses SEGV in its garbage collector */
+  {SIGSEGV,       "SEGV",     TRUE},
+#endif
+#ifdef SIGSYS
+  {SIGSYS,        "SYS",      TRUE},
+#endif
+#ifdef SIGALRM
+  {SIGALRM,       "ALRM",     FALSE},   /* Perl's alarm() can trigger it */
+#endif
+#ifdef SIGTERM
+  {SIGTERM,       "TERM",     TRUE},
+#endif
+#if defined(SIGVTALRM)
+  {SIGVTALRM,     "VTALRM",   TRUE},
+#endif
+#if defined(SIGPROF) && !defined(WE_ARE_PROFILING)
+  /* MzScheme uses SIGPROF for its own needs; On Linux with profiling
+   * this makes Vim exit.  WE_ARE_PROFILING is defined in Makefile.  */
+  {SIGPROF,       "PROF",     TRUE},
+#endif
+#ifdef SIGXCPU
+  {SIGXCPU,       "XCPU",     TRUE},
+#endif
+#ifdef SIGXFSZ
+  {SIGXFSZ,       "XFSZ",     TRUE},
+#endif
+#ifdef SIGUSR1
+  {SIGUSR1,       "USR1",     TRUE},
+#endif
+#if defined(SIGUSR2) && !defined(FEAT_SYSMOUSE)
+  /* Used for sysmouse handling */
+  {SIGUSR2,       "USR2",     TRUE},
+#endif
+#ifdef SIGINT
+  {SIGINT,        "INT",      FALSE},
+#endif
+#ifdef SIGWINCH
+  {SIGWINCH,      "WINCH",    FALSE},
+#endif
+#ifdef SIGTSTP
+  {SIGTSTP,       "TSTP",     FALSE},
+#endif
+#ifdef SIGPIPE
+  {SIGPIPE,       "PIPE",     FALSE},
+#endif
+  {-1,            "Unknown!", FALSE}
+};
+
+int mch_chdir(path)
+char *path;
+{
+  if (p_verbose >= 5) {
+    verbose_enter();
+    smsg((char_u *)"chdir(%s)", path);
+    verbose_leave();
+  }
+  return chdir(path);
+}
+
+/*
+ * Write s[len] to the screen.
+ */
+void mch_write(s, len)
+char_u      *s;
+int len;
+{
+  ignored = (int)write(1, (char *)s, len);
+  if (p_wd)             /* Unix is too fast, slow down a bit more */
+    RealWaitForChar(read_cmd_fd, p_wd, NULL);
+}
+
+/*
+ * mch_inchar(): low level input function.
+ * Get a characters from the keyboard.
+ * Return the number of characters that are available.
+ * If wtime == 0 do not wait for characters.
+ * If wtime == n wait a short time for characters.
+ * If wtime == -1 wait forever for characters.
+ */
+int mch_inchar(buf, maxlen, wtime, tb_change_cnt)
+char_u      *buf;
+int maxlen;
+long wtime;                 /* don't use "time", MIPS cannot handle it */
+int tb_change_cnt;
+{
+  int len;
+
+
+  /* Check if window changed size while we were busy, perhaps the ":set
+   * columns=99" command was used. */
+  while (do_resize)
+    handle_resize();
+
+  if (wtime >= 0) {
+    while (WaitForChar(wtime) == 0) {           /* no character available */
+      if (!do_resize)           /* return if not interrupted by resize */
+        return 0;
+      handle_resize();
+    }
+  } else   {    /* wtime == -1 */
+    /*
+     * If there is no character available within 'updatetime' seconds
+     * flush all the swap files to disk.
+     * Also done when interrupted by SIGWINCH.
+     */
+    if (WaitForChar(p_ut) == 0) {
+      if (trigger_cursorhold() && maxlen >= 3
+          && !typebuf_changed(tb_change_cnt)) {
+        buf[0] = K_SPECIAL;
+        buf[1] = KS_EXTRA;
+        buf[2] = (int)KE_CURSORHOLD;
+        return 3;
+      }
+      before_blocking();
+    }
+  }
+
+  for (;; ) {   /* repeat until we got a character */
+    while (do_resize)        /* window changed size */
+      handle_resize();
+
+    /*
+     * We want to be interrupted by the winch signal
+     * or by an event on the monitored file descriptors.
+     */
+    if (WaitForChar(-1L) == 0) {
+      if (do_resize)                /* interrupted by SIGWINCH signal */
+        handle_resize();
+      return 0;
+    }
+
+    /* If input was put directly in typeahead buffer bail out here. */
+    if (typebuf_changed(tb_change_cnt))
+      return 0;
+
+    /*
+     * For some terminals we only get one character at a time.
+     * We want the get all available characters, so we could keep on
+     * trying until none is available
+     * For some other terminals this is quite slow, that's why we don't do
+     * it.
+     */
+    len = read_from_input_buf(buf, (long)maxlen);
+    if (len > 0) {
+      return len;
+    }
+  }
+}
+
+static void handle_resize()                 {
+  do_resize = FALSE;
+  shell_resized();
+}
+
+/*
+ * return non-zero if a character is available
+ */
+int mch_char_avail()         {
+  return WaitForChar(0L);
+}
+
+#if defined(HAVE_TOTAL_MEM) || defined(PROTO)
+# ifdef HAVE_SYS_RESOURCE_H
+#  include <sys/resource.h>
+# endif
+# if defined(HAVE_SYS_SYSCTL_H) && defined(HAVE_SYSCTL)
+#  include <sys/sysctl.h>
+# endif
+# if defined(HAVE_SYS_SYSINFO_H) && defined(HAVE_SYSINFO)
+#  include <sys/sysinfo.h>
+# endif
+
+/*
+ * Return total amount of memory available in Kbyte.
+ * Doesn't change when memory has been allocated.
+ */
+long_u mch_total_mem(special)
+int special UNUSED;
+{
+  long_u mem = 0;
+  long_u shiftright = 10;         /* how much to shift "mem" right for Kbyte */
+
+#  ifdef HAVE_SYSCTL
+  int mib[2], physmem;
+  size_t len;
+
+  /* BSD way of getting the amount of RAM available. */
+  mib[0] = CTL_HW;
+  mib[1] = HW_USERMEM;
+  len = sizeof(physmem);
+  if (sysctl(mib, 2, &physmem, &len, NULL, 0) == 0)
+    mem = (long_u)physmem;
+#  endif
+
+#  if defined(HAVE_SYS_SYSINFO_H) && defined(HAVE_SYSINFO)
+  if (mem == 0) {
+    struct sysinfo sinfo;
+
+    /* Linux way of getting amount of RAM available */
+    if (sysinfo(&sinfo) == 0) {
+#   ifdef HAVE_SYSINFO_MEM_UNIT
+      /* avoid overflow as much as possible */
+      while (shiftright > 0 && (sinfo.mem_unit & 1) == 0) {
+        sinfo.mem_unit = sinfo.mem_unit >> 1;
+        --shiftright;
+      }
+      mem = sinfo.totalram * sinfo.mem_unit;
+#   else
+      mem = sinfo.totalram;
+#   endif
+    }
+  }
+#  endif
+
+#  ifdef HAVE_SYSCONF
+  if (mem == 0) {
+    long pagesize, pagecount;
+
+    /* Solaris way of getting amount of RAM available */
+    pagesize = sysconf(_SC_PAGESIZE);
+    pagecount = sysconf(_SC_PHYS_PAGES);
+    if (pagesize > 0 && pagecount > 0) {
+      /* avoid overflow as much as possible */
+      while (shiftright > 0 && (pagesize & 1) == 0) {
+        pagesize = (long_u)pagesize >> 1;
+        --shiftright;
+      }
+      mem = (long_u)pagesize * pagecount;
+    }
+  }
+#  endif
+
+  /* Return the minimum of the physical memory and the user limit, because
+   * using more than the user limit may cause Vim to be terminated. */
+#  if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT)
+  {
+    struct rlimit rlp;
+
+    if (getrlimit(RLIMIT_DATA, &rlp) == 0
+        && rlp.rlim_cur < ((rlim_t)1 << (sizeof(long_u) * 8 - 1))
+#   ifdef RLIM_INFINITY
+        && rlp.rlim_cur != RLIM_INFINITY
+#   endif
+        && ((long_u)rlp.rlim_cur >> 10) < (mem >> shiftright)
+        ) {
+      mem = (long_u)rlp.rlim_cur;
+      shiftright = 10;
+    }
+  }
+#  endif
+
+  if (mem > 0)
+    return mem >> shiftright;
+  return (long_u)0x1fffff;
+}
+#endif
+
+void mch_delay(msec, ignoreinput)
+long msec;
+int ignoreinput;
+{
+  int old_tmode;
+
+  if (ignoreinput) {
+    /* Go to cooked mode without echo, to allow SIGINT interrupting us
+     * here.  But we don't want QUIT to kill us (CTRL-\ used in a
+     * shell may produce SIGQUIT). */
+    in_mch_delay = TRUE;
+    old_tmode = curr_tmode;
+    if (curr_tmode == TMODE_RAW)
+      settmode(TMODE_SLEEP);
+
+    /*
+     * Everybody sleeps in a different way...
+     * Prefer nanosleep(), some versions of usleep() can only sleep up to
+     * one second.
+     */
+#ifdef HAVE_NANOSLEEP
+    {
+      struct timespec ts;
+
+      ts.tv_sec = msec / 1000;
+      ts.tv_nsec = (msec % 1000) * 1000000;
+      (void)nanosleep(&ts, NULL);
+    }
+#else
+# ifdef HAVE_USLEEP
+    while (msec >= 1000) {
+      usleep((unsigned int)(999 * 1000));
+      msec -= 999;
+    }
+    usleep((unsigned int)(msec * 1000));
+# else
+#  ifndef HAVE_SELECT
+    poll(NULL, 0, (int)msec);
+#  else
+    {
+      struct timeval tv;
+
+      tv.tv_sec = msec / 1000;
+      tv.tv_usec = (msec % 1000) * 1000;
+      /*
+       * NOTE: Solaris 2.6 has a bug that makes select() hang here.  Get
+       * a patch from Sun to fix this.  Reported by Gunnar Pedersen.
+       */
+      select(0, NULL, NULL, NULL, &tv);
+    }
+#  endif /* HAVE_SELECT */
+# endif /* HAVE_NANOSLEEP */
+#endif /* HAVE_USLEEP */
+
+    settmode(old_tmode);
+    in_mch_delay = FALSE;
+  } else
+    WaitForChar(msec);
+}
+
+#if defined(HAVE_STACK_LIMIT) \
+  || (!defined(HAVE_SIGALTSTACK) && defined(HAVE_SIGSTACK))
+# define HAVE_CHECK_STACK_GROWTH
+/*
+ * Support for checking for an almost-out-of-stack-space situation.
+ */
+
+/*
+ * Return a pointer to an item on the stack.  Used to find out if the stack
+ * grows up or down.
+ */
+static void check_stack_growth __ARGS((char *p));
+static int stack_grows_downwards;
+
+/*
+ * Find out if the stack grows upwards or downwards.
+ * "p" points to a variable on the stack of the caller.
+ */
+static void check_stack_growth(p)
+char        *p;
+{
+  int i;
+
+  stack_grows_downwards = (p > (char *)&i);
+}
+#endif
+
+#if defined(HAVE_STACK_LIMIT) || defined(PROTO)
+static char *stack_limit = NULL;
+
+#if defined(_THREAD_SAFE) && defined(HAVE_PTHREAD_NP_H)
+# include <pthread.h>
+# include <pthread_np.h>
+#endif
+
+/*
+ * Find out until how var the stack can grow without getting into trouble.
+ * Called when starting up and when switching to the signal stack in
+ * deathtrap().
+ */
+static void get_stack_limit()                 {
   struct rlimit rlp;
   int i;
   long lim;
@@ -45,7 +577,8 @@ __END_DECLS static void get_stack_limit(void)                 {
  * Return FAIL when running out of stack space.
  * "p" must point to any variable local to the caller that's on the stack.
  */
-int mch_stackcheck(char *p)
+int mch_stackcheck(p)
+char        *p;
 {
   if (stack_limit != NULL) {
     if (stack_grows_downwards) {
@@ -80,7 +613,7 @@ static struct sigstack sigstk;          /* for sigstack() */
 static void init_signal_stack __ARGS((void));
 static char *signal_stack;
 
-static void init_signal_stack(void)                 {
+static void init_signal_stack()                 {
   if (signal_stack != NULL) {
 # ifdef HAVE_SIGALTSTACK
     sigstk.ss_sp = signal_stack;
@@ -163,18 +696,18 @@ catch_sigpwr SIGDEFARG(sigarg) {
  * Returns OK for normal return, FAIL when the protected code caused a
  * problem and LONGJMP() was used.
  */
-void mch_startjmp(void)          {
+void mch_startjmp()          {
 #ifdef SIGHASARG
   lc_signal = 0;
 #endif
   lc_active = TRUE;
 }
 
-void mch_endjmp(void)          {
+void mch_endjmp()          {
   lc_active = FALSE;
 }
 
-void mch_didjmp(void)          {
+void mch_didjmp()          {
 # if defined(HAVE_SIGALTSTACK) || defined(HAVE_SIGSTACK)
   /* On FreeBSD the signal stack has to be reset after using siglongjmp(),
    * otherwise catching the signal only works once. */
@@ -345,7 +878,7 @@ sigcont_handler SIGDEFARG(sigarg) {
  * If the machine has job control, use it to suspend the program,
  * otherwise fake it by starting a new shell.
  */
-void mch_suspend(void)          {
+void mch_suspend()          {
   /* BeOS does have SIGTSTP, but it doesn't work. */
 #if defined(SIGTSTP) && !defined(__BEOS__)
   out_flush();              /* needed to make cursor visible on some systems */
@@ -390,7 +923,7 @@ void mch_suspend(void)          {
 #endif
 }
 
-void mch_init(void)          {
+void mch_init()          {
   Columns = 80;
   Rows = 24;
 
@@ -402,7 +935,7 @@ void mch_init(void)          {
 #endif
 }
 
-static void set_signals(void)                 {
+static void set_signals()                 {
 #if defined(SIGWINCH)
   /*
    * WINDOW CHANGE signal is handled with sig_winch().
@@ -458,13 +991,13 @@ static void set_signals(void)                 {
 /*
  * Catch CTRL-C (only works while in Cooked mode).
  */
-static void catch_int_signal(void)                 {
+static void catch_int_signal()                 {
   signal(SIGINT, (RETSIGTYPE (*)())catch_sigint);
 }
 
 #endif
 
-void reset_signals(void)          {
+void reset_signals()          {
   catch_signals(SIG_DFL, SIG_DFL);
 #if defined(_REENTRANT) && defined(SIGCONT)
   /* SIGCONT isn't in the list, because its default action is ignore */
@@ -472,7 +1005,9 @@ void reset_signals(void)          {
 #endif
 }
 
-static void catch_signals(RETSIGTYPE (*func_deadly)(void), RETSIGTYPE (*func_other)(void))
+static void catch_signals(func_deadly, func_other)
+RETSIGTYPE (*func_deadly)();
+RETSIGTYPE (*func_other)();
 {
   int i;
 
@@ -521,7 +1056,8 @@ static void catch_signals(RETSIGTYPE (*func_deadly)(void), RETSIGTYPE (*func_oth
  *			     signal
  * Returns TRUE when Vim should exit.
  */
-int vim_handle_signal(int sig)
+int vim_handle_signal(sig)
+int sig;
 {
   static int got_signal = 0;
   static int blocked = TRUE;
@@ -564,7 +1100,7 @@ char    **argv UNUSED;
 /*
  * Return TRUE if the input comes from a terminal, FALSE otherwise.
  */
-int mch_input_isatty(void)         {
+int mch_input_isatty()         {
   if (isatty(read_cmd_fd))
     return TRUE;
   return FALSE;
@@ -576,7 +1112,8 @@ int test_only UNUSED;
   return FALSE;
 }
 
-static int get_x11_icon(int test_only)
+static int get_x11_icon(test_only)
+int test_only;
 {
   if (!test_only) {
     if (STRNCMP(T_NAME, "builtin_", 8) == 0)
@@ -588,18 +1125,20 @@ static int get_x11_icon(int test_only)
 }
 
 
-int mch_can_restore_title(void)         {
+int mch_can_restore_title()         {
   return get_x11_title(TRUE);
 }
 
-int mch_can_restore_icon(void)         {
+int mch_can_restore_icon()         {
   return get_x11_icon(TRUE);
 }
 
 /*
  * Set the window title and icon.
  */
-void mch_settitle(char_u *title, char_u *icon)
+void mch_settitle(title, icon)
+char_u *title;
+char_u *icon;
 {
   int type = 0;
   static int recursive = 0;
@@ -656,7 +1195,8 @@ void mch_settitle(char_u *title, char_u *icon)
  *  2  only restore icon
  *  3  restore title and icon
  */
-void mch_restore_title(int which)
+void mch_restore_title(which)
+int which;
 {
   /* only restore the title or icon when it has been set */
   mch_settitle(((which & 1) && did_set_title) ?
@@ -669,7 +1209,8 @@ void mch_restore_title(int which)
  * Return TRUE if "name" looks like some xterm name.
  * Seiichi Sato mentioned that "mlterm" works like xterm.
  */
-int vim_is_xterm(char_u *name)
+int vim_is_xterm(name)
+char_u *name;
 {
   if (name == NULL)
     return FALSE;
@@ -686,7 +1227,8 @@ int vim_is_xterm(char_u *name)
  * known to support the xterm-style mouse protocol.
  * Relies on term_is_xterm having been set to its correct value.
  */
-int use_xterm_like_mouse(char_u *name)
+int use_xterm_like_mouse(name)
+char_u *name;
 {
   return name != NULL
          && (term_is_xterm || STRNICMP(name, "screen", 6) == 0);
@@ -699,7 +1241,7 @@ int use_xterm_like_mouse(char_u *name)
  * Return 3 for "urxvt".
  * Return 4 for "sgr".
  */
-int use_xterm_mouse(void)         {
+int use_xterm_mouse()         {
   if (ttym_flags == TTYM_SGR)
     return 4;
   if (ttym_flags == TTYM_URXVT)
@@ -711,7 +1253,8 @@ int use_xterm_mouse(void)         {
   return 0;
 }
 
-int vim_is_iris(char_u *name)
+int vim_is_iris(name)
+char_u  *name;
 {
   if (name == NULL)
     return FALSE;
@@ -719,7 +1262,8 @@ int vim_is_iris(char_u *name)
          || STRCMP(name, "builtin_iris-ansi") == 0;
 }
 
-int vim_is_vt300(char_u *name)
+int vim_is_vt300(name)
+char_u  *name;
 {
   if (name == NULL)
     return FALSE;              /* actually all ANSI comp. terminals should be here  */
@@ -733,7 +1277,8 @@ int vim_is_vt300(char_u *name)
  * Return TRUE if "name" is a terminal for which 'ttyfast' should be set.
  * This should include all windowed terminal emulators.
  */
-int vim_is_fastterm(char_u *name)
+int vim_is_fastterm(name)
+char_u  *name;
 {
   if (name == NULL)
     return FALSE;
@@ -749,7 +1294,9 @@ int vim_is_fastterm(char_u *name)
  * Insert user name in s[len].
  * Return OK if a name found.
  */
-int mch_get_user_name(char_u *s, int len)
+int mch_get_user_name(s, len)
+char_u  *s;
+int len;
 {
   return mch_get_uname(getuid(), s, len);
 }
@@ -781,7 +1328,9 @@ int len;
  */
 
 #ifdef HAVE_SYS_UTSNAME_H
-void mch_get_host_name(char_u *s, int len)
+void mch_get_host_name(s, len)
+char_u  *s;
+int len;
 {
   struct utsname vutsname;
 
@@ -796,7 +1345,9 @@ void mch_get_host_name(char_u *s, int len)
 #  define gethostname(nam, len) sysinfo(SI_HOSTNAME, nam, len)
 # endif
 
-void mch_get_host_name(char_u *s, int len)
+void mch_get_host_name(s, len)
+char_u  *s;
+int len;
 {
   gethostname((char *)s, len);
   s[len - 1] = NUL;     /* make sure it's terminated */
@@ -806,14 +1357,15 @@ void mch_get_host_name(char_u *s, int len)
 /*
  * return process ID
  */
-long mch_get_pid(void)          {
+long mch_get_pid()          {
   return (long)getpid();
 }
 
 #if !defined(HAVE_STRERROR) && defined(USE_GETCWD)
 static char *strerror __ARGS((int));
 
-static char *strerror(int err)
+static char * strerror(err)
+int err;
 {
   extern int sys_nerr;
   extern char     *sys_errlist[];
@@ -830,7 +1382,9 @@ static char *strerror(int err)
  * Get name of current directory into buffer 'buf' of length 'len' bytes.
  * Return OK for success, FAIL for failure.
  */
-int mch_dirname(char_u *buf, int len)
+int mch_dirname(buf, len)
+char_u  *buf;
+int len;
 {
 #if defined(USE_GETCWD)
   if (getcwd((char *)buf, len) == NULL) {
@@ -849,13 +1403,10 @@ int mch_dirname(char_u *buf, int len)
  *
  * return FAIL for failure, OK for success
  */
-int 
-mch_FullName (
-    char_u *fname,
-    char_u *buf,
-    int len,
-    int force                      /* also expand when already absolute path */
-)
+int mch_FullName(fname, buf, len, force)
+char_u      *fname, *buf;
+int len;
+int force;                      /* also expand when already absolute path */
 {
   int l;
 #ifdef HAVE_FCHDIR
@@ -961,7 +1512,8 @@ mch_FullName (
 /*
  * Return TRUE if "fname" does not depend on the current directory.
  */
-int mch_isFullName(char_u *fname)
+int mch_isFullName(fname)
+char_u      *fname;
 {
   return *fname == '/' || *fname == '~';
 }
@@ -1026,7 +1578,8 @@ int len UNUSED;              /* buffer size, only used when name gets longer */
  * Get file permissions for 'name'.
  * Returns -1 when it doesn't exist.
  */
-long mch_getperm(char_u *name)
+long mch_getperm(name)
+char_u *name;
 {
   struct stat statb;
 
@@ -1047,7 +1600,9 @@ long mch_getperm(char_u *name)
  *
  * return FAIL for failure, OK otherwise
  */
-int mch_setperm(char_u *name, long perm)
+int mch_setperm(name, perm)
+char_u  *name;
+long perm;
 {
   return chmod((char *)
       name,
@@ -1067,7 +1622,9 @@ int mch_setperm(char_u *name, long perm)
 /*
  * Copy security info from "from_file" to "to_file".
  */
-void mch_copy_sec(char_u *from_file, char_u *to_file)
+void mch_copy_sec(from_file, to_file)
+char_u      *from_file;
+char_u      *to_file;
 {
   if (from_file == NULL)
     return;
@@ -1133,7 +1690,8 @@ vim_acl_T aclent;
     return;
 }
 
-void mch_free_acl(vim_acl_T aclent)
+void mch_free_acl(aclent)
+vim_acl_T aclent;
 {
   if (aclent == NULL)
     return;
@@ -1154,7 +1712,8 @@ char_u      *name UNUSED;
  * return FALSE if "name" is not a directory
  * return FALSE for error
  */
-int mch_isdir(char_u *name)
+int mch_isdir(name)
+char_u *name;
 {
   struct stat statb;
 
@@ -1174,7 +1733,8 @@ static int executable_file __ARGS((char_u *name));
 /*
  * Return 1 if "name" is an executable file, 0 if not or it doesn't exist.
  */
-static int executable_file(char_u *name)
+static int executable_file(name)
+char_u      *name;
 {
   struct stat st;
 
@@ -1187,7 +1747,8 @@ static int executable_file(char_u *name)
  * Return 1 if "name" can be found in $PATH and executed, 0 if not.
  * Return -1 if unknown.
  */
-int mch_can_exe(char_u *name)
+int mch_can_exe(name)
+char_u      *name;
 {
   char_u      *buf;
   char_u      *p, *e;
@@ -1240,7 +1801,8 @@ int mch_can_exe(char_u *name)
  * NODE_WRITABLE: writable device, socket, fifo, etc.
  * NODE_OTHER: non-writable things
  */
-int mch_nodetype(char_u *name)
+int mch_nodetype(name)
+char_u      *name;
 {
   struct stat st;
 
@@ -1254,7 +1816,7 @@ int mch_nodetype(char_u *name)
   return NODE_WRITABLE;
 }
 
-void mch_early_init(void)          {
+void mch_early_init()          {
 #ifdef HAVE_CHECK_STACK_GROWTH
   int i;
 
@@ -1279,7 +1841,7 @@ void mch_early_init(void)          {
 }
 
 #if defined(EXITFREE) || defined(PROTO)
-void mch_free_mem(void)          {
+void mch_free_mem()          {
 # if defined(HAVE_SIGALTSTACK) || defined(HAVE_SIGSTACK)
   vim_free(signal_stack);
   signal_stack = NULL;
@@ -1296,7 +1858,7 @@ static void exit_scroll __ARGS((void));
  * Output a newline when exiting.
  * Make sure the newline goes to the same stream as the text.
  */
-static void exit_scroll(void)                 {
+static void exit_scroll()                 {
   if (silent_mode)
     return;
   if (newline_on_exit || msg_didout) {
@@ -1314,7 +1876,8 @@ static void exit_scroll(void)                 {
   }
 }
 
-void mch_exit(int r)
+void mch_exit(r)
+int r;
 {
   exiting = TRUE;
 
@@ -1364,14 +1927,15 @@ void mch_exit(int r)
   exit(r);
 }
 
-static void may_core_dump(void)                 {
+static void may_core_dump()                 {
   if (deadly_signal != 0) {
     signal(deadly_signal, SIG_DFL);
     kill(getpid(), deadly_signal);      /* Die using the signal we caught */
   }
 }
 
-void mch_settmode(int tmode)
+void mch_settmode(tmode)
+int tmode;
 {
   static int first = TRUE;
 
@@ -1468,7 +2032,7 @@ void mch_settmode(int tmode)
  * be), they're going to get really annoyed if their erase key starts
  * doing forward deletes for no reason. (Eric Fischer)
  */
-void get_stty(void)          {
+void get_stty()          {
   char_u buf[2];
   char_u  *p;
 
