@@ -228,8 +228,10 @@ int ui_get_shellsize(void)         {
  * The gui_set_shellsize() or mch_set_shellsize() function will try to set the
  * new size.  If this is not possible, it will adjust Rows and Columns.
  */
-void ui_set_shellsize(mustset)
-int mustset UNUSED;             /* set by the user */
+void 
+ui_set_shellsize (
+    int mustset             /* set by the user */
+)
 {
   mch_set_shellsize();
 }
@@ -439,8 +441,7 @@ int read_from_input_buf(char_u *buf, long maxlen)
   return (int)maxlen;
 }
 
-void fill_input_buf(exit_on_error)
-int exit_on_error UNUSED;
+void fill_input_buf(int exit_on_error)
 {
 #if defined(UNIX) || defined(OS2) || defined(VMS) || defined(MACOS_X_UNIX)
   int len;
@@ -613,9 +614,7 @@ int check_row(int row)
 /*
  * Get the contents of the X CUT_BUFFER0 and put it in "cbd".
  */
-void yank_cut_buffer0(dpy, cbd)
-Display             *dpy;
-VimClipboard        *cbd;
+void yank_cut_buffer0(Display *dpy, VimClipboard *cbd)
 {
   int nbytes = 0;
   char_u      *buffer = (char_u *)XFetchBuffer(dpy, &nbytes, 0);
@@ -975,11 +974,7 @@ retnomove:
  * window "win".
  * Returns TRUE if the position is below the last line.
  */
-int mouse_comp_pos(win, rowp, colp, lnump)
-win_T       *win;
-int         *rowp;
-int         *colp;
-linenr_T    *lnump;
+int mouse_comp_pos(win_T *win, int *rowp, int *colp, linenr_T *lnump)
 {
   int col = *colp;
   int row = *rowp;
@@ -1045,9 +1040,7 @@ linenr_T    *lnump;
  * Find the window at screen position "*rowp" and "*colp".  The positions are
  * updated to become relative to the top-left of the window.
  */
-win_T * mouse_find_win(rowp, colp)
-int         *rowp;
-int         *colp UNUSED;
+win_T *mouse_find_win(int *rowp, int *colp)
 {
   frame_T     *fp;
 
@@ -1079,8 +1072,7 @@ int         *colp UNUSED;
 /*
  * Translate window coordinates to buffer position without any side effects
  */
-int get_fpos_of_mouse(mpos)
-pos_T       *mpos;
+int get_fpos_of_mouse(pos_T *mpos)
 {
   win_T       *wp;
   int row = mouse_row;
@@ -1118,10 +1110,7 @@ pos_T       *mpos;
  * Convert a virtual (screen) column to a character column.
  * The first column is one.
  */
-int vcol2col(wp, lnum, vcol)
-win_T       *wp;
-linenr_T lnum;
-int vcol;
+int vcol2col(win_T *wp, linenr_T lnum, int vcol)
 {
   /* try to advance to the specified column */
   int count = 0;

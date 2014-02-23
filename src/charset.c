@@ -60,9 +60,11 @@ int init_chartab(void)         {
   return buf_init_chartab(curbuf, TRUE);
 }
 
-int buf_init_chartab(buf, global)
-buf_T       *buf;
-int global;                     /* FALSE: only set buf->b_chartab[] */
+int 
+buf_init_chartab (
+    buf_T *buf,
+    int global                     /* FALSE: only set buf->b_chartab[] */
+)
 {
   int c;
   int c2;
@@ -641,10 +643,7 @@ int chartabsize(char_u *p, colnr_T col)
 }
 #endif
 
-static int win_chartabsize(wp, p, col)
-win_T       *wp;
-char_u      *p;
-colnr_T col;
+static int win_chartabsize(win_T *wp, char_u *p, colnr_T col)
 {
   RET_WIN_BUF_CHARTABSIZE(wp, wp->w_buffer, p, col)
 }
@@ -673,10 +672,7 @@ int linetabsize_col(int startcol, char_u *s)
 /*
  * Like linetabsize(), but for a given window instead of the current one.
  */
-int win_linetabsize(wp, p, len)
-win_T       *wp;
-char_u      *p;
-colnr_T len;
+int win_linetabsize(win_T *wp, char_u *p, colnr_T len)
 {
   colnr_T col = 0;
   char_u      *s;
@@ -705,9 +701,7 @@ int vim_iswordc(int c)
   return vim_iswordc_buf(c, curbuf);
 }
 
-int vim_iswordc_buf(c, buf)
-int c;
-buf_T       *buf;
+int vim_iswordc_buf(int c, buf_T *buf)
 {
   if (c >= 0x100) {
     if (enc_dbcs != 0)
@@ -728,9 +722,7 @@ int vim_iswordp(char_u *p)
   return GET_CHARTAB(curbuf, *p) != 0;
 }
 
-int vim_iswordp_buf(p, buf)
-char_u      *p;
-buf_T       *buf;
+int vim_iswordp_buf(char_u *p, buf_T *buf)
 {
   if (has_mbyte && MB_BYTE2LEN(*p) > 1)
     return mb_get_class(p) >= 2;
@@ -818,11 +810,7 @@ int lbr_chartabsize_adv(char_u **s, colnr_T col)
  * string at start of line.  Warning: *headp is only set if it's a non-zero
  * value, init to 0 before calling.
  */
-int win_lbr_chartabsize(wp, s, col, headp)
-win_T       *wp;
-char_u      *s;
-colnr_T col;
-int         *headp UNUSED;
+int win_lbr_chartabsize(win_T *wp, char_u *s, colnr_T col, int *headp)
 {
   int c;
   int size;
@@ -931,11 +919,7 @@ int         *headp UNUSED;
  * 'wrap' is on.  This means we need to check for a double-byte character that
  * doesn't fit at the end of the screen line.
  */
-static int win_nolbr_chartabsize(wp, s, col, headp)
-win_T       *wp;
-char_u      *s;
-colnr_T col;
-int         *headp;
+static int win_nolbr_chartabsize(win_T *wp, char_u *s, colnr_T col, int *headp)
 {
   int n;
 
@@ -958,9 +942,7 @@ int         *headp;
  * Return TRUE if virtual column "vcol" is in the rightmost column of window
  * "wp".
  */
-int in_win_border(wp, vcol)
-win_T       *wp;
-colnr_T vcol;
+int in_win_border(win_T *wp, colnr_T vcol)
 {
   int width1;                   /* width of first line (after line number) */
   int width2;                   /* width of further lines */
@@ -986,12 +968,7 @@ colnr_T vcol;
  *
  * This is used very often, keep it fast!
  */
-void getvcol(wp, pos, start, cursor, end)
-win_T       *wp;
-pos_T       *pos;
-colnr_T     *start;
-colnr_T     *cursor;
-colnr_T     *end;
+void getvcol(win_T *wp, pos_T *pos, colnr_T *start, colnr_T *cursor, colnr_T *end)
 {
   colnr_T vcol;
   char_u      *ptr;             /* points to current char */
@@ -1093,8 +1070,7 @@ colnr_T     *end;
 /*
  * Get virtual cursor column in the current window, pretending 'list' is off.
  */
-colnr_T getvcol_nolist(posp)
-pos_T       *posp;
+colnr_T getvcol_nolist(pos_T *posp)
 {
   int list_save = curwin->w_p_list;
   colnr_T vcol;
@@ -1108,12 +1084,7 @@ pos_T       *posp;
 /*
  * Get virtual column in virtual mode.
  */
-void getvvcol(wp, pos, start, cursor, end)
-win_T       *wp;
-pos_T       *pos;
-colnr_T     *start;
-colnr_T     *cursor;
-colnr_T     *end;
+void getvvcol(win_T *wp, pos_T *pos, colnr_T *start, colnr_T *cursor, colnr_T *end)
 {
   colnr_T col;
   colnr_T coladd;
@@ -1154,10 +1125,7 @@ colnr_T     *end;
  * Get the leftmost and rightmost virtual column of pos1 and pos2.
  * Used for Visual block mode.
  */
-void getvcols(wp, pos1, pos2, left, right)
-win_T       *wp;
-pos_T       *pos1, *pos2;
-colnr_T     *left, *right;
+void getvcols(win_T *wp, pos_T *pos1, pos_T *pos2, colnr_T *left, colnr_T *right)
 {
   colnr_T from1, from2, to1, to2;
 

@@ -717,8 +717,7 @@ int delete_first_msg(void)         {
 /*
  * ":messages" command.
  */
-void ex_messages(eap)
-exarg_T     *eap UNUSED;
+void ex_messages(exarg_T *eap)
 {
   struct msg_hist *p;
   char_u          *s;
@@ -2694,16 +2693,18 @@ void msg_advance(int col)
  * A '&' in a button name becomes a shortcut, so each '&' should be before a
  * different letter.
  */
-int do_dialog(type, title, message, buttons, dfltbutton, textfield, ex_cmd)
-int type UNUSED;
-char_u      *title UNUSED;
-char_u      *message;
-char_u      *buttons;
-int dfltbutton;
-char_u      *textfield UNUSED;          /* IObuff for inputdialog(), NULL
+int 
+do_dialog (
+    int type,
+    char_u *title,
+    char_u *message,
+    char_u *buttons,
+    int dfltbutton,
+    char_u *textfield,          /* IObuff for inputdialog(), NULL
                                            otherwise */
-int ex_cmd;                 /* when TRUE pressing : accepts default and starts
+    int ex_cmd                 /* when TRUE pressing : accepts default and starts
                                Ex command */
+)
 {
   int oldState;
   int retval = 0;
@@ -3014,9 +3015,7 @@ static double tv_float __ARGS((typval_T *tvs, int *idxp));
 /*
  * Get number argument from "idxp" entry in "tvs".  First entry is 1.
  */
-static long tv_nr(tvs, idxp)
-typval_T    *tvs;
-int         *idxp;
+static long tv_nr(typval_T *tvs, int *idxp)
 {
   int idx = *idxp - 1;
   long n = 0;
@@ -3037,9 +3036,7 @@ int         *idxp;
  * Get string argument from "idxp" entry in "tvs".  First entry is 1.
  * Returns NULL for an error.
  */
-static char * tv_str(tvs, idxp)
-typval_T    *tvs;
-int         *idxp;
+static char *tv_str(typval_T *tvs, int *idxp)
 {
   int idx = *idxp - 1;
   char        *s = NULL;
@@ -3056,9 +3053,7 @@ int         *idxp;
 /*
  * Get float argument from "idxp" entry in "tvs".  First entry is 1.
  */
-static double tv_float(tvs, idxp)
-typval_T    *tvs;
-int         *idxp;
+static double tv_float(typval_T *tvs, int *idxp)
 {
   int idx = *idxp - 1;
   double f = 0;
@@ -3143,11 +3138,7 @@ int vim_snprintf_add(char *str, size_t str_m, char *fmt, ...)         {
 
 # else
 /* Like vim_vsnprintf() but append to the string. */
-int vim_snprintf_add(str, str_m, fmt, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)
-char        *str;
-size_t str_m;
-char        *fmt;
-long a1, a2, a3, a4, a5, a6, a7, a8, a9, a10;
+int vim_snprintf_add(char *str, size_t str_m, char *fmt, long a1, long a2, long a3, long a4, long a5, long a6, long a7, long a8, long a9, long a10)
 {
   size_t len = STRLEN(str);
   size_t space;

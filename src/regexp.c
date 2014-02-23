@@ -682,8 +682,7 @@ static regengine_T nfa_regengine;
 /*
  * Return TRUE if compiled regular expression "prog" can match a line break.
  */
-int re_multiline(prog)
-regprog_T *prog;
+int re_multiline(regprog_T *prog)
 {
   return prog->regflags & RF_HASNL;
 }
@@ -692,8 +691,7 @@ regprog_T *prog;
  * Return TRUE if compiled regular expression "prog" looks before the start
  * position (pattern contains "\@<=" or "\@<!").
  */
-int re_lookbehind(prog)
-regprog_T *prog;
+int re_lookbehind(regprog_T *prog)
 {
   return prog->regflags & RF_LOOKBH;
 }
@@ -1179,9 +1177,7 @@ static void bt_regfree __ARGS((regprog_T *prog));
  * of the structure of the compiled regexp.
  * "re_flags": RE_MAGIC and/or RE_STRING.
  */
-static regprog_T * bt_regcomp(expr, re_flags)
-char_u      *expr;
-int re_flags;
+static regprog_T *bt_regcomp(char_u *expr, int re_flags)
 {
   bt_regprog_T    *r;
   char_u      *scan;
@@ -1301,8 +1297,7 @@ int re_flags;
 /*
  * Free a compiled regexp program, returned by bt_regcomp().
  */
-static void bt_regfree(prog)
-regprog_T   *prog;
+static void bt_regfree(regprog_T *prog)
 {
   vim_free(prog);
 }
@@ -3287,10 +3282,12 @@ static int bt_regexec __ARGS((regmatch_T *rmp, char_u *line, colnr_T col));
  *
  * Return TRUE if there is a match, FALSE if not.
  */
-static int bt_regexec(rmp, line, col)
-regmatch_T  *rmp;
-char_u      *line;      /* string to match against */
-colnr_T col;            /* column to start looking for match */
+static int 
+bt_regexec (
+    regmatch_T *rmp,
+    char_u *line,      /* string to match against */
+    colnr_T col            /* column to start looking for match */
+)
 {
   reg_match = rmp;
   reg_mmatch = NULL;
@@ -3312,10 +3309,12 @@ static int bt_regexec_nl __ARGS((regmatch_T *rmp, char_u *line, colnr_T col));
 /*
  * Like vim_regexec(), but consider a "\n" in "line" to be a line break.
  */
-static int bt_regexec_nl(rmp, line, col)
-regmatch_T  *rmp;
-char_u      *line;      /* string to match against */
-colnr_T col;            /* column to start looking for match */
+static int 
+bt_regexec_nl (
+    regmatch_T *rmp,
+    char_u *line,      /* string to match against */
+    colnr_T col            /* column to start looking for match */
+)
 {
   reg_match = rmp;
   reg_mmatch = NULL;
@@ -3375,7 +3374,7 @@ proftime_T  *tm;                /* timeout limit or NULL */
 static long bt_regexec_both(line, col, tm)
 char_u      *line;
 colnr_T col;                    /* column to start looking for match */
-proftime_T  *tm UNUSED;         /* timeout limit or NULL */
+proftime_T  *tm;         /* timeout limit or NULL */
 {
   bt_regprog_T        *prog;
   char_u      *s;
@@ -3563,7 +3562,7 @@ static reg_extmatch_T *make_extmatch __ARGS((void));
 /*
  * Create a new extmatch and mark it as referenced once.
  */
-static reg_extmatch_T * make_extmatch()                             {
+static reg_extmatch_T *make_extmatch(void)                             {
   reg_extmatch_T      *em;
 
   em = (reg_extmatch_T *)alloc_clear((unsigned)sizeof(reg_extmatch_T));
@@ -3575,8 +3574,7 @@ static reg_extmatch_T * make_extmatch()                             {
 /*
  * Add a reference to an extmatch.
  */
-reg_extmatch_T * ref_extmatch(em)
-reg_extmatch_T      *em;
+reg_extmatch_T *ref_extmatch(reg_extmatch_T *em)
 {
   if (em != NULL)
     em->refcnt++;
@@ -3587,8 +3585,7 @@ reg_extmatch_T      *em;
  * Remove a reference to an extmatch.  If there are no references left, free
  * the info.
  */
-void unref_extmatch(em)
-reg_extmatch_T      *em;
+void unref_extmatch(reg_extmatch_T *em)
 {
   int i;
 
@@ -3603,9 +3600,7 @@ reg_extmatch_T      *em;
  * regtry - try match of "prog" with at regline["col"].
  * Returns 0 for failure, number of lines contained in the match otherwise.
  */
-static long regtry(prog, col)
-bt_regprog_T    *prog;
-colnr_T col;
+static long regtry(bt_regprog_T *prog, colnr_T col)
 {
   reginput = regline + col;
   need_clear_subexpr = TRUE;
@@ -5575,9 +5570,7 @@ static void reg_nextline(void)                 {
 /*
  * Save the input line and position in a regsave_T.
  */
-static void reg_save(save, gap)
-regsave_T   *save;
-garray_T    *gap;
+static void reg_save(regsave_T *save, garray_T *gap)
 {
   if (REG_MULTI) {
     save->rs_u.pos.col = (colnr_T)(reginput - regline);
@@ -5590,9 +5583,7 @@ garray_T    *gap;
 /*
  * Restore the input line and position from a regsave_T.
  */
-static void reg_restore(save, gap)
-regsave_T   *save;
-garray_T    *gap;
+static void reg_restore(regsave_T *save, garray_T *gap)
 {
   if (REG_MULTI) {
     if (reglnum != save->rs_u.pos.lnum) {
@@ -5625,9 +5616,7 @@ static int reg_save_equal(regsave_T *save)
  * Use se_save() to use pointer (save_se_multi()) or position (save_se_one()),
  * depending on REG_MULTI.
  */
-static void save_se_multi(savep, posp)
-save_se_T   *savep;
-lpos_T      *posp;
+static void save_se_multi(save_se_T *savep, lpos_T *posp)
 {
   savep->se_u.pos = *posp;
   posp->lnum = reglnum;
@@ -5723,9 +5712,7 @@ static int match_with_backref(linenr_T start_lnum, colnr_T start_col, linenr_T e
 /*
  * regdump - dump a regexp onto stdout in vaguely comprehensible form
  */
-static void regdump(pattern, r)
-char_u      *pattern;
-bt_regprog_T        *r;
+static void regdump(char_u *pattern, bt_regprog_T *r)
 {
   char_u  *s;
   int op = EXACTLY;             /* Arbitrary non-END op. */
@@ -6213,21 +6200,21 @@ static decomp_T decomp_table[0xfb4f-0xfb20+1] =
   {0x5d4, 0x5bc, 0},            /* 0xfb34	he+dagesh */
   {0x5d5, 0x5bc, 0},            /* 0xfb35	vav+dagesh */
   {0x5d6, 0x5bc, 0},            /* 0xfb36	zayin+dagesh */
-  {0xfb37, 0, 0},               /* 0xfb37 -- UNUSED */
+  {0xfb37, 0, 0},               /* 0xfb37 -- */
   {0x5d8, 0x5bc, 0},            /* 0xfb38	tet+dagesh */
   {0x5d9, 0x5bc, 0},            /* 0xfb39	yud+dagesh */
   {0x5da, 0x5bc, 0},            /* 0xfb3a	kaf sofit+dagesh */
   {0x5db, 0x5bc, 0},            /* 0xfb3b	kaf+dagesh */
   {0x5dc, 0x5bc, 0},            /* 0xfb3c	lamed+dagesh */
-  {0xfb3d, 0, 0},               /* 0xfb3d -- UNUSED */
+  {0xfb3d, 0, 0},               /* 0xfb3d -- */
   {0x5de, 0x5bc, 0},            /* 0xfb3e	mem+dagesh */
-  {0xfb3f, 0, 0},               /* 0xfb3f -- UNUSED */
+  {0xfb3f, 0, 0},               /* 0xfb3f -- */
   {0x5e0, 0x5bc, 0},            /* 0xfb40	nun+dagesh */
   {0x5e1, 0x5bc, 0},            /* 0xfb41	samech+dagesh */
-  {0xfb42, 0, 0},               /* 0xfb42 -- UNUSED */
+  {0xfb42, 0, 0},               /* 0xfb42 -- */
   {0x5e3, 0x5bc, 0},            /* 0xfb43	pe sofit+dagesh */
   {0x5e4, 0x5bc,0},             /* 0xfb44	pe+dagesh */
-  {0xfb45, 0, 0},               /* 0xfb45 -- UNUSED */
+  {0xfb45, 0, 0},               /* 0xfb45 -- */
   {0x5e6, 0x5bc, 0},            /* 0xfb46	tsadi+dagesh */
   {0x5e7, 0x5bc, 0},            /* 0xfb47	qof+dagesh */
   {0x5e8, 0x5bc, 0},            /* 0xfb48	resh+dagesh */
@@ -6498,13 +6485,7 @@ static int submatch_line_lbr;
  *
  * Returns the size of the replacement, including terminating NUL.
  */
-int vim_regsub(rmp, source, dest, copy, magic, backslash)
-regmatch_T  *rmp;
-char_u      *source;
-char_u      *dest;
-int copy;
-int magic;
-int backslash;
+int vim_regsub(regmatch_T *rmp, char_u *source, char_u *dest, int copy, int magic, int backslash)
 {
   reg_match = rmp;
   reg_mmatch = NULL;
@@ -6513,14 +6494,7 @@ int backslash;
   return vim_regsub_both(source, dest, copy, magic, backslash);
 }
 
-int vim_regsub_multi(rmp, lnum, source, dest, copy, magic, backslash)
-regmmatch_T *rmp;
-linenr_T lnum;
-char_u      *source;
-char_u      *dest;
-int copy;
-int magic;
-int backslash;
+int vim_regsub_multi(regmmatch_T *rmp, linenr_T lnum, char_u *source, char_u *dest, int copy, int magic, int backslash)
 {
   reg_match = NULL;
   reg_mmatch = rmp;
@@ -6988,9 +6962,7 @@ static char_u regname[][30] = {
  * Use vim_regfree() to free the memory.
  * Returns NULL for an error.
  */
-regprog_T * vim_regcomp(expr_arg, re_flags)
-char_u      *expr_arg;
-int re_flags;
+regprog_T *vim_regcomp(char_u *expr_arg, int re_flags)
 {
   regprog_T   *prog = NULL;
   char_u      *expr = expr_arg;
@@ -7056,8 +7028,7 @@ int re_flags;
 /*
  * Free a compiled regexp program, returned by vim_regcomp().
  */
-void vim_regfree(prog)
-regprog_T   *prog;
+void vim_regfree(regprog_T *prog)
 {
   if (prog != NULL)
     prog->engine->regfree(prog);
@@ -7070,10 +7041,12 @@ regprog_T   *prog;
  *
  * Return TRUE if there is a match, FALSE if not.
  */
-int vim_regexec(rmp, line, col)
-regmatch_T *rmp;
-char_u      *line;      /* string to match against */
-colnr_T col;            /* column to start looking for match */
+int 
+vim_regexec (
+    regmatch_T *rmp,
+    char_u *line,      /* string to match against */
+    colnr_T col            /* column to start looking for match */
+)
 {
   return rmp->regprog->engine->regexec(rmp, line, col);
 }
@@ -7083,10 +7056,7 @@ colnr_T col;            /* column to start looking for match */
 /*
  * Like vim_regexec(), but consider a "\n" in "line" to be a line break.
  */
-int vim_regexec_nl(rmp, line, col)
-regmatch_T *rmp;
-char_u *line;
-colnr_T col;
+int vim_regexec_nl(regmatch_T *rmp, char_u *line, colnr_T col)
 {
   return rmp->regprog->engine->regexec_nl(rmp, line, col);
 }

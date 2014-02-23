@@ -48,10 +48,7 @@ int setmark(int c)
  * When "c" is upper case use file "fnum".
  * Returns OK on success, FAIL if bad name given.
  */
-int setmark_pos(c, pos, fnum)
-int c;
-pos_T       *pos;
-int fnum;
+int setmark_pos(int c, pos_T *pos, int fnum)
 {
   int i;
 
@@ -183,8 +180,7 @@ void checkpcmark(void)          {
 /*
  * move "count" positions in the jump list (count may be negative)
  */
-pos_T * movemark(count)
-int count;
+pos_T *movemark(int count)
 {
   pos_T       *pos;
   xfmark_T    *jmp;
@@ -237,8 +233,7 @@ int count;
 /*
  * Move "count" positions in the changelist (count may be negative).
  */
-pos_T * movechangelist(count)
-int count;
+pos_T *movechangelist(int count)
 {
   int n;
 
@@ -271,26 +266,17 @@ int count;
  * - NULL if there is no mark called 'c'.
  * - -1 if mark is in other file and jumped there (only if changefile is TRUE)
  */
-pos_T * getmark_buf(buf, c, changefile)
-buf_T       *buf;
-int c;
-int changefile;
+pos_T *getmark_buf(buf_T *buf, int c, int changefile)
 {
   return getmark_buf_fnum(buf, c, changefile, NULL);
 }
 
-pos_T * getmark(c, changefile)
-int c;
-int changefile;
+pos_T *getmark(int c, int changefile)
 {
   return getmark_buf_fnum(curbuf, c, changefile, NULL);
 }
 
-pos_T * getmark_buf_fnum(buf, c, changefile, fnum)
-buf_T       *buf;
-int c;
-int changefile;
-int         *fnum;
+pos_T *getmark_buf_fnum(buf_T *buf, int c, int changefile, int *fnum)
 {
   pos_T               *posp;
   pos_T               *startp, *endp;
@@ -403,10 +389,12 @@ int         *fnum;
  *
  * Returns pointer to pos_T of the next mark or NULL if no mark is found.
  */
-pos_T * getnextmark(startpos, dir, begin_line)
-pos_T       *startpos;          /* where to start */
-int dir;                /* direction for search */
-int begin_line;
+pos_T *
+getnextmark (
+    pos_T *startpos,          /* where to start */
+    int dir,                /* direction for search */
+    int begin_line
+)
 {
   int i;
   pos_T       *result = NULL;
@@ -445,8 +433,7 @@ int begin_line;
  * This is used for marks obtained from the .viminfo file.  It's postponed
  * until the mark is used to avoid a long startup delay.
  */
-static void fname2fnum(fm)
-xfmark_T    *fm;
+static void fname2fnum(xfmark_T *fm)
 {
   char_u      *p;
 
@@ -482,8 +469,7 @@ xfmark_T    *fm;
  * May replace the name with an fnum.
  * Used for marks that come from the .viminfo file.
  */
-void fmarks_check_names(buf)
-buf_T       *buf;
+void fmarks_check_names(buf_T *buf)
 {
   char_u      *name;
   int i;
@@ -508,10 +494,7 @@ buf_T       *buf;
   vim_free(name);
 }
 
-static void fmarks_check_one(fm, name, buf)
-xfmark_T    *fm;
-char_u      *name;
-buf_T       *buf;
+static void fmarks_check_one(xfmark_T *fm, char_u *name, buf_T *buf)
 {
   if (fm->fmark.fnum == 0
       && fm->fname != NULL
@@ -526,8 +509,7 @@ buf_T       *buf;
  * Check a if a position from a mark is valid.
  * Give and error message and return FAIL if not.
  */
-int check_mark(pos)
-pos_T    *pos;
+int check_mark(pos_T *pos)
 {
   if (pos == NULL) {
     EMSG(_(e_umark));
@@ -552,8 +534,7 @@ pos_T    *pos;
  *
  * Used mainly when trashing the entire buffer during ":e" type commands
  */
-void clrallmarks(buf)
-buf_T       *buf;
+void clrallmarks(buf_T *buf)
 {
   static int i = -1;
 
@@ -580,9 +561,7 @@ buf_T       *buf;
  * When it's in the current buffer, return the text at the mark.
  * Returns an allocated string.
  */
-char_u * fm_getname(fmark, lead_len)
-fmark_T     *fmark;
-int lead_len;
+char_u *fm_getname(fmark_T *fmark, int lead_len)
 {
   if (fmark->fnum == curbuf->b_fnum)                /* current buffer */
     return mark_line(&(fmark->mark), lead_len);
@@ -593,9 +572,7 @@ int lead_len;
  * Return the line at mark "mp".  Truncate to fit in window.
  * The returned string has been allocated.
  */
-static char_u * mark_line(mp, lead_len)
-pos_T       *mp;
-int lead_len;
+static char_u *mark_line(pos_T *mp, int lead_len)
 {
   char_u      *s, *p;
   int len;
@@ -619,8 +596,7 @@ int lead_len;
 /*
  * print the marks
  */
-void do_marks(eap)
-exarg_T     *eap;
+void do_marks(exarg_T *eap)
 {
   char_u      *arg = eap->arg;
   int i;
@@ -655,12 +631,14 @@ exarg_T     *eap;
   show_one_mark(-1, arg, NULL, NULL, FALSE);
 }
 
-static void show_one_mark(c, arg, p, name, current)
-int c;
-char_u      *arg;
-pos_T       *p;
-char_u      *name;
-int current;                    /* in current file */
+static void 
+show_one_mark (
+    int c,
+    char_u *arg,
+    pos_T *p,
+    char_u *name,
+    int current                    /* in current file */
+)
 {
   static int did_title = FALSE;
   int mustfree = FALSE;
@@ -705,8 +683,7 @@ int current;                    /* in current file */
 /*
  * ":delmarks[!] [marks]"
  */
-void ex_delmarks(eap)
-exarg_T *eap;
+void ex_delmarks(exarg_T *eap)
 {
   char_u      *p;
   int from, to;
@@ -777,8 +754,7 @@ exarg_T *eap;
 /*
  * print the jumplist
  */
-void ex_jumps(eap)
-exarg_T     *eap UNUSED;
+void ex_jumps(exarg_T *eap)
 {
   int i;
   char_u      *name;
@@ -821,8 +797,7 @@ exarg_T     *eap UNUSED;
 /*
  * print the changelist
  */
-void ex_changes(eap)
-exarg_T     *eap UNUSED;
+void ex_changes(exarg_T *eap)
 {
   int i;
   char_u      *name;
@@ -1137,9 +1112,7 @@ static void cleanup_jumplist(void)                 {
 /*
  * Copy the jumplist from window "from" to window "to".
  */
-void copy_jumplist(from, to)
-win_T       *from;
-win_T       *to;
+void copy_jumplist(win_T *from, win_T *to)
 {
   int i;
 
@@ -1155,8 +1128,7 @@ win_T       *to;
 /*
  * Free items in the jumplist of window "wp".
  */
-void free_jumplist(wp)
-win_T       *wp;
+void free_jumplist(win_T *wp)
 {
   int i;
 
@@ -1164,8 +1136,7 @@ win_T       *wp;
     vim_free(wp->w_jumplist[i].fname);
 }
 
-void set_last_cursor(win)
-win_T       *win;
+void set_last_cursor(win_T *win)
 {
   if (win->w_buffer != NULL)
     win->w_buffer->b_last_cursor = win->w_cursor;
@@ -1182,9 +1153,7 @@ void free_all_marks(void)          {
 
 #endif
 
-int read_viminfo_filemark(virp, force)
-vir_T       *virp;
-int force;
+int read_viminfo_filemark(vir_T *virp, int force)
 {
   char_u      *str;
   xfmark_T    *fm;
@@ -1230,8 +1199,7 @@ int force;
   return vim_fgets(virp->vir_line, LSIZE, virp->vir_fd);
 }
 
-void write_viminfo_filemarks(fp)
-FILE        *fp;
+void write_viminfo_filemarks(FILE *fp)
 {
   int i;
   char_u      *name;
@@ -1286,11 +1254,7 @@ FILE        *fp;
   }
 }
 
-static void write_one_filemark(fp, fm, c1, c2)
-FILE        *fp;
-xfmark_T    *fm;
-int c1;
-int c2;
+static void write_one_filemark(FILE *fp, xfmark_T *fm, int c1, int c2)
 {
   char_u      *name;
 
@@ -1344,8 +1308,7 @@ static void write_one_mark __ARGS((FILE *fp_out, int c, pos_T *pos));
  * Write all the named marks for all buffers.
  * Return the number of buffers for which marks have been written.
  */
-int write_viminfo_marks(fp_out)
-FILE        *fp_out;
+int write_viminfo_marks(FILE *fp_out)
 {
   int count;
   buf_T       *buf;
@@ -1399,10 +1362,7 @@ FILE        *fp_out;
   return count;
 }
 
-static void write_one_mark(fp_out, c, pos)
-FILE        *fp_out;
-int c;
-pos_T       *pos;
+static void write_one_mark(FILE *fp_out, int c, pos_T *pos)
 {
   if (pos->lnum != 0)
     fprintf(fp_out, "\t%c\t%ld\t%d\n", c, (long)pos->lnum, (int)pos->col);
@@ -1414,12 +1374,7 @@ pos_T       *pos;
  * fp_out == NULL && (flags & VIF_WANT_MARKS): read marks for curbuf only
  * fp_out == NULL && (flags & VIF_GET_OLDFILES | VIF_FORCEIT): fill v:oldfiles
  */
-void copy_viminfo_marks(virp, fp_out, count, eof, flags)
-vir_T       *virp;
-FILE        *fp_out;
-int count;
-int eof;
-int flags;
+void copy_viminfo_marks(vir_T *virp, FILE *fp_out, int count, int eof, int flags)
 {
   char_u      *line = virp->vir_line;
   buf_T       *buf;

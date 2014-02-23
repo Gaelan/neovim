@@ -1655,8 +1655,7 @@ static void read_stdin(void)                 {
  * Create the requested number of windows and edit buffers in them.
  * Also does recovery if "recoverymode" set.
  */
-static void create_windows(parmp)
-  mparm_T     *parmp UNUSED;
+static void create_windows(mparm_T *parmp)
 {
   int dorewind;
   int done = 0;

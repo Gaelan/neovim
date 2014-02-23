@@ -1155,9 +1155,7 @@ static char_u *get_loop_line(int c, void *cookie, int indent)
 /*
  * Store a line in "gap" so that a ":while" loop can execute it again.
  */
-static int store_loop_line(gap, line)
-garray_T    *gap;
-char_u      *line;
+static int store_loop_line(garray_T *gap, char_u *line)
 {
   if (ga_grow(gap, 1) == FAIL)
     return FAIL;
@@ -1170,8 +1168,7 @@ char_u      *line;
 /*
  * Free the lines stored for a ":while" or ":for" loop.
  */
-static void free_cmdlines(gap)
-garray_T    *gap;
+static void free_cmdlines(garray_T *gap)
 {
   while (gap->ga_len > 0) {
     vim_free(((wcmd_T *)(gap->ga_data))[gap->ga_len - 1].line);
@@ -1185,7 +1182,7 @@ garray_T    *gap;
  */
 int getline_equal(fgetline, cookie, func)
 char_u      *(*fgetline)__ARGS((int, void *, int));
-void        *cookie UNUSED;             /* argument for fgetline() */
+void        *cookie;             /* argument for fgetline() */
 char_u      *(*func)__ARGS((int, void *, int));
 {
   char_u              *(*gp)__ARGS((int, void *, int));
@@ -1208,7 +1205,7 @@ char_u      *(*func)__ARGS((int, void *, int));
  * getline function.  Otherwise return "cookie".
  */
 void * getline_cookie(fgetline, cookie)
-char_u      *(*fgetline)__ARGS((int, void *, int)) UNUSED;
+char_u      *(*fgetline)__ARGS((int, void *, int));
 void        *cookie;                    /* argument for fgetline() */
 {
   char_u              *(*gp)__ARGS((int, void *, int));
@@ -2199,9 +2196,7 @@ static void append_command(char_u *cmd)
  * "full" is set to TRUE if the whole command name matched.
  * Returns NULL for an ambiguous user command.
  */
-static char_u * find_command(eap, full)
-exarg_T     *eap;
-int         *full UNUSED;
+static char_u *find_command(exarg_T *eap, int *full)
 {
   int len;
   char_u      *p;
@@ -2293,12 +2288,14 @@ int         *full UNUSED;
  * Return a pointer to just after the command.
  * Return NULL if there is no matching command.
  */
-static char_u * find_ucmd(eap, p, full, xp, compl)
-exarg_T     *eap;
-char_u      *p;         /* end of the command (possibly including count) */
-int         *full;      /* set to TRUE for a full match */
-expand_T    *xp;        /* used for completion, NULL otherwise */
-int         *compl;     /* completion flags or NULL */
+static char_u *
+find_ucmd (
+    exarg_T *eap,
+    char_u *p,         /* end of the command (possibly including count) */
+    int *full,      /* set to TRUE for a full match */
+    expand_T *xp,        /* used for completion, NULL otherwise */
+    int *compl     /* completion flags or NULL */
+)
 {
   int len = (int)(p - eap->cmd);
   int j, k, matchlen = 0;
@@ -2481,9 +2478,11 @@ int cmd_exists(char_u *name)
  * perfectly compatible with each other, but then the command line syntax
  * probably won't change that much -- webb.
  */
-char_u * set_one_cmd_context(xp, buff)
-expand_T    *xp;
-char_u      *buff;          /* buffer for command string */
+char_u *
+set_one_cmd_context (
+    expand_T *xp,
+    char_u *buff          /* buffer for command string */
+)
 {
   char_u              *p;
   char_u              *cmd, *arg;
@@ -3416,8 +3415,7 @@ error:
 /*
  * Get flags from an Ex command argument.
  */
-static void get_flags(eap)
-exarg_T *eap;
+static void get_flags(exarg_T *eap)
 {
   while (vim_strchr((char_u *)"lp#", *eap->arg) != NULL) {
     if (*eap->arg == 'l')
@@ -3433,8 +3431,7 @@ exarg_T *eap;
 /*
  * Function called for command which is Not Implemented.  NI!
  */
-void ex_ni(eap)
-exarg_T     *eap;
+void ex_ni(exarg_T *eap)
 {
   if (!eap->skip)
     eap->errmsg = (char_u *)N_(
@@ -3446,8 +3443,7 @@ exarg_T     *eap;
  * Function called for script command which is Not Implemented.  NI!
  * Skips over ":perl <<EOF" constructs.
  */
-static void ex_script_ni(eap)
-exarg_T     *eap;
+static void ex_script_ni(exarg_T *eap)
 {
   if (!eap->skip)
     ex_ni(eap);
@@ -3460,8 +3456,7 @@ exarg_T     *eap;
  * Check range in Ex command for validity.
  * Return NULL when valid, error message when invalid.
  */
-static char_u * invalid_range(eap)
-exarg_T     *eap;
+static char_u *invalid_range(exarg_T *eap)
 {
   if (       eap->line1 < 0
              || eap->line2 < 0
@@ -3478,8 +3473,7 @@ exarg_T     *eap;
 /*
  * Correct the range for zero line number, if required.
  */
-static void correct_range(eap)
-exarg_T     *eap;
+static void correct_range(exarg_T *eap)
 {
   if (!(eap->argt & ZEROR)) {       /* zero in range not allowed */
     if (eap->line1 == 0)
@@ -3495,8 +3489,7 @@ static char_u   *skip_grep_pat __ARGS((exarg_T *eap));
  * For a ":vimgrep" or ":vimgrepadd" command return a pointer past the
  * pattern.  Otherwise return eap->arg.
  */
-static char_u * skip_grep_pat(eap)
-exarg_T     *eap;
+static char_u *skip_grep_pat(exarg_T *eap)
 {
   char_u      *p = eap->arg;
 
@@ -3515,10 +3508,7 @@ exarg_T     *eap;
  * For the ":make" and ":grep" commands insert the 'makeprg'/'grepprg' option
  * in the command line, so that things like % get expanded.
  */
-static char_u * replace_makeprg(eap, p, cmdlinep)
-exarg_T     *eap;
-char_u      *p;
-char_u      **cmdlinep;
+static char_u *replace_makeprg(exarg_T *eap, char_u *p, char_u **cmdlinep)
 {
   char_u      *new_cmdline;
   char_u      *program;
@@ -3590,10 +3580,7 @@ char_u      **cmdlinep;
  * Expand file name in Ex command argument.
  * Return FAIL for failure, OK otherwise.
  */
-int expand_filename(eap, cmdlinep, errormsgp)
-exarg_T     *eap;
-char_u      **cmdlinep;
-char_u      **errormsgp;
+int expand_filename(exarg_T *eap, char_u **cmdlinep, char_u **errormsgp)
 {
   int has_wildcards;            /* need to expand wildcards */
   char_u      *repl;
@@ -3811,12 +3798,7 @@ char_u      **errormsgp;
  * Returns a pointer to the character after the replaced string.
  * Returns NULL for failure.
  */
-static char_u * repl_cmdline(eap, src, srclen, repl, cmdlinep)
-exarg_T     *eap;
-char_u      *src;
-int srclen;
-char_u      *repl;
-char_u      **cmdlinep;
+static char_u *repl_cmdline(exarg_T *eap, char_u *src, int srclen, char_u *repl, char_u **cmdlinep)
 {
   int len;
   int i;
@@ -3866,8 +3848,7 @@ char_u      **cmdlinep;
 /*
  * Check for '|' to separate commands and '"' to start comments.
  */
-void separate_nextcmd(eap)
-exarg_T     *eap;
+void separate_nextcmd(exarg_T *eap)
 {
   char_u      *p;
 
@@ -3967,8 +3948,7 @@ skip_cmd_arg (
  * Get "++opt=arg" argument.
  * Return FAIL or OK.
  */
-static int getargopt(eap)
-exarg_T     *eap;
+static int getargopt(exarg_T *eap)
 {
   char_u      *arg = eap->arg + 2;
   int         *pp = NULL;
@@ -4048,8 +4028,7 @@ exarg_T     *eap;
 /*
  * ":abbreviate" and friends.
  */
-static void ex_abbreviate(eap)
-exarg_T     *eap;
+static void ex_abbreviate(exarg_T *eap)
 {
   do_exmap(eap, TRUE);          /* almost the same as mapping */
 }
@@ -4057,8 +4036,7 @@ exarg_T     *eap;
 /*
  * ":map" and friends.
  */
-static void ex_map(eap)
-exarg_T     *eap;
+static void ex_map(exarg_T *eap)
 {
   /*
    * If we are sourcing .exrc or .vimrc in current directory we
@@ -4075,8 +4053,7 @@ exarg_T     *eap;
 /*
  * ":unmap" and friends.
  */
-static void ex_unmap(eap)
-exarg_T     *eap;
+static void ex_unmap(exarg_T *eap)
 {
   do_exmap(eap, FALSE);
 }
@@ -4084,8 +4061,7 @@ exarg_T     *eap;
 /*
  * ":mapclear" and friends.
  */
-static void ex_mapclear(eap)
-exarg_T     *eap;
+static void ex_mapclear(exarg_T *eap)
 {
   map_clear(eap->cmd, eap->arg, eap->forceit, FALSE);
 }
@@ -4093,14 +4069,12 @@ exarg_T     *eap;
 /*
  * ":abclear" and friends.
  */
-static void ex_abclear(eap)
-exarg_T     *eap;
+static void ex_abclear(exarg_T *eap)
 {
   map_clear(eap->cmd, eap->arg, TRUE, TRUE);
 }
 
-static void ex_autocmd(eap)
-exarg_T     *eap;
+static void ex_autocmd(exarg_T *eap)
 {
   /*
    * Disallow auto commands from .exrc and .vimrc in current
@@ -4118,8 +4092,7 @@ exarg_T     *eap;
 /*
  * ":doautocmd": Apply the automatic commands to the current buffer.
  */
-static void ex_doautocmd(eap)
-exarg_T     *eap;
+static void ex_doautocmd(exarg_T *eap)
 {
   char_u      *arg = eap->arg;
   int call_do_modelines = check_nomodeline(&arg);
@@ -4134,8 +4107,7 @@ exarg_T     *eap;
  * :[N]bdelete[!] [N] [bufname] delete buffer from buffer list
  * :[N]bwipeout[!] [N] [bufname] delete buffer really
  */
-static void ex_bunload(eap)
-exarg_T     *eap;
+static void ex_bunload(exarg_T *eap)
 {
   eap->errmsg = do_bufdel(
       eap->cmdidx == CMD_bdelete ? DOBUF_DEL
@@ -4148,8 +4120,7 @@ exarg_T     *eap;
  * :[N]buffer [N]	to buffer N
  * :[N]sbuffer [N]	to buffer N
  */
-static void ex_buffer(eap)
-exarg_T     *eap;
+static void ex_buffer(exarg_T *eap)
 {
   if (*eap->arg)
     eap->errmsg = e_trailing;
@@ -4165,8 +4136,7 @@ exarg_T     *eap;
  * :[N]bmodified [N]	to next mod. buffer
  * :[N]sbmodified [N]	to next mod. buffer
  */
-static void ex_bmodified(eap)
-exarg_T     *eap;
+static void ex_bmodified(exarg_T *eap)
 {
   goto_buffer(eap, DOBUF_MOD, FORWARD, (int)eap->line2);
 }
@@ -4175,8 +4145,7 @@ exarg_T     *eap;
  * :[N]bnext [N]	to next buffer
  * :[N]sbnext [N]	split and to next buffer
  */
-static void ex_bnext(eap)
-exarg_T     *eap;
+static void ex_bnext(exarg_T *eap)
 {
   goto_buffer(eap, DOBUF_CURRENT, FORWARD, (int)eap->line2);
 }
@@ -4187,8 +4156,7 @@ exarg_T     *eap;
  * :[N]sbNext [N]	split and to previous buffer
  * :[N]sbprevious [N]	split and to previous buffer
  */
-static void ex_bprevious(eap)
-exarg_T     *eap;
+static void ex_bprevious(exarg_T *eap)
 {
   goto_buffer(eap, DOBUF_CURRENT, BACKWARD, (int)eap->line2);
 }
@@ -4199,8 +4167,7 @@ exarg_T     *eap;
  * :sbrewind		split and to first buffer
  * :sbfirst		split and to first buffer
  */
-static void ex_brewind(eap)
-exarg_T     *eap;
+static void ex_brewind(exarg_T *eap)
 {
   goto_buffer(eap, DOBUF_FIRST, FORWARD, 0);
 }
@@ -4209,8 +4176,7 @@ exarg_T     *eap;
  * :blast		to last buffer
  * :sblast		split and to last buffer
  */
-static void ex_blast(eap)
-exarg_T     *eap;
+static void ex_blast(exarg_T *eap)
 {
   goto_buffer(eap, DOBUF_LAST, BACKWARD, 0);
 }
@@ -4297,9 +4263,7 @@ check_more (
 /*
  * Function given to ExpandGeneric() to obtain the list of command names.
  */
-char_u * get_command_name(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_command_name(expand_T *xp, int idx)
 {
   if (idx >= (int)CMD_SIZE)
     return get_user_command_name(idx);
@@ -4320,18 +4284,7 @@ static size_t uc_check_code __ARGS((char_u *code, size_t len, char_u *buf,
                                     *split_buf,
                                     size_t *split_len));
 
-static int uc_add_command(name, name_len, rep, argt, def, flags, compl,
-    compl_arg,
-    force)
-char_u      *name;
-size_t name_len;
-char_u      *rep;
-long argt;
-long def;
-int flags;
-int         compl;
-char_u      *compl_arg;
-int force;
+static int uc_add_command(char_u *name, size_t name_len, char_u *rep, long argt, long def, int flags, int compl, char_u *compl_arg, int force)
 {
   ucmd_T      *cmd = NULL;
   char_u      *p;
@@ -4465,9 +4418,7 @@ static struct {
   {0, NULL}
 };
 
-static void uc_list(name, name_len)
-char_u      *name;
-size_t name_len;
+static void uc_list(char_u *name, size_t name_len)
 {
   int i, j;
   int found = FALSE;
@@ -4588,14 +4539,7 @@ static char_u *uc_fun_cmd(void)                     {
   return IObuff;
 }
 
-static int uc_scan_attr(attr, len, argt, def, flags, compl, compl_arg)
-char_u      *attr;
-size_t len;
-long        *argt;
-long        *def;
-int         *flags;
-int         *compl;
-char_u      **compl_arg;
+static int uc_scan_attr(char_u *attr, size_t len, long *argt, long *def, int *flags, int *compl, char_u **compl_arg)
 {
   char_u      *p;
 
@@ -4709,8 +4653,7 @@ invalid_count:
 /*
  * ":command ..."
  */
-static void ex_command(eap)
-exarg_T   *eap;
+static void ex_command(exarg_T *eap)
 {
   char_u  *name;
   char_u  *end;
@@ -4770,8 +4713,7 @@ exarg_T   *eap;
  * ":comclear"
  * Clear all user commands, global and for current buffer.
  */
-void ex_comclear(eap)
-exarg_T     *eap UNUSED;
+void ex_comclear(exarg_T *eap)
 {
   uc_clear(&ucmds);
   uc_clear(&curbuf->b_ucmds);
@@ -4780,8 +4722,7 @@ exarg_T     *eap UNUSED;
 /*
  * Clear all user commands for "gap".
  */
-void uc_clear(gap)
-garray_T    *gap;
+void uc_clear(garray_T *gap)
 {
   int i;
   ucmd_T      *cmd;
@@ -4795,8 +4736,7 @@ garray_T    *gap;
   ga_clear(gap);
 }
 
-static void ex_delcommand(eap)
-exarg_T     *eap;
+static void ex_delcommand(exarg_T *eap)
 {
   int i = 0;
   ucmd_T      *cmd = NULL;
@@ -4834,9 +4774,7 @@ exarg_T     *eap;
 /*
  * split and quote args for <f-args>
  */
-static char_u * uc_split_args(arg, lenp)
-char_u *arg;
-size_t *lenp;
+static char_u *uc_split_args(char_u *arg, size_t *lenp)
 {
   char_u *buf;
   char_u *p;
@@ -4916,14 +4854,16 @@ size_t *lenp;
  * Returns the length of the replacement, which has been added to "buf".
  * Returns -1 if there was no match, and only the "<" has been copied.
  */
-static size_t uc_check_code(code, len, buf, cmd, eap, split_buf, split_len)
-char_u      *code;
-size_t len;
-char_u      *buf;
-ucmd_T      *cmd;               /* the user command we're expanding */
-exarg_T     *eap;               /* ex arguments */
-char_u      **split_buf;
-size_t      *split_len;
+static size_t 
+uc_check_code (
+    char_u *code,
+    size_t len,
+    char_u *buf,
+    ucmd_T *cmd,               /* the user command we're expanding */
+    exarg_T *eap,               /* ex arguments */
+    char_u **split_buf,
+    size_t *split_len
+)
 {
   size_t result = 0;
   char_u      *p = code + 1;
@@ -5093,8 +5033,7 @@ size_t      *split_len;
   return result;
 }
 
-static void do_ucmd(eap)
-exarg_T     *eap;
+static void do_ucmd(exarg_T *eap)
 {
   char_u      *buf;
   char_u      *p;
@@ -5210,9 +5149,7 @@ static char_u *get_user_command_name(int idx)
 /*
  * Function given to ExpandGeneric() to obtain the list of user command names.
  */
-char_u * get_user_commands(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_user_commands(expand_T *xp, int idx)
 {
   if (idx < curbuf->b_ucmds.ga_len)
     return USER_CMD_GA(&curbuf->b_ucmds, idx)->uc_name;
@@ -5226,9 +5163,7 @@ int idx;
  * Function given to ExpandGeneric() to obtain the list of user command
  * attributes.
  */
-char_u * get_user_cmd_flags(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_user_cmd_flags(expand_T *xp, int idx)
 {
   static char *user_cmd_flags[] =
   {"bang", "bar", "buffer", "complete", "count",
@@ -5242,9 +5177,7 @@ int idx;
 /*
  * Function given to ExpandGeneric() to obtain the list of values for -nargs.
  */
-char_u * get_user_cmd_nargs(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_user_cmd_nargs(expand_T *xp, int idx)
 {
   static char *user_cmd_nargs[] = {"0", "1", "*", "?", "+"};
 
@@ -5256,9 +5189,7 @@ int idx;
 /*
  * Function given to ExpandGeneric() to obtain the list of values for -complete.
  */
-char_u * get_user_cmd_complete(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_user_cmd_complete(expand_T *xp, int idx)
 {
   return (char_u *)command_complete[idx].name;
 }
@@ -5271,12 +5202,7 @@ int idx;
  * copied to allocated memory and stored in "*compl_arg".
  * Returns FAIL if something is wrong.
  */
-int parse_compl_arg(value, vallen, complp, argt, compl_arg)
-char_u      *value;
-int vallen;
-int         *complp;
-long        *argt;
-char_u      **compl_arg UNUSED;
+int parse_compl_arg(char_u *value, int vallen, int *complp, long *argt, char_u **compl_arg)
 {
   char_u      *arg = NULL;
   size_t arglen = 0;
@@ -5328,8 +5254,7 @@ char_u      **compl_arg UNUSED;
   return OK;
 }
 
-static void ex_colorscheme(eap)
-exarg_T     *eap;
+static void ex_colorscheme(exarg_T *eap)
 {
   if (*eap->arg == NUL) {
     char_u *expr = vim_strsave((char_u *)"g:colors_name");
@@ -5350,8 +5275,7 @@ exarg_T     *eap;
     EMSG2(_("E185: Cannot find color scheme '%s'"), eap->arg);
 }
 
-static void ex_highlight(eap)
-exarg_T     *eap;
+static void ex_highlight(exarg_T *eap)
 {
   if (*eap->arg == NUL && eap->cmd[2] == '!')
     MSG(_("Greetings, Vim user!"));
@@ -5371,8 +5295,7 @@ void not_exiting(void)          {
 /*
  * ":quit": quit current window, quit Vim if closed the last window.
  */
-static void ex_quit(eap)
-exarg_T     *eap;
+static void ex_quit(exarg_T *eap)
 {
   if (cmdwin_type != 0) {
     cmdwin_result = Ctrl_C;
@@ -5413,8 +5336,7 @@ exarg_T     *eap;
 /*
  * ":cquit".
  */
-static void ex_cquit(eap)
-exarg_T     *eap UNUSED;
+static void ex_cquit(exarg_T *eap)
 {
   getout(1);    /* this does not always pass on the exit code to the Manx
                    compiler. why? */
@@ -5423,8 +5345,7 @@ exarg_T     *eap UNUSED;
 /*
  * ":qall": try to quit all windows
  */
-static void ex_quit_all(eap)
-exarg_T     *eap;
+static void ex_quit_all(exarg_T *eap)
 {
   if (cmdwin_type != 0) {
     if (eap->forceit)
@@ -5454,8 +5375,7 @@ exarg_T     *eap;
 /*
  * ":close": close current window, unless it is the last one
  */
-static void ex_close(eap)
-exarg_T     *eap;
+static void ex_close(exarg_T *eap)
 {
   if (cmdwin_type != 0)
     cmdwin_result = Ctrl_C;
@@ -5468,8 +5388,7 @@ exarg_T     *eap;
 /*
  * ":pclose": Close any preview window.
  */
-static void ex_pclose(eap)
-exarg_T     *eap;
+static void ex_pclose(exarg_T *eap)
 {
   win_T       *win;
 
@@ -5484,10 +5403,12 @@ exarg_T     *eap;
  * Close window "win" and take care of handling closing the last window for a
  * modified buffer.
  */
-static void ex_win_close(forceit, win, tp)
-int forceit;
-win_T       *win;
-tabpage_T   *tp;                /* NULL or the tab page "win" is in */
+static void 
+ex_win_close (
+    int forceit,
+    win_T *win,
+    tabpage_T *tp                /* NULL or the tab page "win" is in */
+)
 {
   int need_hide;
   buf_T       *buf = win->w_buffer;
@@ -5517,8 +5438,7 @@ tabpage_T   *tp;                /* NULL or the tab page "win" is in */
  * ":tabclose": close current tab page, unless it is the last one.
  * ":tabclose N": close tab page N.
  */
-static void ex_tabclose(eap)
-exarg_T     *eap;
+static void ex_tabclose(exarg_T *eap)
 {
   tabpage_T   *tp;
 
@@ -5548,8 +5468,7 @@ exarg_T     *eap;
 /*
  * ":tabonly": close all tab pages except the current one
  */
-static void ex_tabonly(eap)
-exarg_T     *eap;
+static void ex_tabonly(exarg_T *eap)
 {
   tabpage_T   *tp;
   int done;
@@ -5596,9 +5515,7 @@ void tabpage_close(int forceit)
  * Also takes care of the tab pages line disappearing when closing the
  * last-but-one tab page.
  */
-void tabpage_close_other(tp, forceit)
-tabpage_T   *tp;
-int forceit;
+void tabpage_close_other(tabpage_T *tp, int forceit)
 {
   int done = 0;
   win_T       *wp;
@@ -5624,8 +5541,7 @@ int forceit;
 /*
  * ":only".
  */
-static void ex_only(eap)
-exarg_T     *eap;
+static void ex_only(exarg_T *eap)
 {
   close_others(TRUE, eap->forceit);
 }
@@ -5634,16 +5550,14 @@ exarg_T     *eap;
  * ":all" and ":sall".
  * Also used for ":tab drop file ..." after setting the argument list.
  */
-void ex_all(eap)
-exarg_T     *eap;
+void ex_all(exarg_T *eap)
 {
   if (eap->addr_count == 0)
     eap->line2 = 9999;
   do_arg_all((int)eap->line2, eap->forceit, eap->cmdidx == CMD_drop);
 }
 
-static void ex_hide(eap)
-exarg_T     *eap;
+static void ex_hide(exarg_T *eap)
 {
   if (*eap->arg != NUL && check_nextcmd(eap->arg) == NULL)
     eap->errmsg = e_invarg;
@@ -5659,8 +5573,7 @@ exarg_T     *eap;
 /*
  * ":stop" and ":suspend": Suspend Vim.
  */
-static void ex_stop(eap)
-exarg_T     *eap;
+static void ex_stop(exarg_T *eap)
 {
   /*
    * Disallow suspending for "rvim".
@@ -5688,8 +5601,7 @@ exarg_T     *eap;
 /*
  * ":exit", ":xit" and ":wq": Write file and exit Vim.
  */
-static void ex_exit(eap)
-exarg_T     *eap;
+static void ex_exit(exarg_T *eap)
 {
   if (cmdwin_type != 0) {
     cmdwin_result = Ctrl_C;
@@ -5728,8 +5640,7 @@ exarg_T     *eap;
 /*
  * ":print", ":list", ":number".
  */
-static void ex_print(eap)
-exarg_T     *eap;
+static void ex_print(exarg_T *eap)
 {
   if (curbuf->b_ml.ml_flags & ML_EMPTY)
     EMSG(_(e_emptybuf));
@@ -5752,8 +5663,7 @@ exarg_T     *eap;
   ex_no_reprint = TRUE;
 }
 
-static void ex_goto(eap)
-exarg_T     *eap;
+static void ex_goto(exarg_T *eap)
 {
   goto_byte(eap->line2);
 }
@@ -5761,8 +5671,7 @@ exarg_T     *eap;
 /*
  * ":shell".
  */
-static void ex_shell(eap)
-exarg_T     *eap UNUSED;
+static void ex_shell(exarg_T *eap)
 {
   do_shell(NULL, 0);
 }
@@ -5858,8 +5767,7 @@ handle_drop (
 /*
  * Clear an argument list: free all file names and reset it to zero entries.
  */
-void alist_clear(al)
-alist_T     *al;
+void alist_clear(alist_T *al)
 {
   while (--al->al_ga.ga_len >= 0)
     vim_free(AARGLIST(al)[al->al_ga.ga_len].ae_fname);
@@ -5869,8 +5777,7 @@ alist_T     *al;
 /*
  * Init an argument list.
  */
-void alist_init(al)
-alist_T     *al;
+void alist_init(alist_T *al)
 {
   ga_init2(&al->al_ga, (int)sizeof(aentry_T), 5);
 }
@@ -5881,8 +5788,7 @@ alist_T     *al;
  * Ignored when the argument list is the global one.
  * If the argument list is no longer used by any window, free it.
  */
-void alist_unlink(al)
-alist_T     *al;
+void alist_unlink(alist_T *al)
 {
   if (al != &global_alist && --al->al_refcount <= 0) {
     alist_clear(al);
@@ -5945,13 +5851,7 @@ void alist_expand(int *fnum_list, int fnum_len)
  * Set the argument list for the current window.
  * Takes over the allocated files[] and the allocated fnames in it.
  */
-void alist_set(al, count, files, use_curbuf, fnum_list, fnum_len)
-alist_T     *al;
-int count;
-char_u      **files;
-int use_curbuf;
-int         *fnum_list;
-int fnum_len;
+void alist_set(alist_T *al, int count, char_u **files, int use_curbuf, int *fnum_list, int fnum_len)
 {
   int i;
 
@@ -5985,10 +5885,12 @@ int fnum_len;
  * Add file "fname" to argument list "al".
  * "fname" must have been allocated and "al" must have been checked for room.
  */
-void alist_add(al, fname, set_fnum)
-alist_T     *al;
-char_u      *fname;
-int set_fnum;                   /* 1: set buffer number; 2: re-use curbuf */
+void 
+alist_add (
+    alist_T *al,
+    char_u *fname,
+    int set_fnum                   /* 1: set buffer number; 2: re-use curbuf */
+)
 {
   if (fname == NULL)            /* don't add NULL file names */
     return;
@@ -6026,8 +5928,7 @@ void alist_slash_adjust(void)          {
 /*
  * ":preserve".
  */
-static void ex_preserve(eap)
-exarg_T     *eap UNUSED;
+static void ex_preserve(exarg_T *eap)
 {
   curbuf->b_flags |= BF_PRESERVED;
   ml_preserve(curbuf, TRUE);
@@ -6036,8 +5937,7 @@ exarg_T     *eap UNUSED;
 /*
  * ":recover".
  */
-static void ex_recover(eap)
-exarg_T     *eap;
+static void ex_recover(exarg_T *eap)
 {
   /* Set recoverymode right away to avoid the ATTENTION prompt. */
   recoverymode = TRUE;
@@ -6055,8 +5955,7 @@ exarg_T     *eap;
 /*
  * Command modifier used in a wrong way.
  */
-static void ex_wrongmodifier(eap)
-exarg_T     *eap;
+static void ex_wrongmodifier(exarg_T *eap)
 {
   eap->errmsg = e_invcmd;
 }
@@ -6074,8 +5973,7 @@ exarg_T     *eap;
  * :tabnew [[+command] file]	just like :tabedit
  * :tabfind [+command] file	open new Tab page and find "file"
  */
-void ex_splitview(eap)
-exarg_T     *eap;
+void ex_splitview(exarg_T *eap)
 {
   win_T       *old_curwin = curwin;
   char_u      *fname = NULL;
@@ -6150,8 +6048,7 @@ void tabpage_new(void)          {
 /*
  * :tabnext command
  */
-static void ex_tabnext(eap)
-exarg_T     *eap;
+static void ex_tabnext(exarg_T *eap)
 {
   switch (eap->cmdidx) {
   case CMD_tabfirst:
@@ -6174,8 +6071,7 @@ exarg_T     *eap;
 /*
  * :tabmove command
  */
-static void ex_tabmove(eap)
-exarg_T     *eap;
+static void ex_tabmove(exarg_T *eap)
 {
   int tab_number = 9999;
 
@@ -6211,8 +6107,7 @@ exarg_T     *eap;
 /*
  * :tabs command: List tabs and their contents.
  */
-static void ex_tabs(eap)
-exarg_T     *eap UNUSED;
+static void ex_tabs(exarg_T *eap)
 {
   tabpage_T   *tp;
   win_T       *wp;
@@ -6254,8 +6149,7 @@ exarg_T     *eap UNUSED;
  * ":mode": Set screen mode.
  * If no argument given, just get the screen size and redraw.
  */
-static void ex_mode(eap)
-exarg_T     *eap;
+static void ex_mode(exarg_T *eap)
 {
   if (*eap->arg == NUL)
     shell_resized();
@@ -6267,8 +6161,7 @@ exarg_T     *eap;
  * ":resize".
  * set, increment or decrement current window height
  */
-static void ex_resize(eap)
-exarg_T     *eap;
+static void ex_resize(exarg_T *eap)
 {
   int n;
   win_T       *wp = curwin;
@@ -6298,8 +6191,7 @@ exarg_T     *eap;
 /*
  * ":find [+command] <file>" command.
  */
-static void ex_find(eap)
-exarg_T     *eap;
+static void ex_find(exarg_T *eap)
 {
   char_u      *fname;
   int count;
@@ -6327,8 +6219,7 @@ exarg_T     *eap;
 /*
  * ":open" simulation: for now just work like ":visual".
  */
-static void ex_open(eap)
-exarg_T     *eap;
+static void ex_open(exarg_T *eap)
 {
   regmatch_T regmatch;
   char_u      *p;
@@ -6362,8 +6253,7 @@ exarg_T     *eap;
 /*
  * ":edit", ":badd", ":visual".
  */
-static void ex_edit(eap)
-exarg_T     *eap;
+static void ex_edit(exarg_T *eap)
 {
   do_exedit(eap, NULL);
 }
@@ -6371,9 +6261,11 @@ exarg_T     *eap;
 /*
  * ":edit <file>" command and alikes.
  */
-void do_exedit(eap, old_curwin)
-exarg_T     *eap;
-win_T       *old_curwin;            /* curwin before doing a split or NULL */
+void 
+do_exedit (
+    exarg_T *eap,
+    win_T *old_curwin            /* curwin before doing a split or NULL */
+)
 {
   int n;
   int need_hide;
@@ -6503,16 +6395,14 @@ win_T       *old_curwin;            /* curwin before doing a split or NULL */
 /*
  * ":gui" and ":gvim" when there is no GUI.
  */
-static void ex_nogui(eap)
-exarg_T     *eap;
+static void ex_nogui(exarg_T *eap)
 {
   eap->errmsg = e_nogvim;
 }
 
 
 
-static void ex_swapname(eap)
-exarg_T     *eap UNUSED;
+static void ex_swapname(exarg_T *eap)
 {
   if (curbuf->b_ml.ml_mfp == NULL || curbuf->b_ml.ml_mfp->mf_fname == NULL)
     MSG(_("No swap file"));
@@ -6525,8 +6415,7 @@ exarg_T     *eap UNUSED;
  * offset.
  * (1998-11-02 16:21:01  R. Edward Ralston <eralston@computer.org>)
  */
-static void ex_syncbind(eap)
-exarg_T     *eap UNUSED;
+static void ex_syncbind(exarg_T *eap)
 {
   win_T       *wp;
   win_T       *save_curwin = curwin;
@@ -6589,8 +6478,7 @@ exarg_T     *eap UNUSED;
 }
 
 
-static void ex_read(eap)
-exarg_T     *eap;
+static void ex_read(exarg_T *eap)
 {
   int i;
   int empty = (curbuf->b_ml.ml_flags & ML_EMPTY);
@@ -6681,8 +6569,7 @@ void post_chdir(int local)
 /*
  * ":cd", ":lcd", ":chdir" and ":lchdir".
  */
-void ex_cd(eap)
-exarg_T     *eap;
+void ex_cd(exarg_T *eap)
 {
   char_u              *new_dir;
   char_u              *tofree;
@@ -6744,8 +6631,7 @@ exarg_T     *eap;
 /*
  * ":pwd".
  */
-static void ex_pwd(eap)
-exarg_T     *eap UNUSED;
+static void ex_pwd(exarg_T *eap)
 {
   if (mch_dirname(NameBuff, MAXPATHL) == OK) {
 #ifdef BACKSLASH_IN_FILENAME
@@ -6759,15 +6645,13 @@ exarg_T     *eap UNUSED;
 /*
  * ":=".
  */
-static void ex_equal(eap)
-exarg_T     *eap;
+static void ex_equal(exarg_T *eap)
 {
   smsg((char_u *)"%ld", (long)eap->line2);
   ex_may_print(eap);
 }
 
-static void ex_sleep(eap)
-exarg_T     *eap;
+static void ex_sleep(exarg_T *eap)
 {
   int n;
   long len;
@@ -6802,9 +6686,7 @@ void do_sleep(long msec)
   }
 }
 
-static void do_exmap(eap, isabbrev)
-exarg_T     *eap;
-int isabbrev;
+static void do_exmap(exarg_T *eap, int isabbrev)
 {
   int mode;
   char_u  *cmdp;
@@ -6824,8 +6706,7 @@ int isabbrev;
 /*
  * ":winsize" command (obsolete).
  */
-static void ex_winsize(eap)
-exarg_T     *eap;
+static void ex_winsize(exarg_T *eap)
 {
   int w, h;
   char_u      *arg = eap->arg;
@@ -6841,8 +6722,7 @@ exarg_T     *eap;
     EMSG(_("E465: :winsize requires two number arguments"));
 }
 
-static void ex_wincmd(eap)
-exarg_T     *eap;
+static void ex_wincmd(exarg_T *eap)
 {
   int xchar = NUL;
   char_u      *p;
@@ -6905,8 +6785,7 @@ exarg_T     *eap;
 /*
  * Handle command that work like operators: ":delete", ":yank", ":>" and ":<".
  */
-static void ex_operators(eap)
-exarg_T     *eap;
+static void ex_operators(exarg_T *eap)
 {
   oparg_T oa;
 
@@ -6954,8 +6833,7 @@ exarg_T     *eap;
 /*
  * ":put".
  */
-static void ex_put(eap)
-exarg_T     *eap;
+static void ex_put(exarg_T *eap)
 {
   /* ":0put" works like ":1put!". */
   if (eap->line2 == 0) {
@@ -6970,8 +6848,7 @@ exarg_T     *eap;
 /*
  * Handle ":copy" and ":move".
  */
-static void ex_copymove(eap)
-exarg_T     *eap;
+static void ex_copymove(exarg_T *eap)
 {
   long n;
 
@@ -7003,8 +6880,7 @@ exarg_T     *eap;
 /*
  * Print the current line if flags were given to the Ex command.
  */
-static void ex_may_print(eap)
-exarg_T     *eap;
+static void ex_may_print(exarg_T *eap)
 {
   if (eap->flags != 0) {
     print_line(curwin->w_cursor.lnum, (eap->flags & EXFLAG_NR),
@@ -7016,8 +6892,7 @@ exarg_T     *eap;
 /*
  * ":smagic" and ":snomagic".
  */
-static void ex_submagic(eap)
-exarg_T     *eap;
+static void ex_submagic(exarg_T *eap)
 {
   int magic_save = p_magic;
 
@@ -7029,8 +6904,7 @@ exarg_T     *eap;
 /*
  * ":join".
  */
-static void ex_join(eap)
-exarg_T     *eap;
+static void ex_join(exarg_T *eap)
 {
   curwin->w_cursor.lnum = eap->line1;
   if (eap->line1 == eap->line2) {
@@ -7050,8 +6924,7 @@ exarg_T     *eap;
 /*
  * ":[addr]@r" or ":[addr]*r": execute register
  */
-static void ex_at(eap)
-exarg_T     *eap;
+static void ex_at(exarg_T *eap)
 {
   int c;
   int prev_len = typebuf.tb_len;
@@ -7090,8 +6963,7 @@ exarg_T     *eap;
 /*
  * ":!".
  */
-static void ex_bang(eap)
-exarg_T     *eap;
+static void ex_bang(exarg_T *eap)
 {
   do_bang(eap->addr_count, eap, eap->forceit, TRUE, TRUE);
 }
@@ -7099,8 +6971,7 @@ exarg_T     *eap;
 /*
  * ":undo".
  */
-static void ex_undo(eap)
-exarg_T     *eap UNUSED;
+static void ex_undo(exarg_T *eap)
 {
   if (eap->addr_count == 1)         /* :undo 123 */
     undo_time(eap->line2, FALSE, FALSE, TRUE);
@@ -7108,8 +6979,7 @@ exarg_T     *eap UNUSED;
     u_undo(1);
 }
 
-static void ex_wundo(eap)
-exarg_T *eap;
+static void ex_wundo(exarg_T *eap)
 {
   char_u hash[UNDO_HASH_SIZE];
 
@@ -7117,8 +6987,7 @@ exarg_T *eap;
   u_write_undo(eap->arg, eap->forceit, curbuf, hash);
 }
 
-static void ex_rundo(eap)
-exarg_T *eap;
+static void ex_rundo(exarg_T *eap)
 {
   char_u hash[UNDO_HASH_SIZE];
 
@@ -7129,8 +6998,7 @@ exarg_T *eap;
 /*
  * ":redo".
  */
-static void ex_redo(eap)
-exarg_T     *eap UNUSED;
+static void ex_redo(exarg_T *eap)
 {
   u_redo(1);
 }
@@ -7138,8 +7006,7 @@ exarg_T     *eap UNUSED;
 /*
  * ":earlier" and ":later".
  */
-static void ex_later(eap)
-exarg_T     *eap;
+static void ex_later(exarg_T *eap)
 {
   long count = 0;
   int sec = FALSE;
@@ -7169,8 +7036,7 @@ exarg_T     *eap;
 /*
  * ":redir": start/stop redirection.
  */
-static void ex_redir(eap)
-exarg_T     *eap;
+static void ex_redir(exarg_T *eap)
 {
   char        *mode;
   char_u      *fname;
@@ -7252,8 +7118,7 @@ exarg_T     *eap;
 /*
  * ":redraw": force redraw
  */
-static void ex_redraw(eap)
-exarg_T     *eap;
+static void ex_redraw(exarg_T *eap)
 {
   int r = RedrawingDisabled;
   int p = p_lz;
@@ -7282,8 +7147,7 @@ exarg_T     *eap;
 /*
  * ":redrawstatus": force redraw of status line(s)
  */
-static void ex_redrawstatus(eap)
-exarg_T     *eap UNUSED;
+static void ex_redrawstatus(exarg_T *eap)
 {
   int r = RedrawingDisabled;
   int p = p_lz;
@@ -7322,8 +7186,7 @@ static int mksession_nl = FALSE;    /* use NL only in put_eol() */
 /*
  * ":mkexrc", ":mkvimrc", ":mkview" and ":mksession".
  */
-static void ex_mkrc(eap)
-exarg_T     *eap;
+static void ex_mkrc(exarg_T *eap)
 {
   FILE        *fd;
   int failed = FALSE;
@@ -7485,9 +7348,7 @@ exarg_T     *eap;
 
 #if ((defined(FEAT_SESSION) || defined(FEAT_EVAL)) && defined(vim_mkdir)) \
   || defined(PROTO)
-int vim_mkdir_emsg(name, prot)
-char_u      *name;
-int prot UNUSED;
+int vim_mkdir_emsg(char_u *name, int prot)
 {
   if (vim_mkdir(name, prot) != 0) {
     EMSG2(_("E739: Cannot create directory: %s"), name);
@@ -7501,10 +7362,12 @@ int prot UNUSED;
  * Open a file for writing for an Ex command, with some checks.
  * Return file descriptor, or NULL on failure.
  */
-FILE * open_exfile(fname, forceit, mode)
-char_u      *fname;
-int forceit;
-char        *mode;          /* "w" for create new file or "a" for append */
+FILE *
+open_exfile (
+    char_u *fname,
+    int forceit,
+    char *mode          /* "w" for create new file or "a" for append */
+)
 {
   FILE        *fd;
 
@@ -7529,8 +7392,7 @@ char        *mode;          /* "w" for create new file or "a" for append */
 /*
  * ":mark" and ":k".
  */
-static void ex_mark(eap)
-exarg_T     *eap;
+static void ex_mark(exarg_T *eap)
 {
   pos_T pos;
 
@@ -7562,8 +7424,7 @@ void update_topline_cursor(void)          {
 /*
  * ":normal[!] {commands}": Execute normal mode commands.
  */
-static void ex_normal(eap)
-exarg_T     *eap;
+static void ex_normal(exarg_T *eap)
 {
   int save_msg_scroll = msg_scroll;
   int save_restart_edit = restart_edit;
@@ -7672,8 +7533,7 @@ exarg_T     *eap;
 /*
  * ":startinsert", ":startreplace" and ":startgreplace"
  */
-static void ex_startinsert(eap)
-exarg_T     *eap;
+static void ex_startinsert(exarg_T *eap)
 {
   if (eap->forceit) {
     coladvance((colnr_T)MAXCOL);
@@ -7703,8 +7563,7 @@ exarg_T     *eap;
 /*
  * ":stopinsert"
  */
-static void ex_stopinsert(eap)
-exarg_T     *eap UNUSED;
+static void ex_stopinsert(exarg_T *eap)
 {
   restart_edit = 0;
   stop_insert_mode = TRUE;
@@ -7732,8 +7591,7 @@ void exec_normal_cmd(char_u *cmd, int remap, int silent)
   }
 }
 
-static void ex_checkpath(eap)
-exarg_T     *eap;
+static void ex_checkpath(exarg_T *eap)
 {
   find_pattern_in_path(NULL, 0, 0, FALSE, FALSE, CHECK_PATH, 1L,
       eap->forceit ? ACTION_SHOW_ALL : ACTION_SHOW,
@@ -7743,16 +7601,14 @@ exarg_T     *eap;
 /*
  * ":psearch"
  */
-static void ex_psearch(eap)
-exarg_T     *eap;
+static void ex_psearch(exarg_T *eap)
 {
   g_do_tagpreview = p_pvh;
   ex_findpat(eap);
   g_do_tagpreview = 0;
 }
 
-static void ex_findpat(eap)
-exarg_T     *eap;
+static void ex_findpat(exarg_T *eap)
 {
   int whole = TRUE;
   long n;
@@ -7808,8 +7664,7 @@ exarg_T     *eap;
 /*
  * ":ptag", ":ptselect", ":ptjump", ":ptnext", etc.
  */
-static void ex_ptag(eap)
-exarg_T     *eap;
+static void ex_ptag(exarg_T *eap)
 {
   g_do_tagpreview = p_pvh;    /* will be reset to 0 in ex_tag_cmd() */
   ex_tag_cmd(eap, cmdnames[eap->cmdidx].cmd_name + 1);
@@ -7818,8 +7673,7 @@ exarg_T     *eap;
 /*
  * ":pedit"
  */
-static void ex_pedit(eap)
-exarg_T     *eap;
+static void ex_pedit(exarg_T *eap)
 {
   win_T       *curwin_save = curwin;
 
@@ -7840,8 +7694,7 @@ exarg_T     *eap;
 /*
  * ":stag", ":stselect" and ":stjump".
  */
-static void ex_stag(eap)
-exarg_T     *eap;
+static void ex_stag(exarg_T *eap)
 {
   postponed_split = -1;
   postponed_split_flags = cmdmod.split;
@@ -7854,15 +7707,12 @@ exarg_T     *eap;
 /*
  * ":tag", ":tselect", ":tjump", ":tnext", etc.
  */
-static void ex_tag(eap)
-exarg_T     *eap;
+static void ex_tag(exarg_T *eap)
 {
   ex_tag_cmd(eap, cmdnames[eap->cmdidx].cmd_name);
 }
 
-static void ex_tag_cmd(eap, name)
-exarg_T     *eap;
-char_u      *name;
+static void ex_tag_cmd(exarg_T *eap, char_u *name)
 {
   int cmd;
 
@@ -8302,9 +8152,11 @@ static int ses_fname __ARGS((FILE *fd, buf_T *buf, unsigned *flagp));
  * Write openfile commands for the current buffers to an .exrc file.
  * Return FAIL on error, OK otherwise.
  */
-static int makeopens(fd, dirnow)
-FILE        *fd;
-char_u      *dirnow;            /* Current directory name */
+static int 
+makeopens (
+    FILE *fd,
+    char_u *dirnow            /* Current directory name */
+)
 {
   buf_T       *buf;
   int only_save_windows = TRUE;
@@ -8572,10 +8424,7 @@ char_u      *dirnow;            /* Current directory name */
   return OK;
 }
 
-static int ses_winsizes(fd, restore_size, tab_firstwin)
-FILE        *fd;
-int restore_size;
-win_T       *tab_firstwin;
+static int ses_winsizes(FILE *fd, int restore_size, win_T *tab_firstwin)
 {
   int n = 0;
   win_T       *wp;
@@ -8616,9 +8465,7 @@ win_T       *tab_firstwin;
  * After the commands the last window in the frame is the current window.
  * Returns FAIL when writing the commands to "fd" fails.
  */
-static int ses_win_rec(fd, fr)
-FILE        *fd;
-frame_T     *fr;
+static int ses_win_rec(FILE *fd, frame_T *fr)
 {
   frame_T     *frc;
   int count = 0;
@@ -8662,8 +8509,7 @@ frame_T     *fr;
  * Skip frames that don't contain windows we want to save in the Session.
  * Returns NULL when there none.
  */
-static frame_T * ses_skipframe(fr)
-frame_T     *fr;
+static frame_T *ses_skipframe(frame_T *fr)
 {
   frame_T     *frc;
 
@@ -8677,8 +8523,7 @@ frame_T     *fr;
  * Return TRUE if frame "fr" has a window somewhere that we want to save in
  * the Session.
  */
-static int ses_do_frame(fr)
-frame_T     *fr;
+static int ses_do_frame(frame_T *fr)
 {
   frame_T     *frc;
 
@@ -8693,8 +8538,7 @@ frame_T     *fr;
 /*
  * Return non-zero if window "wp" is to be stored in the Session.
  */
-static int ses_do_win(wp)
-win_T       *wp;
+static int ses_do_win(win_T *wp)
 {
   if (wp->w_buffer->b_fname == NULL
       /* When 'buftype' is "nofile" can't restore the window contents. */
@@ -8710,13 +8554,15 @@ win_T       *wp;
  * Write commands to "fd" to restore the view of a window.
  * Caller must make sure 'scrolloff' is zero.
  */
-static int put_view(fd, wp, add_edit, flagp, current_arg_idx)
-FILE        *fd;
-win_T       *wp;
-int add_edit;                   /* add ":edit" command to view */
-unsigned    *flagp;             /* vop_flags or ssop_flags */
-int current_arg_idx;             /* current argument index of the window, use
+static int 
+put_view (
+    FILE *fd,
+    win_T *wp,
+    int add_edit,                   /* add ":edit" command to view */
+    unsigned *flagp,             /* vop_flags or ssop_flags */
+    int current_arg_idx             /* current argument index of the window, use
                                   * -1 if unknown */
+)
 {
   win_T       *save_curwin;
   int f;
@@ -8886,12 +8732,14 @@ int current_arg_idx;             /* current argument index of the window, use
  * Write an argument list to the session file.
  * Returns FAIL if writing fails.
  */
-static int ses_arglist(fd, cmd, gap, fullname, flagp)
-FILE        *fd;
-char        *cmd;
-garray_T    *gap;
-int fullname;                   /* TRUE: use full path name */
-unsigned    *flagp;
+static int 
+ses_arglist (
+    FILE *fd,
+    char *cmd,
+    garray_T *gap,
+    int fullname,                   /* TRUE: use full path name */
+    unsigned *flagp
+)
 {
   int i;
   char_u      *buf = NULL;
@@ -8927,10 +8775,7 @@ unsigned    *flagp;
  * Also ends the line.
  * Returns FAIL if writing fails.
  */
-static int ses_fname(fd, buf, flagp)
-FILE        *fd;
-buf_T       *buf;
-unsigned    *flagp;
+static int ses_fname(FILE *fd, buf_T *buf, unsigned *flagp)
 {
   char_u      *name;
 
@@ -8958,10 +8803,7 @@ unsigned    *flagp;
  * characters.
  * Returns FAIL if writing fails or out of memory.
  */
-static int ses_put_fname(fd, name, flagp)
-FILE        *fd;
-char_u      *name;
-unsigned    *flagp;
+static int ses_put_fname(FILE *fd, char_u *name, unsigned *flagp)
 {
   char_u      *sname;
   char_u      *p;
@@ -8995,8 +8837,7 @@ unsigned    *flagp;
 /*
  * ":loadview [nr]"
  */
-static void ex_loadview(eap)
-exarg_T     *eap;
+static void ex_loadview(exarg_T *eap)
 {
   char_u      *fname;
 
@@ -9069,8 +8910,7 @@ static char_u *get_view_file(int c)
  * Write end-of-line character(s) for ":mkexrc", ":mkvimrc" and ":mksession".
  * Return FAIL for a write error.
  */
-int put_eol(fd)
-FILE        *fd;
+int put_eol(FILE *fd)
 {
   if (
 #ifdef USE_CRNL
@@ -9089,9 +8929,7 @@ FILE        *fd;
  * Write a line to "fd".
  * Return FAIL for a write error.
  */
-int put_line(fd, s)
-FILE        *fd;
-char        *s;
+int put_line(FILE *fd, char *s)
 {
   if (fputs(s, fd) < 0 || put_eol(fd) == FAIL)
     return FAIL;
@@ -9101,8 +8939,7 @@ char        *s;
 /*
  * ":rviminfo" and ":wviminfo".
  */
-static void ex_viminfo(eap)
-exarg_T     *eap;
+static void ex_viminfo(exarg_T *eap)
 {
   char_u      *save_viminfo;
 
@@ -9132,8 +8969,7 @@ void dialog_msg(char_u *buff, char *format, char_u *fname)
 /*
  * ":behave {mswin,xterm}"
  */
-static void ex_behave(eap)
-exarg_T     *eap;
+static void ex_behave(exarg_T *eap)
 {
   if (STRCMP(eap->arg, "mswin") == 0) {
     set_option_value((char_u *)"selection", 0L, (char_u *)"exclusive", 0);
@@ -9154,9 +8990,7 @@ exarg_T     *eap;
  * Function given to ExpandGeneric() to obtain the possible arguments of the
  * ":behave {mswin,xterm}" command.
  */
-char_u * get_behave_arg(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_behave_arg(expand_T *xp, int idx)
 {
   if (idx == 0)
     return (char_u *)"mswin";
@@ -9178,8 +9012,7 @@ static int filetype_indent = FALSE;
  * indent on: load filetype.vim and indent.vim
  * indent off: load indoff.vim
  */
-static void ex_filetype(eap)
-exarg_T     *eap;
+static void ex_filetype(exarg_T *eap)
 {
   char_u      *arg = eap->arg;
   int plugin = FALSE;
@@ -9246,15 +9079,13 @@ exarg_T     *eap;
 /*
  * ":setfiletype {name}"
  */
-static void ex_setfiletype(eap)
-exarg_T     *eap;
+static void ex_setfiletype(exarg_T *eap)
 {
   if (!did_filetype)
     set_option_value((char_u *)"filetype", 0L, eap->arg, OPT_LOCAL);
 }
 
-static void ex_digraphs(eap)
-exarg_T     *eap UNUSED;
+static void ex_digraphs(exarg_T *eap)
 {
   if (*eap->arg != NUL)
     putdigraph(eap->arg);
@@ -9262,8 +9093,7 @@ exarg_T     *eap UNUSED;
     listdigraphs();
 }
 
-static void ex_set(eap)
-exarg_T     *eap;
+static void ex_set(exarg_T *eap)
 {
   int flags = 0;
 
@@ -9277,8 +9107,7 @@ exarg_T     *eap;
 /*
  * ":nohlsearch"
  */
-static void ex_nohlsearch(eap)
-exarg_T     *eap UNUSED;
+static void ex_nohlsearch(exarg_T *eap)
 {
   SET_NO_HLSEARCH(TRUE);
   redraw_all_later(SOME_VALID);
@@ -9289,8 +9118,7 @@ exarg_T     *eap UNUSED;
  * Sets nextcmd to the start of the next command, if any.  Also called when
  * skipping commands to find the next command.
  */
-static void ex_match(eap)
-exarg_T     *eap;
+static void ex_match(exarg_T *eap)
 {
   char_u      *p;
   char_u      *g = NULL;
@@ -9348,29 +9176,25 @@ exarg_T     *eap;
 /*
  * ":X": Get crypt key
  */
-static void ex_X(eap)
-exarg_T     *eap UNUSED;
+static void ex_X(exarg_T *eap)
 {
   if (get_crypt_method(curbuf) == 0 || blowfish_self_test() == OK)
     (void)get_crypt_key(TRUE, TRUE);
 }
 
-static void ex_fold(eap)
-exarg_T     *eap;
+static void ex_fold(exarg_T *eap)
 {
   if (foldManualAllowed(TRUE))
     foldCreate(eap->line1, eap->line2);
 }
 
-static void ex_foldopen(eap)
-exarg_T     *eap;
+static void ex_foldopen(exarg_T *eap)
 {
   opFoldRange(eap->line1, eap->line2, eap->cmdidx == CMD_foldopen,
       eap->forceit, FALSE);
 }
 
-static void ex_folddo(eap)
-exarg_T     *eap;
+static void ex_folddo(exarg_T *eap)
 {
   linenr_T lnum;
 

@@ -42,8 +42,7 @@ static void max_topfill __ARGS((void));
  * Compute wp->w_botline for the current wp->w_topline.  Can be called after
  * wp->w_topline changed.
  */
-static void comp_botline(wp)
-win_T       *wp;
+static void comp_botline(win_T *wp)
 {
   int n;
   linenr_T lnum;
@@ -343,8 +342,7 @@ void update_curswant(void)          {
 /*
  * Check if the cursor has moved.  Set the w_valid flag accordingly.
  */
-void check_cursor_moved(wp)
-win_T       *wp;
+void check_cursor_moved(win_T *wp)
 {
   if (wp->w_cursor.lnum != wp->w_valid_cursor.lnum) {
     wp->w_valid &= ~(VALID_WROW|VALID_WCOL|VALID_VIRTCOL
@@ -371,8 +369,7 @@ void changed_window_setting(void)          {
   changed_window_setting_win(curwin);
 }
 
-void changed_window_setting_win(wp)
-win_T       *wp;
+void changed_window_setting_win(win_T *wp)
 {
   wp->w_lines_valid = 0;
   changed_line_abv_curs_win(wp);
@@ -383,9 +380,7 @@ win_T       *wp;
 /*
  * Set wp->w_topline to a certain number.
  */
-void set_topline(wp, lnum)
-win_T       *wp;
-linenr_T lnum;
+void set_topline(win_T *wp, linenr_T lnum)
 {
   /* go to first of folded lines */
   (void)hasFoldingWin(wp, lnum, &lnum, NULL, TRUE, NULL);
@@ -409,8 +404,7 @@ void changed_cline_bef_curs(void)          {
                        |VALID_CHEIGHT|VALID_TOPLINE);
 }
 
-void changed_cline_bef_curs_win(wp)
-win_T       *wp;
+void changed_cline_bef_curs_win(win_T *wp)
 {
   wp->w_valid &= ~(VALID_WROW|VALID_WCOL|VALID_VIRTCOL
                    |VALID_CHEIGHT|VALID_TOPLINE);
@@ -426,8 +420,7 @@ void changed_line_abv_curs(void)          {
                        |VALID_CHEIGHT|VALID_TOPLINE);
 }
 
-void changed_line_abv_curs_win(wp)
-win_T       *wp;
+void changed_line_abv_curs_win(win_T *wp)
 {
   wp->w_valid &= ~(VALID_WROW|VALID_WCOL|VALID_VIRTCOL|VALID_CROW
                    |VALID_CHEIGHT|VALID_TOPLINE);
@@ -444,8 +437,7 @@ void validate_botline(void)          {
 /*
  * Make sure the value of wp->w_botline is valid.
  */
-static void validate_botline_win(wp)
-win_T       *wp;
+static void validate_botline_win(win_T *wp)
 {
   if (!(wp->w_valid & VALID_BOTLINE))
     comp_botline(wp);
@@ -458,14 +450,12 @@ void invalidate_botline(void)          {
   curwin->w_valid &= ~(VALID_BOTLINE|VALID_BOTLINE_AP);
 }
 
-void invalidate_botline_win(wp)
-win_T       *wp;
+void invalidate_botline_win(win_T *wp)
 {
   wp->w_valid &= ~(VALID_BOTLINE|VALID_BOTLINE_AP);
 }
 
-void approximate_botline_win(wp)
-win_T       *wp;
+void approximate_botline_win(win_T *wp)
 {
   wp->w_valid &= ~VALID_BOTLINE;
 }
@@ -495,9 +485,11 @@ void validate_cursor(void)          {
  *
  * Returns OK when cursor is in the window, FAIL when it isn't.
  */
-static void curs_rows(wp, do_botline)
-win_T       *wp;
-int do_botline;                         /* also compute w_botline */
+static void 
+curs_rows (
+    win_T *wp,
+    int do_botline                         /* also compute w_botline */
+)
 {
   linenr_T lnum;
   int i;
@@ -592,8 +584,7 @@ void validate_virtcol(void)          {
 /*
  * Validate wp->w_virtcol only.
  */
-void validate_virtcol_win(wp)
-win_T       *wp;
+void validate_virtcol_win(win_T *wp)
 {
   check_cursor_moved(wp);
   if (!(wp->w_valid & VALID_VIRTCOL)) {
@@ -657,8 +648,7 @@ void validate_cursor_col(void)          {
  * Compute offset of a window, occupied by absolute or relative line number,
  * fold column and sign column (these don't move when scrolling horizontally).
  */
-int win_col_off(wp)
-win_T       *wp;
+int win_col_off(win_T *wp)
 {
   return ((wp->w_p_nu || wp->w_p_rnu) ? number_width(wp) + 1 : 0)
          + (cmdwin_type == 0 || wp != curwin ? 0 : 1)
@@ -675,8 +665,7 @@ int curwin_col_off(void)         {
  * wrapped line.  It's 8 if 'number' or 'relativenumber' is on and 'n' is in
  * 'cpoptions'.
  */
-int win_col_off2(wp)
-win_T       *wp;
+int win_col_off2(win_T *wp)
 {
   if ((wp->w_p_nu || wp->w_p_rnu) && vim_strchr(p_cpo, CPO_NUMCOL) != NULL)
     return number_width(wp) + 1;
@@ -922,9 +911,11 @@ curs_columns (
 /*
  * Scroll the current window down by "line_count" logical lines.  "CTRL-Y"
  */
-void scrolldown(line_count, byfold)
-long line_count;
-int byfold UNUSED;              /* TRUE: count a closed fold as one line */
+void 
+scrolldown (
+    long line_count,
+    int byfold              /* TRUE: count a closed fold as one line */
+)
 {
   long done = 0;                /* total # of physical lines done */
   int wrow;
@@ -1001,9 +992,11 @@ int byfold UNUSED;              /* TRUE: count a closed fold as one line */
 /*
  * Scroll the current window up by "line_count" logical lines.  "CTRL-E"
  */
-void scrollup(line_count, byfold)
-long line_count;
-int byfold UNUSED;              /* TRUE: count a closed fold as one line */
+void 
+scrollup (
+    long line_count,
+    int byfold              /* TRUE: count a closed fold as one line */
+)
 {
   linenr_T lnum;
 
@@ -1057,9 +1050,11 @@ int byfold UNUSED;              /* TRUE: count a closed fold as one line */
 /*
  * Don't end up with too many filler lines in the window.
  */
-void check_topfill(wp, down)
-win_T       *wp;
-int down;               /* when TRUE scroll down when not enough space */
+void 
+check_topfill (
+    win_T *wp,
+    int down               /* when TRUE scroll down when not enough space */
+)
 {
   int n;
 
@@ -1379,9 +1374,7 @@ void scroll_cursor_top(int min_scroll, int always)
  * Set w_empty_rows and w_filler_rows for window "wp", having used up "used"
  * screen lines for text lines.
  */
-void set_empty_rows(wp, used)
-win_T       *wp;
-int used;
+void set_empty_rows(win_T *wp, int used)
 {
   wp->w_filler_rows = 0;
   if (used == 0)

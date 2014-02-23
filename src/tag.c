@@ -929,8 +929,7 @@ static void taglen_advance(int l)
 /*
  * Print the tag stack
  */
-void do_tags(eap)
-exarg_T     *eap UNUSED;
+void do_tags(exarg_T *eap)
 {
   int i;
   char_u      *name;
@@ -979,10 +978,7 @@ static int tag_strnicmp __ARGS((char_u *s1, char_u *s2, size_t len));
  * return 0 for match, < 0 for smaller, > 0 for bigger
  * Make sure case is folded to uppercase in comparison (like for 'sort -f')
  */
-static int tag_strnicmp(s1, s2, len)
-char_u      *s1;
-char_u      *s2;
-size_t len;
+static int tag_strnicmp(char_u *s1, char_u *s2, size_t len)
 {
   int i;
 
@@ -2021,9 +2017,7 @@ static void found_tagfile_cb __ARGS((char_u *fname, void *cookie));
  * Callback function for finding all "tags" and "tags-??" files in
  * 'runtimepath' doc directories.
  */
-static void found_tagfile_cb(fname, cookie)
-char_u      *fname;
-void        *cookie UNUSED;
+static void found_tagfile_cb(char_u *fname, void *cookie)
 {
   if (ga_grow(&tag_fnames, 1) == OK)
     ((char_u **)(tag_fnames.ga_data))[tag_fnames.ga_len++] =
@@ -2050,10 +2044,12 @@ void free_tag_stuff(void)          {
  *
  * Return FAIL if no more tag file names, OK otherwise.
  */
-int get_tagfname(tnp, first, buf)
-tagname_T   *tnp;       /* holds status info */
-int first;              /* TRUE when first file name is wanted */
-char_u      *buf;       /* pointer to buffer of MAXPATHL chars */
+int 
+get_tagfname (
+    tagname_T *tnp,       /* holds status info */
+    int first,              /* TRUE when first file name is wanted */
+    char_u *buf       /* pointer to buffer of MAXPATHL chars */
+)
 {
   char_u              *fname = NULL;
   char_u              *r_ptr;
@@ -2153,8 +2149,7 @@ char_u      *buf;       /* pointer to buffer of MAXPATHL chars */
 /*
  * Free the contents of a tagname_T that was filled by get_tagfname().
  */
-void tagname_free(tnp)
-tagname_T   *tnp;
+void tagname_free(tagname_T *tnp)
 {
   vim_free(tnp->tn_tags);
   vim_findfile_cleanup(tnp->tn_search_ctx);
@@ -2975,11 +2970,13 @@ static int add_tag_field __ARGS((dict_T *dict, char *field_name, char_u *start,
  * Add a tag field to the dictionary "dict".
  * Return OK or FAIL.
  */
-static int add_tag_field(dict, field_name, start, end)
-dict_T  *dict;
-char    *field_name;
-char_u  *start;                 /* start of the value */
-char_u  *end;                   /* after the value; can be NULL */
+static int 
+add_tag_field (
+    dict_T *dict,
+    char *field_name,
+    char_u *start,                 /* start of the value */
+    char_u *end                   /* after the value; can be NULL */
+)
 {
   char_u      *buf;
   int len = 0;
@@ -3018,9 +3015,7 @@ char_u  *end;                   /* after the value; can be NULL */
  * Add the tags matching the specified pattern to the list "list"
  * as a dictionary
  */
-int get_tags(list, pat)
-list_T *list;
-char_u *pat;
+int get_tags(list_T *list, char_u *pat)
 {
   int num_matches, i, ret;
   char_u      **matches, *p;

@@ -350,7 +350,7 @@ int mch_char_avail()         {
  * Doesn't change when memory has been allocated.
  */
 long_u mch_total_mem(special)
-int special UNUSED;
+int special;
 {
   long_u mem = 0;
   long_u shiftright = 10;         /* how much to shift "mem" right for Kbyte */
@@ -1089,8 +1089,8 @@ int sig;
  * Check_win checks whether we have an interactive stdout.
  */
 int mch_check_win(argc, argv)
-int argc UNUSED;
-char    **argv UNUSED;
+int argc;
+char    **argv;
 {
   if (isatty(1))
     return OK;
@@ -1107,7 +1107,7 @@ int mch_input_isatty()         {
 }
 
 static int get_x11_title(test_only)
-int test_only UNUSED;
+int test_only;
 {
   return FALSE;
 }
@@ -1526,7 +1526,7 @@ char_u      *fname;
  */
 void fname_case(name, len)
 char_u      *name;
-int len UNUSED;              /* buffer size, only used when name gets longer */
+int len;              /* buffer size, only used when name gets longer */
 {
   struct stat st;
   char_u      *slash, *tail;
@@ -1673,7 +1673,7 @@ char_u      *to_file;
  * Return NULL if the ACL is not available for whatever reason.
  */
 vim_acl_T mch_get_acl(fname)
-char_u      *fname UNUSED;
+char_u      *fname;
 {
   vim_acl_T ret = NULL;
   return ret;
@@ -1683,7 +1683,7 @@ char_u      *fname UNUSED;
  * Set the ACL of file "fname" to "acl" (unless it's NULL).
  */
 void mch_set_acl(fname, aclent)
-char_u      *fname UNUSED;
+char_u      *fname;
 vim_acl_T aclent;
 {
   if (aclent == NULL)
@@ -1702,7 +1702,7 @@ vim_acl_T aclent;
  * Set hidden flag for "name".
  */
 void mch_hide(name)
-char_u      *name UNUSED;
+char_u      *name;
 {
   /* can't hide a file */
 }
@@ -2196,7 +2196,7 @@ void check_mouse_termcode()          {
  * set screen mode, always fails.
  */
 int mch_screenmode(arg)
-char_u   *arg UNUSED;
+char_u   *arg;
 {
   EMSG(_(e_screenmode));
   return FAIL;
@@ -3153,7 +3153,7 @@ long msec;
 static int RealWaitForChar(fd, msec, check_for_gpm)
 int fd;
 long msec;
-int         *check_for_gpm UNUSED;
+int         *check_for_gpm;
 {
   int ret;
 

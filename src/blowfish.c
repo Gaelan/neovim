@@ -319,9 +319,7 @@ static UINT32_T sbi[4][256] = {
         sbx[3][xr & 0xFF];
 
 
-static void bf_e_block(p_xl, p_xr)
-UINT32_T *p_xl;
-UINT32_T *p_xr;
+static void bf_e_block(UINT32_T *p_xl, UINT32_T *p_xr)
 {
   UINT32_T temp, xl = *p_xl, xr = *p_xr;
 
@@ -417,10 +415,7 @@ void bf_key_init(char_u *password, char_u *salt, int salt_len)
 /*
  * BF Self test for corrupted tables or instructions
  */
-static int bf_check_tables(a_ipa, a_sbi, val)
-UINT32_T a_ipa[18];
-UINT32_T a_sbi[4][256];
-UINT32_T val;
+static int bf_check_tables(UINT32_T a_ipa[18], UINT32_T a_sbi[4][256], UINT32_T val)
 {
   int i, j;
   UINT32_T c = 0;
@@ -536,10 +531,7 @@ void bf_ofb_init(char_u *iv, int iv_len)
  * Encrypt "from[len]" into "to[len]".
  * "from" and "to" can be equal to encrypt in place.
  */
-void bf_crypt_encode(from, len, to)
-char_u      *from;
-size_t len;
-char_u      *to;
+void bf_crypt_encode(char_u *from, size_t len, char_u *to)
 {
   size_t i;
   int ztemp, t;

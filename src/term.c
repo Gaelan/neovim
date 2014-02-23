@@ -2895,9 +2895,7 @@ void term_cursor_shape(void)          {
  * Also set the vertical scroll region for a vertically split window.  Always
  * the full width of the window, excluding the vertical separator.
  */
-void scroll_region_set(wp, off)
-win_T       *wp;
-int off;
+void scroll_region_set(win_T *wp, int off)
 {
   OUT_STR(tgoto((char *)T_CS, W_WINROW(wp) + wp->w_height - 1,
           W_WINROW(wp) + off));
@@ -3156,8 +3154,7 @@ static int orig_topfill = 0;
  * Set orig_topline.  Used when jumping to another window, so that a double
  * click still works.
  */
-void set_mouse_topline(wp)
-win_T       *wp;
+void set_mouse_topline(win_T *wp)
 {
   orig_topline = wp->w_topline;
   orig_topfill = wp->w_topfill;

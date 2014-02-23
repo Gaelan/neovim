@@ -40,11 +40,13 @@ static int pum_set_selected __ARGS((int n, int repeat));
  * When possible the leftmost character is aligned with screen column "col".
  * The menu appears above the screen line "row" or at "row" + "height" - 1.
  */
-void pum_display(array, size, selected)
-pumitem_T   *array;
-int size;
-int selected;                   /* index of initially selected item, none if
+void 
+pum_display (
+    pumitem_T *array,
+    int size,
+    int selected                   /* index of initially selected item, none if
                                    out of range */
+)
 {
   int w;
   int def_width;

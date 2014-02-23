@@ -591,8 +591,7 @@ int has_patch(int n)
   return FALSE;
 }
 
-void ex_version(eap)
-exarg_T     *eap;
+void ex_version(exarg_T *eap)
 {
   /*
    * Ignore a ":version 9.99" command.
@@ -965,8 +964,7 @@ static void do_intro_line(int row, char_u *mesg, int add_version, int attr)
 /*
  * ":intro": clear screen, display intro screen and wait for return.
  */
-void ex_intro(eap)
-exarg_T     *eap UNUSED;
+void ex_intro(exarg_T *eap)
 {
   screenclear();
   intro_message(TRUE);

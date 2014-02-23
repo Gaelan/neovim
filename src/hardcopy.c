@@ -172,10 +172,7 @@ char_u *parse_printmbfont(void)              {
  * Returns an error message for an illegal option, NULL otherwise.
  * Only used for the printer at the moment...
  */
-static char_u * parse_list_options(option_str, table, table_size)
-char_u              *option_str;
-option_table_T      *table;
-int table_size;
+static char_u *parse_list_options(char_u *option_str, option_table_T *table, int table_size)
 {
   char_u      *stringp;
   char_u      *colonp;
@@ -249,10 +246,7 @@ static long_u prt_get_term_color(int colorindex)
   return cterm_color_8[colorindex % 8];
 }
 
-static void prt_get_attr(hl_id, pattr, modec)
-int hl_id;
-prt_text_attr_T     *pattr;
-int modec;
+static void prt_get_attr(int hl_id, prt_text_attr_T *pattr, int modec)
 {
   int colorindex;
   long_u fg_color;
@@ -319,10 +313,7 @@ static void prt_set_font(int bold, int italic, int underline)
 /*
  * Print the line number in the left margin.
  */
-static void prt_line_number(psettings, page_line, lnum)
-prt_settings_T *psettings;
-int page_line;
-linenr_T lnum;
+static void prt_line_number(prt_settings_T *psettings, int page_line, linenr_T lnum)
 {
   int i;
   char_u tbuf[20];
@@ -389,10 +380,7 @@ int prt_get_unit(int idx)
 /*
  * Print the page header.
  */
-static void prt_header(psettings, pagenum, lnum)
-prt_settings_T  *psettings;
-int pagenum;
-linenr_T lnum UNUSED;
+static void prt_header(prt_settings_T *psettings, int pagenum, linenr_T lnum)
 {
   int width = psettings->chars_per_line;
   int page_line;
@@ -480,8 +468,7 @@ static void prt_message(char_u *s)
   out_flush();
 }
 
-void ex_hardcopy(eap)
-exarg_T     *eap;
+void ex_hardcopy(exarg_T *eap)
 {
   linenr_T lnum;
   int collated_copies, uncollated_copies;
@@ -717,10 +704,7 @@ print_fail_no_begin:
  * Print one page line.
  * Return the next column to print, or zero if the line is finished.
  */
-static colnr_T hardcopy_line(psettings, page_line, ppos)
-prt_settings_T      *psettings;
-int page_line;
-prt_pos_T           *ppos;
+static colnr_T hardcopy_line(prt_settings_T *psettings, int page_line, prt_pos_T *ppos)
 {
   colnr_T col;
   char_u      *line;
@@ -2138,10 +2122,7 @@ static int prt_match_charset(char *p_charset, struct prt_ps_mbfont_S *p_cmap, st
   return FALSE;
 }
 
-int mch_print_init(psettings, jobname, forceit)
-prt_settings_T *psettings;
-char_u      *jobname;
-int forceit UNUSED;
+int mch_print_init(prt_settings_T *psettings, char_u *jobname, int forceit)
 {
   int i;
   char        *paper_name;
@@ -2466,8 +2447,7 @@ static int prt_add_resource(struct prt_ps_resource_S *resource)
   return TRUE;
 }
 
-int mch_print_begin(psettings)
-prt_settings_T *psettings;
+int mch_print_begin(prt_settings_T *psettings)
 {
   time_t now;
   int bbox[4];
@@ -2838,8 +2818,7 @@ theend:
   return retval;
 }
 
-void mch_print_end(psettings)
-prt_settings_T *psettings;
+void mch_print_end(prt_settings_T *psettings)
 {
   prt_dsc_noarg("Trailer");
 
@@ -2883,8 +2862,7 @@ int mch_print_end_page(void)         {
   return !prt_file_error;
 }
 
-int mch_print_begin_page(str)
-char_u      *str UNUSED;
+int mch_print_begin_page(char_u *str)
 {
   int page_num[2];
 
@@ -2942,9 +2920,7 @@ void mch_print_start_line(int margin, int page_line)
   prt_half_width = FALSE;
 }
 
-int mch_print_text_out(p, len)
-char_u      *p;
-int len UNUSED;
+int mch_print_text_out(char_u *p, int len)
 {
   int need_break;
   char_u ch;

@@ -83,8 +83,7 @@ static cscmd_T cs_cmds[] =
   { NULL, NULL, NULL, NULL, 0 }
 };
 
-static void cs_usage_msg(x)
-csid_e x;
+static void cs_usage_msg(csid_e x)
 {
   (void)EMSG2(_("E560: Usage: cs[cope] %s"), cs_cmds[(int)x].usage);
 }
@@ -101,9 +100,7 @@ static enum {
  * Function given to ExpandGeneric() to obtain the cscope command
  * expansion.
  */
-char_u * get_cscope_name(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_cscope_name(expand_T *xp, int idx)
 {
   int current_idx;
   int i;
@@ -160,10 +157,7 @@ int idx;
 /*
  * Handle command line completion for :cscope command.
  */
-void set_context_in_cscope_cmd(xp, arg, cmdidx)
-expand_T    *xp;
-char_u      *arg;
-cmdidx_T cmdidx;
+void set_context_in_cscope_cmd(expand_T *xp, char_u *arg, cmdidx_T cmdidx)
 {
   char_u      *p;
 
@@ -199,9 +193,11 @@ cmdidx_T cmdidx;
  * Find the command, print help if invalid, and then call the corresponding
  * command function.
  */
-static void do_cscope_general(eap, make_split)
-exarg_T     *eap;
-int make_split;             /* whether to split window */
+static void 
+do_cscope_general (
+    exarg_T *eap,
+    int make_split             /* whether to split window */
+)
 {
   cscmd_T *cmdp;
 
@@ -230,8 +226,7 @@ int make_split;             /* whether to split window */
 /*
  * PUBLIC: do_cscope
  */
-void do_cscope(eap)
-exarg_T *eap;
+void do_cscope(exarg_T *eap)
 {
   do_cscope_general(eap, FALSE);
 }
@@ -241,8 +236,7 @@ exarg_T *eap;
  *
  * same as do_cscope, but splits window, too.
  */
-void do_scscope(eap)
-exarg_T *eap;
+void do_scscope(exarg_T *eap)
 {
   do_cscope_general(eap, TRUE);
 }
@@ -251,8 +245,7 @@ exarg_T *eap;
  * PUBLIC: do_cstag
  *
  */
-void do_cstag(eap)
-exarg_T *eap;
+void do_cstag(exarg_T *eap)
 {
   int ret = FALSE;
 
@@ -434,8 +427,7 @@ int cs_connection(int num, char_u *dbpath, char_u *ppath)
  *
  * MAXPATHL 256
  */
-static int cs_add(eap)
-exarg_T *eap UNUSED;
+static int cs_add(exarg_T *eap)
 {
   char *fname, *ppath, *flags = NULL;
 
@@ -958,8 +950,7 @@ err_closing:
  *
  * returns TRUE if we jump to a tag or abort, FALSE if not.
  */
-static int cs_find(eap)
-exarg_T *eap;
+static int cs_find(exarg_T *eap)
 {
   char *opt, *pat;
   int i;
@@ -1179,8 +1170,7 @@ static int cs_find_common(char *opt, char *pat, int forceit, int verbose, int us
  *
  * print help
  */
-static int cs_help(eap)
-exarg_T *eap UNUSED;
+static int cs_help(exarg_T *eap)
 {
   cscmd_T *cmdp = cs_cmds;
 
@@ -1256,11 +1246,7 @@ static char *GetWin32Error(void)                   {
  *
  * insert a new cscope database filename into the filelist
  */
-static int cs_insert_filelist(fname, ppath, flags, sb)
-char *fname;
-char *ppath;
-char *flags;
-struct stat *sb UNUSED;
+static int cs_insert_filelist(char *fname, char *ppath, char *flags, struct stat *sb)
 {
   short i, j;
 #ifndef UNIX
@@ -1412,8 +1398,7 @@ exarg_T *eap;
  *
  * nuke em
  */
-static int cs_kill(eap)
-exarg_T *eap UNUSED;
+static int cs_kill(exarg_T *eap)
 {
   char *stok;
   short i;
@@ -1548,11 +1533,7 @@ static char *cs_make_vim_style_matches(char *fname, char *slno, char *search, ch
  *
  * Print: prints the tags
  */
-static char * cs_manage_matches(matches, contexts, totmatches, cmd)
-char **matches;
-char **contexts;
-int totmatches;
-mcmd_e cmd;
+static char *cs_manage_matches(char **matches, char **contexts, int totmatches, mcmd_e cmd)
 {
   static char **mp = NULL;
   static char **cp = NULL;
@@ -1664,9 +1645,7 @@ static char *cs_parse_results(int cnumber, char *buf, int bufsize, char **contex
  *
  * write cscope find results to file
  */
-static void cs_file_results(f, nummatches_a)
-FILE *f;
-int *nummatches_a;
+static void cs_file_results(FILE *f, int *nummatches_a)
 {
   int i, j;
   char *buf;
@@ -2148,8 +2127,7 @@ static void cs_release_csp(int i, int freefnpp)
  *
  * calls cs_kill on all cscope connections then reinits
  */
-static int cs_reset(eap)
-exarg_T *eap UNUSED;
+static int cs_reset(exarg_T *eap)
 {
   char        **dblist = NULL, **pplist = NULL, **fllist = NULL;
   int i;
@@ -2268,8 +2246,7 @@ static char *cs_resolve_file(int i, char *name)
  *
  * show all cscope connections
  */
-static int cs_show(eap)
-exarg_T *eap UNUSED;
+static int cs_show(exarg_T *eap)
 {
   short i;
   if (cs_cnt_connections() == 0)

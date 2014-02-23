@@ -53,8 +53,10 @@ static char_u e_nomenu[] = N_("E329: No menu \"%s\"");
 /*
  * Do the :menu command and relatives.
  */
-void ex_menu(eap)
-exarg_T     *eap;                   /* Ex command arguments */
+void 
+ex_menu (
+    exarg_T *eap                   /* Ex command arguments */
+)
 {
   char_u      *menu_path;
   int modes;
@@ -262,12 +264,14 @@ theend:
 /*
  * Add the menu with the given name to the menu hierarchy
  */
-static int add_menu_path(menu_path, menuarg, pri_tab, call_data)
-char_u      *menu_path;
-vimmenu_T   *menuarg;           /* passes modes, iconfile, iconidx,
+static int 
+add_menu_path (
+    char_u *menu_path,
+    vimmenu_T *menuarg,           /* passes modes, iconfile, iconidx,
                                    icon_builtin, silent[0], noremap[0] */
-int         *pri_tab;
-char_u      *call_data;
+    int *pri_tab,
+    char_u *call_data
+)
 {
   char_u      *path_name;
   int modes = menuarg->modes;
@@ -506,11 +510,7 @@ erret:
  * Set the (sub)menu with the given name to enabled or disabled.
  * Called recursively.
  */
-static int menu_nable_recurse(menu, name, modes, enable)
-vimmenu_T   *menu;
-char_u      *name;
-int modes;
-int enable;
+static int menu_nable_recurse(vimmenu_T *menu, char_u *name, int modes, int enable)
 {
   char_u      *p;
 
@@ -559,11 +559,13 @@ int enable;
  * Remove the (sub)menu with the given name from the menu hierarchy
  * Called recursively.
  */
-static int remove_menu(menup, name, modes, silent)
-vimmenu_T   **menup;
-char_u      *name;
-int modes;
-int silent;                     /* don't give error messages */
+static int 
+remove_menu (
+    vimmenu_T **menup,
+    char_u *name,
+    int modes,
+    int silent                     /* don't give error messages */
+)
 {
   vimmenu_T   *menu;
   vimmenu_T   *child;
@@ -666,8 +668,7 @@ int silent;                     /* don't give error messages */
 /*
  * Free the given menu structure and remove it from the linked list.
  */
-static void free_menu(menup)
-vimmenu_T   **menup;
+static void free_menu(vimmenu_T **menup)
 {
   int i;
   vimmenu_T   *menu;
@@ -692,9 +693,7 @@ vimmenu_T   **menup;
 /*
  * Free the menu->string with the given index.
  */
-static void free_menu_string(menu, idx)
-vimmenu_T   *menu;
-int idx;
+static void free_menu_string(vimmenu_T *menu, int idx)
 {
   int count = 0;
   int i;
@@ -763,10 +762,7 @@ static int show_menus(char_u *path_name, int modes)
 /*
  * Recursively show the mappings associated with the menus under the given one
  */
-static void show_menus_recursive(menu, modes, depth)
-vimmenu_T   *menu;
-int modes;
-int depth;
+static void show_menus_recursive(vimmenu_T *menu, int modes, int depth)
 {
   int i;
   int bit;
@@ -842,11 +838,7 @@ static int expand_emenu;                /* TRUE for ":emenu" command */
 /*
  * Work out what to complete when doing command line completion of menu names.
  */
-char_u * set_context_in_menu_cmd(xp, cmd, arg, forceit)
-expand_T    *xp;
-char_u      *cmd;
-char_u      *arg;
-int forceit;
+char_u *set_context_in_menu_cmd(expand_T *xp, char_u *cmd, char_u *arg, int forceit)
 {
   char_u      *after_dot;
   char_u      *p;
@@ -950,9 +942,7 @@ int forceit;
  * Function given to ExpandGeneric() to obtain the list of (sub)menus (not
  * entries).
  */
-char_u * get_menu_name(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_menu_name(expand_T *xp, int idx)
 {
   static vimmenu_T    *menu = NULL;
   char_u              *str;
@@ -997,9 +987,7 @@ int idx;
  * Function given to ExpandGeneric() to obtain the list of menus and menu
  * entries.
  */
-char_u * get_menu_names(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_menu_names(expand_T *xp, int idx)
 {
   static vimmenu_T    *menu = NULL;
 #define TBUFFER_LEN 256
@@ -1083,9 +1071,7 @@ char_u *menu_name_skip(char_u *name)
  * Return TRUE when "name" matches with menu "menu".  The name is compared in
  * two ways: raw menu name and menu name without '&'.  ignore part after a TAB.
  */
-static int menu_name_equal(name, menu)
-char_u      *name;
-vimmenu_T   *menu;
+static int menu_name_equal(char_u *name, vimmenu_T *menu)
 {
   if (menu->en_name != NULL
       && (menu_namecmp(name, menu->en_name)
@@ -1289,8 +1275,7 @@ static int menu_is_hidden(char_u *name)
 /*
  * Return TRUE if the menu is the tearoff menu.
  */
-static int menu_is_tearoff(name)
-char_u *name UNUSED;
+static int menu_is_tearoff(char_u *name)
 {
   return FALSE;
 }
@@ -1302,8 +1287,7 @@ char_u *name UNUSED;
  * Given a menu descriptor, e.g. "File.New", find it in the menu hierarchy and
  * execute it.
  */
-void ex_emenu(eap)
-exarg_T     *eap;
+void ex_emenu(exarg_T *eap)
 {
   vimmenu_T   *menu;
   char_u      *name;
@@ -1417,8 +1401,7 @@ exarg_T     *eap;
 /*
  * Given a menu descriptor, e.g. "File.New", find it in the menu hierarchy.
  */
-vimmenu_T * gui_find_menu(path_name)
-char_u *path_name;
+vimmenu_T *gui_find_menu(char_u *path_name)
 {
   vimmenu_T   *menu = NULL;
   char_u      *name;
@@ -1486,8 +1469,7 @@ static garray_T menutrans_ga = {0, 0, 0, 0, NULL};
  * This function is also defined without the +multi_lang feature, in which
  * case the commands are ignored.
  */
-void ex_menutranslate(eap)
-exarg_T     *eap UNUSED;
+void ex_menutranslate(exarg_T *eap)
 {
   char_u              *arg = eap->arg;
   menutrans_T         *tp;

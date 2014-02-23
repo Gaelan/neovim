@@ -41,8 +41,7 @@ static void sha256_process __ARGS((context_sha256_T *ctx, char_u data[64]));
     (b)[(i) + 3] = (char_u)((n)      );   \
   }
 
-void sha256_start(ctx)
-context_sha256_T *ctx;
+void sha256_start(context_sha256_T *ctx)
 {
   ctx->total[0] = 0;
   ctx->total[1] = 0;
@@ -57,9 +56,7 @@ context_sha256_T *ctx;
   ctx->state[7] = 0x5BE0CD19;
 }
 
-static void sha256_process(ctx, data)
-context_sha256_T *ctx;
-char_u data[64];
+static void sha256_process(context_sha256_T *ctx, char_u data[64])
 {
   UINT32_T temp1, temp2, W[64];
   UINT32_T A, B, C, D, E, F, G, H;
@@ -190,10 +187,7 @@ char_u data[64];
   ctx->state[7] += H;
 }
 
-void sha256_update(ctx, input, length)
-context_sha256_T *ctx;
-char_u           *input;
-UINT32_T length;
+void sha256_update(context_sha256_T *ctx, char_u *input, UINT32_T length)
 {
   UINT32_T left, fill;
 
@@ -234,9 +228,7 @@ static char_u sha256_padding[64] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void sha256_finish(ctx, digest)
-context_sha256_T *ctx;
-char_u digest[32];
+void sha256_finish(context_sha256_T *ctx, char_u digest[32])
 {
   UINT32_T last, padn;
   UINT32_T high, low;

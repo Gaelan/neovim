@@ -104,18 +104,18 @@ int coladvance(colnr_T wcol)
  * Return in "pos" the position of the cursor advanced to screen column "wcol".
  * return OK if desired column is reached, FAIL if not
  */
-int getvpos(pos, wcol)
-pos_T   *pos;
-colnr_T wcol;
+int getvpos(pos_T *pos, colnr_T wcol)
 {
   return coladvance2(pos, FALSE, virtual_active(), wcol);
 }
 
-static int coladvance2(pos, addspaces, finetune, wcol)
-pos_T       *pos;
-int addspaces;                  /* change the text to achieve our goal? */
-int finetune;                   /* change char offset for the exact column */
-colnr_T wcol;                   /* column to move to */
+static int 
+coladvance2 (
+    pos_T *pos,
+    int addspaces,                  /* change the text to achieve our goal? */
+    int finetune,                   /* change char offset for the exact column */
+    colnr_T wcol                   /* column to move to */
+)
 {
   int idx;
   char_u      *ptr;
@@ -293,8 +293,7 @@ int inc_cursor(void)         {
  * Return -1 when at the end of file.
  * Return 0 otherwise.
  */
-int inc(lp)
-pos_T  *lp;
+int inc(pos_T *lp)
 {
   char_u  *p = ml_get_pos(lp);
 
@@ -321,8 +320,7 @@ pos_T  *lp;
 /*
  * incl(lp): same as inc(), but skip the NUL at the end of non-empty lines
  */
-int incl(lp)
-pos_T    *lp;
+int incl(pos_T *lp)
 {
   int r;
 
@@ -341,8 +339,7 @@ int dec_cursor(void)         {
   return dec(&curwin->w_cursor);
 }
 
-int dec(lp)
-pos_T  *lp;
+int dec(pos_T *lp)
 {
   char_u      *p;
 
@@ -369,8 +366,7 @@ pos_T  *lp;
 /*
  * decl(lp): same as dec(), but skip the NUL at the end of non-empty lines
  */
-int decl(lp)
-pos_T    *lp;
+int decl(pos_T *lp)
 {
   int r;
 
@@ -384,9 +380,11 @@ pos_T    *lp;
  * difference between line number and cursor position. Only look for lines that
  * can be visible, folded lines don't count.
  */
-linenr_T get_cursor_rel_lnum(wp, lnum)
-win_T       *wp;
-linenr_T lnum;                      /* line number to get the result for */
+linenr_T 
+get_cursor_rel_lnum (
+    win_T *wp,
+    linenr_T lnum                      /* line number to get the result for */
+)
 {
   linenr_T cursor = wp->w_cursor.lnum;
   linenr_T retval = 0;
@@ -445,8 +443,7 @@ void check_cursor_col(void)          {
 /*
  * Make sure win->w_cursor.col is valid.
  */
-void check_cursor_col_win(win)
-win_T *win;
+void check_cursor_col_win(win_T *win)
 {
   colnr_T len;
   colnr_T oldcol = win->w_cursor.col;
@@ -575,8 +572,7 @@ static void mem_pre_alloc_l __ARGS((long_u *sizep));
 static void mem_post_alloc __ARGS((void **pp, size_t size));
 static void mem_pre_free __ARGS((void **pp));
 
-static void mem_pre_alloc_s(sizep)
-size_t *sizep;
+static void mem_pre_alloc_s(size_t *sizep)
 {
   *sizep += sizeof(size_t);
 }
@@ -586,9 +582,7 @@ static void mem_pre_alloc_l(long_u *sizep)
   *sizep += sizeof(size_t);
 }
 
-static void mem_post_alloc(pp, size)
-void **pp;
-size_t size;
+static void mem_post_alloc(void **pp, size_t size)
 {
   if (*pp == NULL)
     return;
@@ -804,9 +798,7 @@ theend:
 /*
  * realloc() with memory profiling.
  */
-void * mem_realloc(ptr, size)
-void *ptr;
-size_t size;
+void *mem_realloc(void *ptr, size_t size)
 {
   void *p;
 
@@ -1265,9 +1257,7 @@ char_u *strup_save(char_u *orig)
 /*
  * copy a space a number of times
  */
-void copy_spaces(ptr, count)
-char_u      *ptr;
-size_t count;
+void copy_spaces(char_u *ptr, size_t count)
 {
   size_t i = count;
   char_u      *p = ptr;
@@ -1280,10 +1270,7 @@ size_t count;
  * Copy a character a number of times.
  * Does not work for multi-byte characters!
  */
-void copy_chars(ptr, count, c)
-char_u      *ptr;
-size_t count;
-int c;
+void copy_chars(char_u *ptr, size_t count, int c)
 {
   size_t i = count;
   char_u      *p = ptr;
@@ -1308,10 +1295,7 @@ void del_trailing_spaces(char_u *ptr)
  * Like strncpy(), but always terminate the result with one NUL.
  * "to" must be "len + 1" long!
  */
-void vim_strncpy(to, from, len)
-char_u      *to;
-char_u      *from;
-size_t len;
+void vim_strncpy(char_u *to, char_u *from, size_t len)
 {
   STRNCPY(to, from, len);
   to[len] = NUL;
@@ -1321,10 +1305,7 @@ size_t len;
  * Like strcat(), but make sure the result fits in "tosize" bytes and is
  * always NUL terminated.
  */
-void vim_strcat(to, from, tosize)
-char_u      *to;
-char_u      *from;
-size_t tosize;
+void vim_strcat(char_u *to, char_u *from, size_t tosize)
 {
   size_t tolen = STRLEN(to);
   size_t fromlen = STRLEN(from);
@@ -1477,10 +1458,7 @@ int vim_stricmp(char *s1, char *s2)
  * Doesn't work for multi-byte characters.
  * return 0 for match, < 0 for smaller, > 0 for bigger
  */
-int vim_strnicmp(s1, s2, len)
-char        *s1;
-char        *s2;
-size_t len;
+int vim_strnicmp(char *s1, char *s2, size_t len)
 {
   int i;
 
@@ -1614,8 +1592,7 @@ int vim_isspace(int x)
 /*
  * Clear an allocated growing array.
  */
-void ga_clear(gap)
-garray_T *gap;
+void ga_clear(garray_T *gap)
 {
   vim_free(gap->ga_data);
   ga_init(gap);
@@ -1624,8 +1601,7 @@ garray_T *gap;
 /*
  * Clear a growing array that contains a list of strings.
  */
-void ga_clear_strings(gap)
-garray_T *gap;
+void ga_clear_strings(garray_T *gap)
 {
   int i;
 
@@ -1638,18 +1614,14 @@ garray_T *gap;
  * Initialize a growing array.	Don't forget to set ga_itemsize and
  * ga_growsize!  Or use ga_init2().
  */
-void ga_init(gap)
-garray_T *gap;
+void ga_init(garray_T *gap)
 {
   gap->ga_data = NULL;
   gap->ga_maxlen = 0;
   gap->ga_len = 0;
 }
 
-void ga_init2(gap, itemsize, growsize)
-garray_T    *gap;
-int itemsize;
-int growsize;
+void ga_init2(garray_T *gap, int itemsize, int growsize)
 {
   ga_init(gap);
   gap->ga_itemsize = itemsize;
@@ -1660,9 +1632,7 @@ int growsize;
  * Make room in growing array "gap" for at least "n" items.
  * Return FAIL for failure, OK otherwise.
  */
-int ga_grow(gap, n)
-garray_T    *gap;
-int n;
+int ga_grow(garray_T *gap, int n)
 {
   size_t old_len;
   size_t new_len;
@@ -1689,8 +1659,7 @@ int n;
  * strings with a separating comma.
  * Returns NULL when out of memory.
  */
-char_u * ga_concat_strings(gap)
-garray_T *gap;
+char_u *ga_concat_strings(garray_T *gap)
 {
   int i;
   int len = 0;
@@ -1715,9 +1684,7 @@ garray_T *gap;
  * Concatenate a string to a growarray which contains characters.
  * Note: Does NOT copy the NUL at the end!
  */
-void ga_concat(gap, s)
-garray_T    *gap;
-char_u      *s;
+void ga_concat(garray_T *gap, char_u *s)
 {
   int len = (int)STRLEN(s);
 
@@ -1730,9 +1697,7 @@ char_u      *s;
 /*
  * Append one byte to a growarray which contains bytes.
  */
-void ga_append(gap, c)
-garray_T    *gap;
-int c;
+void ga_append(garray_T *gap, int c)
 {
   if (ga_grow(gap, 1) == OK) {
     *((char *)gap->ga_data + gap->ga_len) = c;
@@ -1744,8 +1709,7 @@ int c;
 /*
  * Append the text in "gap" below the cursor line and clear "gap".
  */
-void append_ga_line(gap)
-garray_T    *gap;
+void append_ga_line(garray_T *gap)
 {
   /* Remove trailing CR. */
   if (gap->ga_len > 0
@@ -2532,8 +2496,7 @@ get_pseudo_mouse_code (
 /*
  * Return the current end-of-line type: EOL_DOS, EOL_UNIX or EOL_MAC.
  */
-int get_fileformat(buf)
-buf_T       *buf;
+int get_fileformat(buf_T *buf)
 {
   int c = *buf->b_p_ff;
 
@@ -2548,9 +2511,11 @@ buf_T       *buf;
  * Like get_fileformat(), but override 'fileformat' with "p" for "++opt=val"
  * argument.
  */
-int get_fileformat_force(buf, eap)
-buf_T       *buf;
-exarg_T     *eap;           /* can be NULL! */
+int 
+get_fileformat_force (
+    buf_T *buf,
+    exarg_T *eap           /* can be NULL! */
+)
 {
   int c;
 
@@ -3099,8 +3064,7 @@ int crypt_method_from_string(char_u *s)
 /*
  * Get the crypt method for buffer "buf" as a number.
  */
-int get_crypt_method(buf)
-buf_T *buf;
+int get_crypt_method(buf_T *buf)
 {
   return crypt_method_from_string(*buf->b_p_cm == NUL ? p_cm : buf->b_p_cm);
 }
@@ -3109,9 +3073,7 @@ buf_T *buf;
  * Set the crypt method for buffer "buf" to "method" using the int value as
  * returned by crypt_method_from_string().
  */
-void set_crypt_method(buf, method)
-buf_T   *buf;
-int method;
+void set_crypt_method(buf_T *buf, int method)
 {
   free_string_option(buf->b_p_cm);
   buf->b_p_cm = vim_strsave((char_u *)(method == 0 ? "zip" : "blowfish"));
@@ -3159,10 +3121,7 @@ void crypt_pop_state(void)          {
  * Encrypt "from[len]" into "to[len]".
  * "from" and "to" can be equal to encrypt in place.
  */
-void crypt_encode(from, len, to)
-char_u      *from;
-size_t len;
-char_u      *to;
+void crypt_encode(char_u *from, size_t len, char_u *to)
 {
   size_t i;
   int ztemp, t;
@@ -3536,19 +3495,18 @@ static char_u e_pathtoolong[] = N_("E854: path too long for completion");
  * This function silently ignores a few errors, vim_findfile() will have
  * limited functionality then.
  */
-void * vim_findfile_init(path, filename, stopdirs, level, free_visited,
-    find_what,
-    search_ctx_arg, tagfile,
-    rel_fname)
-char_u      *path;
-char_u      *filename;
-char_u      *stopdirs UNUSED;
-int level;
-int free_visited;
-int find_what;
-void        *search_ctx_arg;
-int tagfile;                    /* expanding names of tags files */
-char_u      *rel_fname;         /* file name to use for "." */
+void *
+vim_findfile_init (
+    char_u *path,
+    char_u *filename,
+    char_u *stopdirs,
+    int level,
+    int free_visited,
+    int find_what,
+    void *search_ctx_arg,
+    int tagfile,                    /* expanding names of tags files */
+    char_u *rel_fname         /* file name to use for "." */
+)
 {
   char_u              *wc_part;
   ff_stack_T          *sptr;
@@ -5246,8 +5204,7 @@ int emsgn(char_u *s, long n)
 /*
  * Read 2 bytes from "fd" and turn them into an int, MSB first.
  */
-int get2c(fd)
-FILE        *fd;
+int get2c(FILE *fd)
 {
   int n;
 
@@ -5259,8 +5216,7 @@ FILE        *fd;
 /*
  * Read 3 bytes from "fd" and turn them into an int, MSB first.
  */
-int get3c(fd)
-FILE        *fd;
+int get3c(FILE *fd)
 {
   int n;
 
@@ -5273,8 +5229,7 @@ FILE        *fd;
 /*
  * Read 4 bytes from "fd" and turn them into an int, MSB first.
  */
-int get4c(fd)
-FILE        *fd;
+int get4c(FILE *fd)
 {
   /* Use unsigned rather than int otherwise result is undefined
    * when left-shift sets the MSB. */
@@ -5290,8 +5245,7 @@ FILE        *fd;
 /*
  * Read 8 bytes from "fd" and turn them into a time_t, MSB first.
  */
-time_t get8ctime(fd)
-FILE        *fd;
+time_t get8ctime(FILE *fd)
 {
   time_t n = 0;
   int i;
@@ -5305,9 +5259,7 @@ FILE        *fd;
  * Read a string of length "cnt" from "fd" into allocated memory.
  * Returns NULL when out of memory or unable to read that many bytes.
  */
-char_u * read_string(fd, cnt)
-FILE        *fd;
-int cnt;
+char_u *read_string(FILE *fd, int cnt)
 {
   char_u      *str;
   int i;
@@ -5333,10 +5285,7 @@ int cnt;
 /*
  * Write a number to file "fd", MSB first, in "len" bytes.
  */
-int put_bytes(fd, nr, len)
-FILE    *fd;
-long_u nr;
-int len;
+int put_bytes(FILE *fd, long_u nr, int len)
 {
   int i;
 
@@ -5350,9 +5299,7 @@ int len;
 /*
  * Write time_t to file "fd" in 8 bytes.
  */
-void put_time(fd, the_time)
-FILE        *fd;
-time_t the_time;
+void put_time(FILE *fd, time_t the_time)
 {
   int c;
   int i;

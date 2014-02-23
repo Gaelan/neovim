@@ -246,8 +246,7 @@ void do_debug(char_u *cmd)
 /*
  * ":debug".
  */
-void ex_debug(eap)
-exarg_T     *eap;
+void ex_debug(exarg_T *eap)
 {
   int debug_break_level_save = debug_break_level;
 
@@ -276,8 +275,7 @@ static char_u   *debug_skipped_name;
  * decide to execute something themselves.
  * Called from do_one_cmd() before executing a command.
  */
-void dbg_check_breakpoint(eap)
-exarg_T     *eap;
+void dbg_check_breakpoint(exarg_T *eap)
 {
   char_u      *p;
 
@@ -316,8 +314,7 @@ exarg_T     *eap;
  * Go to debug mode if skipped by dbg_check_breakpoint() because eap->skip was
  * set.  Return TRUE when the debug mode is entered this time.
  */
-int dbg_check_skipped(eap)
-exarg_T     *eap;
+int dbg_check_skipped(exarg_T *eap)
 {
   int prev_got_int;
 
@@ -373,9 +370,11 @@ static linenr_T debuggy_find __ARGS((int file,char_u *fname, linenr_T after,
  * is allocated.
  * Returns FAIL for failure.
  */
-static int dbg_parsearg(arg, gap)
-char_u      *arg;
-garray_T    *gap;           /* either &dbg_breakp or &prof_ga */
+static int 
+dbg_parsearg (
+    char_u *arg,
+    garray_T *gap           /* either &dbg_breakp or &prof_ga */
+)
 {
   char_u      *p = arg;
   char_u      *q;
@@ -455,8 +454,7 @@ garray_T    *gap;           /* either &dbg_breakp or &prof_ga */
 /*
  * ":breakadd".
  */
-void ex_breakadd(eap)
-exarg_T     *eap;
+void ex_breakadd(exarg_T *eap)
 {
   struct debuggy *bp;
   char_u      *pat;
@@ -492,8 +490,7 @@ exarg_T     *eap;
 /*
  * ":debuggreedy".
  */
-void ex_debuggreedy(eap)
-exarg_T     *eap;
+void ex_debuggreedy(exarg_T *eap)
 {
   if (eap->addr_count == 0 || eap->line2 != 0)
     debug_greedy = TRUE;
@@ -504,8 +501,7 @@ exarg_T     *eap;
 /*
  * ":breakdel" and ":profdel".
  */
-void ex_breakdel(eap)
-exarg_T     *eap;
+void ex_breakdel(exarg_T *eap)
 {
   struct debuggy *bp, *bpi;
   int nr;
@@ -576,8 +572,7 @@ exarg_T     *eap;
 /*
  * ":breaklist".
  */
-void ex_breaklist(eap)
-exarg_T     *eap UNUSED;
+void ex_breaklist(exarg_T *eap)
 {
   struct debuggy *bp;
   int i;
@@ -628,12 +623,14 @@ has_profiling (
 /*
  * Common code for dbg_find_breakpoint() and has_profiling().
  */
-static linenr_T debuggy_find(file, fname, after, gap, fp)
-int file;                   /* TRUE for a file, FALSE for a function */
-char_u      *fname;         /* file or function name */
-linenr_T after;             /* after this line number */
-garray_T    *gap;           /* either &dbg_breakp or &prof_ga */
-int         *fp;            /* if not NULL: return forceit */
+static linenr_T 
+debuggy_find (
+    int file,                   /* TRUE for a file, FALSE for a function */
+    char_u *fname,         /* file or function name */
+    linenr_T after,             /* after this line number */
+    garray_T *gap,           /* either &dbg_breakp or &prof_ga */
+    int *fp            /* if not NULL: return forceit */
+)
 {
   struct debuggy *bp;
   int i;
@@ -902,8 +899,7 @@ static proftime_T pause_time;
 /*
  * ":profile cmd args"
  */
-void ex_profile(eap)
-exarg_T     *eap;
+void ex_profile(exarg_T *eap)
 {
   char_u      *e;
   int len;
@@ -961,9 +957,7 @@ static char *pexpand_cmds[] = {
  * Function given to ExpandGeneric() to obtain the profile command
  * specific expansion.
  */
-char_u * get_profile_name(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_profile_name(expand_T *xp, int idx)
 {
   switch (pexpand_what) {
   case PEXP_SUBCMD:
@@ -977,9 +971,7 @@ int idx;
 /*
  * Handle command line completion for :profile command.
  */
-void set_context_in_profile_cmd(xp, arg)
-expand_T    *xp;
-char_u      *arg;
+void set_context_in_profile_cmd(expand_T *xp, char_u *arg)
 {
   char_u      *end_subcmd;
 
@@ -1090,8 +1082,7 @@ void prof_inchar_exit(void)          {
 /*
  * Dump the profiling results for all scripts in file "fd".
  */
-static void script_dump_profile(fd)
-FILE    *fd;
+static void script_dump_profile(FILE *fd)
 {
   int id;
   scriptitem_T    *si;
@@ -1154,9 +1145,7 @@ int prof_def_func(void)         {
  *
  * return FAIL for failure, OK otherwise
  */
-int autowrite(buf, forceit)
-buf_T       *buf;
-int forceit;
+int autowrite(buf_T *buf, int forceit)
 {
   int r;
 
@@ -1195,9 +1184,7 @@ void autowrite_all(void)          {
  * Return TRUE if buffer was changed and cannot be abandoned.
  * For flags use the CCGD_ values.
  */
-int check_changed(buf, flags)
-buf_T       *buf;
-int flags;
+int check_changed(buf_T *buf, int flags)
 {
   int forceit = (flags & CCGD_FORCEIT);
 
@@ -1239,9 +1226,11 @@ int flags;
  * Ask the user what to do when abandoning a changed buffer.
  * Must check 'write' option first!
  */
-void dialog_changed(buf, checkall)
-buf_T       *buf;
-int checkall;                   /* may abandon all changed buffers */
+void 
+dialog_changed (
+    buf_T *buf,
+    int checkall                   /* may abandon all changed buffers */
+)
 {
   char_u buff[DIALOG_MSG_SIZE];
   int ret;
@@ -1300,9 +1289,7 @@ int checkall;                   /* may abandon all changed buffers */
  * Return TRUE if the buffer "buf" can be abandoned, either by making it
  * hidden, autowriting it or unloading it.
  */
-int can_abandon(buf, forceit)
-buf_T       *buf;
-int forceit;
+int can_abandon(buf_T *buf, int forceit)
 {
   return P_HID(buf)
          || !bufIsChanged(buf)
@@ -1452,9 +1439,7 @@ int check_fname(void)         {
  *
  * return FAIL for failure, OK otherwise
  */
-int buf_write_all(buf, forceit)
-buf_T       *buf;
-int forceit;
+int buf_write_all(buf_T *buf, int forceit)
 {
   int retval;
   buf_T       *old_curbuf = curbuf;
@@ -1518,9 +1503,7 @@ static char_u *do_one_arg(char_u *str)
  * Separate the arguments in "str" and return a list of pointers in the
  * growarray "gap".
  */
-int get_arglist(gap, str)
-garray_T    *gap;
-char_u      *str;
+int get_arglist(garray_T *gap, char_u *str)
 {
   ga_init2(gap, (int)sizeof(char_u *), 20);
   while (*str != NUL) {
@@ -1567,10 +1550,12 @@ int get_arglist_exp(char_u *str, int *fcountp, char_u ***fnamesp, int wig)
  *
  * Return FAIL for failure, OK otherwise.
  */
-static int do_arglist(str, what, after)
-char_u      *str;
-int what UNUSED;
-int after UNUSED;                       /* 0 means before first one */
+static int 
+do_arglist (
+    char_u *str,
+    int what,
+    int after                       /* 0 means before first one */
+)
 {
   garray_T new_ga;
   int exp_count;
@@ -1664,8 +1649,7 @@ static void alist_check_arg_idx(void)                 {
  * Return TRUE if window "win" is editing the file at the current argument
  * index.
  */
-static int editing_arg_idx(win)
-win_T       *win;
+static int editing_arg_idx(win_T *win)
 {
   return !(win->w_arg_idx >= WARGCOUNT(win)
            || (win->w_buffer->b_fnum
@@ -1679,8 +1663,7 @@ win_T       *win;
 /*
  * Check if window "win" is editing the w_arg_idx file in its argument list.
  */
-void check_arg_idx(win)
-win_T       *win;
+void check_arg_idx(win_T *win)
 {
   if (WARGCOUNT(win) > 1 && !editing_arg_idx(win)) {
     /* We are not editing the current entry in the argument list.
@@ -1710,8 +1693,7 @@ win_T       *win;
 /*
  * ":args", ":argslocal" and ":argsglobal".
  */
-void ex_args(eap)
-exarg_T     *eap;
+void ex_args(exarg_T *eap)
 {
   int i;
 
@@ -1767,8 +1749,7 @@ exarg_T     *eap;
 /*
  * ":previous", ":sprevious", ":Next" and ":sNext".
  */
-void ex_previous(eap)
-exarg_T     *eap;
+void ex_previous(exarg_T *eap)
 {
   /* If past the last one already, go to the last one. */
   if (curwin->w_arg_idx - (int)eap->line2 >= ARGCOUNT)
@@ -1780,8 +1761,7 @@ exarg_T     *eap;
 /*
  * ":rewind", ":first", ":sfirst" and ":srewind".
  */
-void ex_rewind(eap)
-exarg_T     *eap;
+void ex_rewind(exarg_T *eap)
 {
   do_argfile(eap, 0);
 }
@@ -1789,8 +1769,7 @@ exarg_T     *eap;
 /*
  * ":last" and ":slast".
  */
-void ex_last(eap)
-exarg_T     *eap;
+void ex_last(exarg_T *eap)
 {
   do_argfile(eap, ARGCOUNT - 1);
 }
@@ -1798,8 +1777,7 @@ exarg_T     *eap;
 /*
  * ":argument" and ":sargument".
  */
-void ex_argument(eap)
-exarg_T     *eap;
+void ex_argument(exarg_T *eap)
 {
   int i;
 
@@ -1813,9 +1791,7 @@ exarg_T     *eap;
 /*
  * Edit file "argn" of the argument lists.
  */
-void do_argfile(eap, argn)
-exarg_T     *eap;
-int argn;
+void do_argfile(exarg_T *eap, int argn)
 {
   int other;
   char_u      *p;
@@ -1878,8 +1854,7 @@ int argn;
 /*
  * ":next", and commands that behave like it.
  */
-void ex_next(eap)
-exarg_T     *eap;
+void ex_next(exarg_T *eap)
 {
   int i;
 
@@ -1905,8 +1880,7 @@ exarg_T     *eap;
 /*
  * ":argedit"
  */
-void ex_argedit(eap)
-exarg_T     *eap;
+void ex_argedit(exarg_T *eap)
 {
   int fnum;
   int i;
@@ -1940,8 +1914,7 @@ exarg_T     *eap;
 /*
  * ":argadd"
  */
-void ex_argadd(eap)
-exarg_T     *eap;
+void ex_argadd(exarg_T *eap)
 {
   do_arglist(eap->arg, AL_ADD,
       eap->addr_count > 0 ? (int)eap->line2 : curwin->w_arg_idx + 1);
@@ -1951,8 +1924,7 @@ exarg_T     *eap;
 /*
  * ":argdelete"
  */
-void ex_argdelete(eap)
-exarg_T     *eap;
+void ex_argdelete(exarg_T *eap)
 {
   int i;
   int n;
@@ -1985,8 +1957,7 @@ exarg_T     *eap;
 /*
  * ":argdo", ":windo", ":bufdo", ":tabdo"
  */
-void ex_listdo(eap)
-exarg_T     *eap;
+void ex_listdo(exarg_T *eap)
 {
   int i;
   win_T       *wp;
@@ -2150,8 +2121,7 @@ alist_add_list (
 /*
  * ":compiler[!] {name}"
  */
-void ex_compiler(eap)
-exarg_T     *eap;
+void ex_compiler(exarg_T *eap)
 {
   char_u      *buf;
   char_u      *old_cur_comp = NULL;
@@ -2212,17 +2182,14 @@ exarg_T     *eap;
 /*
  * ":runtime {name}"
  */
-void ex_runtime(eap)
-exarg_T     *eap;
+void ex_runtime(exarg_T *eap)
 {
   source_runtime(eap->arg, eap->forceit);
 }
 
 static void source_callback __ARGS((char_u *fname, void *cookie));
 
-static void source_callback(fname, cookie)
-char_u      *fname;
-void        *cookie UNUSED;
+static void source_callback(char_u *fname, void *cookie)
 {
   (void)do_source(fname, FALSE, DOSO_NONE);
 }
@@ -2333,8 +2300,7 @@ void        *cookie;
 /*
  * ":options"
  */
-void ex_options(eap)
-exarg_T     *eap UNUSED;
+void ex_options(exarg_T *eap)
 {
   cmd_source((char_u *)SYS_OPTWIN_FILE, NULL);
 }
@@ -2342,15 +2308,12 @@ exarg_T     *eap UNUSED;
 /*
  * ":source {fname}"
  */
-void ex_source(eap)
-exarg_T     *eap;
+void ex_source(exarg_T *eap)
 {
   cmd_source(eap->arg, eap);
 }
 
-static void cmd_source(fname, eap)
-char_u      *fname;
-exarg_T     *eap;
+static void cmd_source(char_u *fname, exarg_T *eap)
 {
   if (*fname == NUL)
     EMSG(_(e_argreq));
@@ -2431,8 +2394,7 @@ static FILE *fopen_noinh_readbin __ARGS((char *filename));
  * Special function to open a file without handle inheritance.
  * When possible the handle is closed on exec().
  */
-static FILE * fopen_noinh_readbin(filename)
-char    *filename;
+static FILE *fopen_noinh_readbin(char *filename)
 {
   int fd_tmp = mch_open(filename, O_RDONLY, 0);
 
@@ -2766,8 +2728,7 @@ theend:
 /*
  * ":scriptnames"
  */
-void ex_scriptnames(eap)
-exarg_T     *eap UNUSED;
+void ex_scriptnames(exarg_T *eap)
 {
   int i;
 
@@ -2796,8 +2757,7 @@ void scriptnames_slash_adjust(void)          {
 /*
  * Get a pointer to a script name.  Used for ":verbose set".
  */
-char_u * get_scriptname(id)
-scid_T id;
+char_u *get_scriptname(scid_T id)
 {
   if (id == SID_MODELINE)
     return (char_u *)_("modeline");
@@ -2833,10 +2793,7 @@ void free_scriptnames(void)          {
  * Test with earlier versions, MSL 2.2 is the library supplied with
  * Codewarrior Pro 2.
  */
-char * fgets_cr(s, n, stream)
-char        *s;
-int n;
-FILE        *stream;
+char *fgets_cr(char *s, int n, FILE *stream)
 {
   return fgets(s, n, stream);
 }
@@ -2847,10 +2804,7 @@ FILE        *stream;
  * For older versions of the Metrowerks library.
  * At least CodeWarrior 9 needed this code.
  */
-char * fgets_cr(s, n, stream)
-char        *s;
-int n;
-FILE        *stream;
+char *fgets_cr(char *s, int n, FILE *stream)
 {
   int c = 0;
   int char_read = 0;
@@ -2886,10 +2840,7 @@ FILE        *stream;
  * Return a pointer to the line in allocated memory.
  * Return NULL for end-of-file or some error.
  */
-char_u * getsourceline(c, cookie, indent)
-int c UNUSED;
-void        *cookie;
-int indent UNUSED;
+char_u *getsourceline(int c, void *cookie, int indent)
 {
   struct source_cookie *sp = (struct source_cookie *)cookie;
   char_u              *line;
@@ -3188,8 +3139,7 @@ void script_line_end(void)          {
  * ":scriptencoding": Set encoding conversion for a sourced script.
  * Without the multi-byte feature it's simply ignored.
  */
-void ex_scriptencoding(eap)
-exarg_T     *eap UNUSED;
+void ex_scriptencoding(exarg_T *eap)
 {
   struct source_cookie        *sp;
   char_u                      *name;
@@ -3217,8 +3167,7 @@ exarg_T     *eap UNUSED;
 /*
  * ":finish": Mark a sourced file as finished.
  */
-void ex_finish(eap)
-exarg_T     *eap;
+void ex_finish(exarg_T *eap)
 {
   if (getline_equal(eap->getline, eap->cookie, getsourceline))
     do_finish(eap, FALSE);
@@ -3231,9 +3180,7 @@ exarg_T     *eap;
  * Also called for a pending finish at the ":endtry" or after returning from
  * an extra do_cmdline().  "reanimate" is used in the latter case.
  */
-void do_finish(eap, reanimate)
-exarg_T     *eap;
-int reanimate;
+void do_finish(exarg_T *eap, int reanimate)
 {
   int idx;
 
@@ -3274,8 +3221,7 @@ void        *cookie;
 /*
  * ":checktime [buffer]"
  */
-void ex_checktime(eap)
-exarg_T     *eap;
+void ex_checktime(exarg_T *eap)
 {
   buf_T       *buf;
   int save_no_check_timestamps = no_check_timestamps;
@@ -3402,8 +3348,7 @@ void set_lang_var(void)          {
 /*
  * ":language":  Set the language (locale).
  */
-void ex_language(eap)
-exarg_T     *eap;
+void ex_language(exarg_T *eap)
 {
   char        *loc;
   char_u      *p;
@@ -3571,9 +3516,7 @@ void free_locales(void)          {
  * Function given to ExpandGeneric() to obtain the possible arguments of the
  * ":language" command.
  */
-char_u * get_lang_arg(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_lang_arg(expand_T *xp, int idx)
 {
   if (idx == 0)
     return (char_u *)"messages";
@@ -3591,9 +3534,7 @@ int idx;
 /*
  * Function given to ExpandGeneric() to obtain the available locales.
  */
-char_u * get_locales(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_locales(expand_T *xp, int idx)
 {
   init_locales();
   if (locales == NULL)

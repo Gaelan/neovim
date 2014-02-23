@@ -526,9 +526,7 @@ fail:
  * Discard an exception.  "was_finished" is set when the exception has been
  * caught and the catch clause has been ended normally.
  */
-static void discard_exception(excp, was_finished)
-except_T            *excp;
-int was_finished;
+static void discard_exception(except_T *excp, int was_finished)
 {
   char_u              *saved_IObuff;
 
@@ -584,8 +582,7 @@ void discard_current_exception(void)          {
 /*
  * Put an exception on the caught stack.
  */
-static void catch_exception(excp)
-except_T    *excp;
+static void catch_exception(except_T *excp)
 {
   excp->caught = caught_stack;
   caught_stack = excp;
@@ -628,8 +625,7 @@ except_T    *excp;
 /*
  * Remove an exception from the caught stack.
  */
-static void finish_exception(excp)
-except_T    *excp;
+static void finish_exception(except_T *excp)
 {
   if (excp != caught_stack)
     EMSG(_(e_internal));
@@ -792,8 +788,7 @@ void report_discard_pending(int pending, void *value)
 /*
  * ":if".
  */
-void ex_if(eap)
-exarg_T     *eap;
+void ex_if(exarg_T *eap)
 {
   int error;
   int skip;
@@ -830,8 +825,7 @@ exarg_T     *eap;
 /*
  * ":endif".
  */
-void ex_endif(eap)
-exarg_T     *eap;
+void ex_endif(exarg_T *eap)
 {
   did_endif = TRUE;
   if (eap->cstack->cs_idx < 0
@@ -859,8 +853,7 @@ exarg_T     *eap;
 /*
  * ":else" and ":elseif".
  */
-void ex_else(eap)
-exarg_T     *eap;
+void ex_else(exarg_T *eap)
 {
   int error;
   int skip;
@@ -941,8 +934,7 @@ exarg_T     *eap;
 /*
  * Handle ":while" and ":for".
  */
-void ex_while(eap)
-exarg_T     *eap;
+void ex_while(exarg_T *eap)
 {
   int error;
   int skip;
@@ -1031,8 +1023,7 @@ exarg_T     *eap;
 /*
  * ":continue"
  */
-void ex_continue(eap)
-exarg_T     *eap;
+void ex_continue(exarg_T *eap)
 {
   int idx;
   struct condstack    *cstack = eap->cstack;
@@ -1065,8 +1056,7 @@ exarg_T     *eap;
 /*
  * ":break"
  */
-void ex_break(eap)
-exarg_T     *eap;
+void ex_break(exarg_T *eap)
 {
   int idx;
   struct condstack    *cstack = eap->cstack;
@@ -1089,8 +1079,7 @@ exarg_T     *eap;
 /*
  * ":endwhile" and ":endfor"
  */
-void ex_endwhile(eap)
-exarg_T     *eap;
+void ex_endwhile(exarg_T *eap)
 {
   struct condstack    *cstack = eap->cstack;
   int idx;
@@ -1166,8 +1155,7 @@ exarg_T     *eap;
 /*
  * ":throw expr"
  */
-void ex_throw(eap)
-exarg_T     *eap;
+void ex_throw(exarg_T *eap)
 {
   char_u      *arg = eap->arg;
   char_u      *value;
@@ -1254,8 +1242,7 @@ void do_throw(struct condstack *cstack)
 /*
  * ":try"
  */
-void ex_try(eap)
-exarg_T     *eap;
+void ex_try(exarg_T *eap)
 {
   int skip;
   struct condstack    *cstack = eap->cstack;
@@ -1322,8 +1309,7 @@ exarg_T     *eap;
 /*
  * ":catch /{pattern}/" and ":catch"
  */
-void ex_catch(eap)
-exarg_T     *eap;
+void ex_catch(exarg_T *eap)
 {
   int idx = 0;
   int give_up = FALSE;
@@ -1464,8 +1450,7 @@ exarg_T     *eap;
 /*
  * ":finally"
  */
-void ex_finally(eap)
-exarg_T     *eap;
+void ex_finally(exarg_T *eap)
 {
   int idx;
   int skip = FALSE;
@@ -1583,8 +1568,7 @@ exarg_T     *eap;
 /*
  * ":endtry"
  */
-void ex_endtry(eap)
-exarg_T     *eap;
+void ex_endtry(exarg_T *eap)
 {
   int idx;
   int skip;
@@ -1772,8 +1756,7 @@ exarg_T     *eap;
  * do_cmdline() that is going to be made for the cleanup autocommand
  * execution.
  */
-void enter_cleanup(csp)
-cleanup_T   *csp;
+void enter_cleanup(cleanup_T *csp)
 {
   int pending = CSTP_NONE;
 
@@ -1829,8 +1812,7 @@ cleanup_T   *csp;
  * cleanup autocommands.  In the latter case, the saved error/interrupt/
  * exception state is discarded.
  */
-void leave_cleanup(csp)
-cleanup_T   *csp;
+void leave_cleanup(cleanup_T *csp)
 {
   int pending = csp->pending;
 
@@ -2049,8 +2031,7 @@ void rewind_conditionals(struct condstack *cstack, int idx, int cond_type, int *
 /*
  * ":endfunction" when not after a ":function"
  */
-void ex_endfunction(eap)
-exarg_T     *eap UNUSED;
+void ex_endfunction(exarg_T *eap)
 {
   EMSG(_("E193: :endfunction not inside a function"));
 }

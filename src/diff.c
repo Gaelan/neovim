@@ -55,8 +55,7 @@ static diff_T *diff_alloc_new __ARGS((tabpage_T *tp, diff_T *dprev, diff_T *dp))
 /*
  * Called when deleting or unloading a buffer: No longer make a diff with it.
  */
-void diff_buf_delete(buf)
-buf_T       *buf;
+void diff_buf_delete(buf_T *buf)
 {
   int i;
   tabpage_T   *tp;
@@ -76,8 +75,7 @@ buf_T       *buf;
  * Check if the current buffer should be added to or removed from the list of
  * diff buffers.
  */
-void diff_buf_adjust(win)
-win_T       *win;
+void diff_buf_adjust(win_T *win)
 {
   win_T       *wp;
   int i;
@@ -108,8 +106,7 @@ win_T       *win;
  * This must be done before any autocmd, because a command may use info
  * about the screen contents.
  */
-void diff_buf_add(buf)
-buf_T       *buf;
+void diff_buf_add(buf_T *buf)
 {
   int i;
 
@@ -131,8 +128,7 @@ buf_T       *buf;
  * Find buffer "buf" in the list of diff buffers for the current tab page.
  * Return its index or DB_COUNT if not found.
  */
-static int diff_buf_idx(buf)
-buf_T       *buf;
+static int diff_buf_idx(buf_T *buf)
 {
   int idx;
 
@@ -146,9 +142,7 @@ buf_T       *buf;
  * Find buffer "buf" in the list of diff buffers for tab page "tp".
  * Return its index or DB_COUNT if not found.
  */
-static int diff_buf_idx_tp(buf, tp)
-buf_T       *buf;
-tabpage_T   *tp;
+static int diff_buf_idx_tp(buf_T *buf, tabpage_T *tp)
 {
   int idx;
 
@@ -162,8 +156,7 @@ tabpage_T   *tp;
  * Mark the diff info involving buffer "buf" as invalid, it will be updated
  * when info is requested.
  */
-void diff_invalidate(buf)
-buf_T       *buf;
+void diff_invalidate(buf_T *buf)
 {
   tabpage_T   *tp;
   int i;
@@ -201,13 +194,7 @@ void diff_mark_adjust(linenr_T line1, linenr_T line2, long amount, long amount_a
  * new change block and update the line numbers in following blocks.
  * When inserting/deleting lines in existing change blocks, update them.
  */
-static void diff_mark_adjust_tp(tp, idx, line1, line2, amount, amount_after)
-tabpage_T   *tp;
-int idx;
-linenr_T line1;
-linenr_T line2;
-long amount;
-long amount_after;
+static void diff_mark_adjust_tp(tabpage_T *tp, int idx, linenr_T line1, linenr_T line2, long amount, long amount_after)
 {
   diff_T      *dp;
   diff_T      *dprev;
@@ -413,10 +400,7 @@ long amount_after;
 /*
  * Allocate a new diff block and link it between "dprev" and "dp".
  */
-static diff_T * diff_alloc_new(tp, dprev, dp)
-tabpage_T   *tp;
-diff_T      *dprev;
-diff_T      *dp;
+static diff_T *diff_alloc_new(tabpage_T *tp, diff_T *dprev, diff_T *dp)
 {
   diff_T      *dnew;
 
@@ -437,9 +421,7 @@ diff_T      *dp;
  * This may result in a change where all buffers have zero lines, the caller
  * must take care of removing it.
  */
-static void diff_check_unchanged(tp, dp)
-tabpage_T   *tp;
-diff_T      *dp;
+static void diff_check_unchanged(tabpage_T *tp, diff_T *dp)
 {
   int i_org;
   int i_new;
@@ -508,9 +490,7 @@ diff_T      *dp;
  * Check if a diff block doesn't contain invalid line numbers.
  * This can happen when the diff program returns invalid results.
  */
-static int diff_check_sanity(tp, dp)
-tabpage_T   *tp;
-diff_T      *dp;
+static int diff_check_sanity(tabpage_T *tp, diff_T *dp)
 {
   int i;
 
@@ -555,9 +535,7 @@ diff_redraw (
  * Always use 'fileformat' set to "unix".
  * Return FAIL for failure
  */
-static int diff_write(buf, fname)
-buf_T       *buf;
-char_u      *fname;
+static int diff_write(buf_T *buf, char_u *fname)
 {
   int r;
   char_u      *save_ff;
@@ -577,8 +555,10 @@ char_u      *fname;
  * The buffers are written to a file, also for unmodified buffers (the file
  * could have been produced by autocommands, e.g. the netrw plugin).
  */
-void ex_diffupdate(eap)
-exarg_T     *eap UNUSED;            /* can be NULL */
+void 
+ex_diffupdate (
+    exarg_T *eap            /* can be NULL */
+)
 {
   buf_T       *buf;
   int idx_orig;
@@ -764,8 +744,7 @@ static void diff_file(char_u *tmp_orig, char_u *tmp_new, char_u *tmp_diff)
  * The buffer is written to a file, also for unmodified buffers (the file
  * could have been produced by autocommands, e.g. the netrw plugin).
  */
-void ex_diffpatch(eap)
-exarg_T     *eap;
+void ex_diffpatch(exarg_T *eap)
 {
   char_u      *tmp_orig;        /* name of original temp file */
   char_u      *tmp_new;         /* name of patched temp file */
@@ -920,8 +899,7 @@ theend:
 /*
  * Split the window and edit another file, setting options to show the diffs.
  */
-void ex_diffsplit(eap)
-exarg_T     *eap;
+void ex_diffsplit(exarg_T *eap)
 {
   win_T       *old_curwin = curwin;
 
@@ -945,8 +923,7 @@ exarg_T     *eap;
 /*
  * Set options to show diffs for the current window.
  */
-void ex_diffthis(eap)
-exarg_T     *eap UNUSED;
+void ex_diffthis(exarg_T *eap)
 {
   /* Set 'diff', 'scrollbind' on and 'wrap' off. */
   diff_win_options(curwin, TRUE);
@@ -955,9 +932,11 @@ exarg_T     *eap UNUSED;
 /*
  * Set options in window "wp" for diff mode.
  */
-void diff_win_options(wp, addbuf)
-win_T       *wp;
-int addbuf;                     /* Add buffer to diff. */
+void 
+diff_win_options (
+    win_T *wp,
+    int addbuf                     /* Add buffer to diff. */
+)
 {
   win_T *old_curwin = curwin;
 
@@ -1011,8 +990,7 @@ int addbuf;                     /* Add buffer to diff. */
  * Set options not to show diffs.  For the current window or all windows.
  * Only in the current tab page.
  */
-void ex_diffoff(eap)
-exarg_T     *eap;
+void ex_diffoff(exarg_T *eap)
 {
   win_T       *wp;
   win_T       *old_curwin = curwin;
@@ -1248,11 +1226,7 @@ done:
 /*
  * Copy an entry at "dp" from "idx_orig" to "idx_new".
  */
-static void diff_copy_entry(dprev, dp, idx_orig, idx_new)
-diff_T      *dprev;
-diff_T      *dp;
-int idx_orig;
-int idx_new;
+static void diff_copy_entry(diff_T *dprev, diff_T *dp, int idx_orig, int idx_new)
 {
   long off;
 
@@ -1268,8 +1242,7 @@ int idx_new;
 /*
  * Clear the list of diffblocks for tab page "tp".
  */
-void diff_clear(tp)
-tabpage_T   *tp;
+void diff_clear(tabpage_T *tp)
 {
   diff_T      *p, *next_p;
 
@@ -1289,9 +1262,7 @@ tabpage_T   *tp;
  * when 'diffopt' doesn't contain "filler").
  * This should only be used for windows where 'diff' is set.
  */
-int diff_check(wp, lnum)
-win_T       *wp;
-linenr_T lnum;
+int diff_check(win_T *wp, linenr_T lnum)
 {
   int idx;                      /* index in tp_diffbuf[] for this buffer */
   diff_T      *dp;
@@ -1376,10 +1347,7 @@ linenr_T lnum;
 /*
  * Compare two entries in diff "*dp" and return TRUE if they are equal.
  */
-static int diff_equal_entry(dp, idx1, idx2)
-diff_T      *dp;
-int idx1;
-int idx2;
+static int diff_equal_entry(diff_T *dp, int idx1, int idx2)
 {
   int i;
   char_u      *line;
@@ -1458,9 +1426,7 @@ static int diff_cmp(char_u *s1, char_u *s2)
 /*
  * Return the number of filler lines above "lnum".
  */
-int diff_check_fill(wp, lnum)
-win_T       *wp;
-linenr_T lnum;
+int diff_check_fill(win_T *wp, linenr_T lnum)
 {
   int n;
 
@@ -1477,9 +1443,7 @@ linenr_T lnum;
  * Set the topline of "towin" to match the position in "fromwin", so that they
  * show the same diff'ed lines.
  */
-void diff_set_topline(fromwin, towin)
-win_T       *fromwin;
-win_T       *towin;
+void diff_set_topline(win_T *fromwin, win_T *towin)
 {
   buf_T       *frombuf = fromwin->w_buffer;
   linenr_T lnum = fromwin->w_topline;
@@ -1651,11 +1615,13 @@ int diffopt_horizontal(void)         {
  * Find the difference within a changed line.
  * Returns TRUE if the line was added, no other buffer has it.
  */
-int diff_find_change(wp, lnum, startp, endp)
-win_T       *wp;
-linenr_T lnum;
-int         *startp;            /* first char of the change */
-int         *endp;              /* last char of the change */
+int 
+diff_find_change (
+    win_T *wp,
+    linenr_T lnum,
+    int *startp,            /* first char of the change */
+    int *endp              /* last char of the change */
+)
 {
   char_u      *line_org;
   char_u      *line_new;
@@ -1758,9 +1724,7 @@ int         *endp;              /* last char of the change */
  * be in a fold.
  * Return FALSE if there are no diff blocks at all in this window.
  */
-int diff_infold(wp, lnum)
-win_T       *wp;
-linenr_T lnum;
+int diff_infold(win_T *wp, linenr_T lnum)
 {
   int i;
   int idx = -1;
@@ -1822,8 +1786,7 @@ void nv_diffgetput(int put)
  * ":diffget"
  * ":diffput"
  */
-void ex_diffgetput(eap)
-exarg_T     *eap;
+void ex_diffgetput(exarg_T *eap)
 {
   linenr_T lnum;
   int count;
@@ -2101,9 +2064,7 @@ exarg_T     *eap;
  * Skip buffer with index "skip_idx".
  * When there are no diffs, all folds are removed.
  */
-static void diff_fold_update(dp, skip_idx)
-diff_T      *dp;
-int skip_idx;
+static void diff_fold_update(diff_T *dp, int skip_idx)
 {
   int i;
   win_T       *wp;
@@ -2118,8 +2079,7 @@ int skip_idx;
 /*
  * Return TRUE if buffer "buf" is in diff-mode.
  */
-int diff_mode_buf(buf)
-buf_T       *buf;
+int diff_mode_buf(buf_T *buf)
 {
   tabpage_T   *tp;
 
@@ -2182,11 +2142,7 @@ int diff_move_to(int dir, long count)
   return OK;
 }
 
-linenr_T diff_get_corresponding_line(buf1, lnum1, buf2, lnum3)
-buf_T       *buf1;
-linenr_T lnum1;
-buf_T       *buf2;
-linenr_T lnum3;
+linenr_T diff_get_corresponding_line(buf_T *buf1, linenr_T lnum1, buf_T *buf2, linenr_T lnum3)
 {
   int idx1;
   int idx2;
@@ -2249,9 +2205,7 @@ linenr_T lnum3;
  * For line "lnum" in the current window find the equivalent lnum in window
  * "wp", compensating for inserted/deleted lines.
  */
-linenr_T diff_lnum_win(lnum, wp)
-linenr_T lnum;
-win_T       *wp;
+linenr_T diff_lnum_win(linenr_T lnum, win_T *wp)
 {
   diff_T      *dp;
   int idx;

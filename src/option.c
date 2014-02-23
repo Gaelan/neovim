@@ -3601,8 +3601,7 @@ void check_options(void)          {
 /*
  * Check string options in a buffer for NULL value.
  */
-void check_buf_options(buf)
-buf_T       *buf;
+void check_buf_options(buf_T *buf)
 {
   check_string_option(&buf->b_p_bh);
   check_string_option(&buf->b_p_bt);
@@ -3745,12 +3744,14 @@ static void redraw_titles(void) {
  * When "set_sid" is zero set the scriptID to current_SID.  When "set_sid" is
  * SID_NONE don't set the scriptID.  Otherwise set the scriptID to "set_sid".
  */
-void set_string_option_direct(name, opt_idx, val, opt_flags, set_sid)
-char_u      *name;
-int opt_idx;
-char_u      *val;
-int opt_flags;                  /* OPT_FREE, OPT_LOCAL and/or OPT_GLOBAL */
-int set_sid UNUSED;
+void 
+set_string_option_direct (
+    char_u *name,
+    int opt_idx,
+    char_u *val,
+    int opt_flags,                  /* OPT_FREE, OPT_LOCAL and/or OPT_GLOBAL */
+    int set_sid
+)
 {
   char_u      *s;
   char_u      **varp;
@@ -4822,8 +4823,7 @@ static int int_cmp(const void *a, const void *b)
  * Handle setting 'colorcolumn' or 'textwidth' in window "wp".
  * Returns error message, NULL if it's OK.
  */
-char_u * check_colorcolumn(wp)
-win_T       *wp;
+char_u *check_colorcolumn(win_T *wp)
 {
   char_u      *s;
   int col;
@@ -5047,8 +5047,7 @@ char_u *check_stl_option(char_u *s)
  * Set curbuf->b_cap_prog to the regexp program for 'spellcapcheck'.
  * Return error message when failed, NULL when OK.
  */
-static char_u * compile_cap_prog(synblock)
-synblock_T *synblock;
+static char_u *compile_cap_prog(synblock_T *synblock)
 {
   regprog_T   *rp = synblock->b_cap_prog;
   char_u      *re;
@@ -5487,15 +5486,16 @@ set_bool_option (
  * Set the value of a number option, and take care of side effects.
  * Returns NULL for success, or an error message for an error.
  */
-static char_u * set_num_option(opt_idx, varp, value, errbuf, errbuflen,
-    opt_flags)
-int opt_idx;                            /* index in options[] table */
-char_u      *varp;                      /* pointer to the option variable */
-long value;                             /* new value */
-char_u      *errbuf;                    /* buffer for error messages */
-size_t errbuflen;                       /* length of "errbuf" */
-int opt_flags;                          /* OPT_LOCAL, OPT_GLOBAL and
+static char_u *
+set_num_option (
+    int opt_idx,                            /* index in options[] table */
+    char_u *varp,                      /* pointer to the option variable */
+    long value,                             /* new value */
+    char_u *errbuf,                    /* buffer for error messages */
+    size_t errbuflen,                       /* length of "errbuf" */
+    int opt_flags                          /* OPT_LOCAL, OPT_GLOBAL and
                                            OPT_MODELINE */
+)
 {
   char_u      *errmsg = NULL;
   long old_value = *(long *)varp;
@@ -6301,10 +6301,7 @@ showoneopt (
  *
  * Return FAIL on error, OK otherwise.
  */
-int makeset(fd, opt_flags, local_only)
-FILE        *fd;
-int opt_flags;
-int local_only;
+int makeset(FILE *fd, int opt_flags, int local_only)
 {
   struct vimoption    *p;
   char_u              *varp;                    /* currently used value */
@@ -6406,8 +6403,7 @@ int local_only;
  * Generate set commands for the local fold options only.  Used when
  * 'sessionoptions' or 'viewoptions' contains "folds" but not "options".
  */
-int makefoldset(fd)
-FILE        *fd;
+int makefoldset(FILE *fd)
 {
   if (put_setstring(fd, "setlocal", "fdm", &curwin->w_p_fdm, FALSE) == FAIL
       || put_setstring(fd, "setlocal", "fde", &curwin->w_p_fde, FALSE)
@@ -6426,12 +6422,7 @@ FILE        *fd;
   return OK;
 }
 
-static int put_setstring(fd, cmd, name, valuep, expand)
-FILE        *fd;
-char        *cmd;
-char        *name;
-char_u      **valuep;
-int expand;
+static int put_setstring(FILE *fd, char *cmd, char *name, char_u **valuep, int expand)
 {
   char_u      *s;
   char_u      *buf;
@@ -6465,11 +6456,7 @@ int expand;
   return OK;
 }
 
-static int put_setnum(fd, cmd, name, valuep)
-FILE        *fd;
-char        *cmd;
-char        *name;
-long        *valuep;
+static int put_setnum(FILE *fd, char *cmd, char *name, long *valuep)
 {
   long wc;
 
@@ -6486,11 +6473,7 @@ long        *valuep;
   return OK;
 }
 
-static int put_setbool(fd, cmd, name, value)
-FILE        *fd;
-char        *cmd;
-char        *name;
-int value;
+static int put_setbool(FILE *fd, char *cmd, char *name, int value)
 {
   if (value < 0)        /* global/local option using global value */
     return OK;
@@ -6867,9 +6850,7 @@ char_u *get_equalprg(void)              {
  * Copy options from one window to another.
  * Used when splitting a window.
  */
-void win_copy_options(wp_from, wp_to)
-win_T       *wp_from;
-win_T       *wp_to;
+void win_copy_options(win_T *wp_from, win_T *wp_to)
 {
   copy_winopt(&wp_from->w_onebuf_opt, &wp_to->w_onebuf_opt);
   copy_winopt(&wp_from->w_allbuf_opt, &wp_to->w_allbuf_opt);
@@ -6883,9 +6864,7 @@ win_T       *wp_to;
  * The 'scroll' option is not copied, because it depends on the window height.
  * The 'previewwindow' option is reset, there can be only one preview window.
  */
-void copy_winopt(from, to)
-winopt_T    *from;
-winopt_T    *to;
+void copy_winopt(winopt_T *from, winopt_T *to)
 {
   to->wo_arab = from->wo_arab;
   to->wo_list = from->wo_list;
@@ -6931,8 +6910,7 @@ winopt_T    *to;
 /*
  * Check string options in a window for a NULL value.
  */
-void check_win_options(win)
-win_T       *win;
+void check_win_options(win_T *win)
 {
   check_winopt(&win->w_onebuf_opt);
   check_winopt(&win->w_allbuf_opt);
@@ -6941,8 +6919,7 @@ win_T       *win;
 /*
  * Check for NULL pointers in a winopt_T and replace them with empty_option.
  */
-void check_winopt(wop)
-winopt_T    *wop UNUSED;
+void check_winopt(winopt_T *wop)
 {
   check_string_option(&wop->wo_fdi);
   check_string_option(&wop->wo_fdm);
@@ -6959,8 +6936,7 @@ winopt_T    *wop UNUSED;
 /*
  * Free the allocated memory inside a winopt_T.
  */
-void clear_winopt(wop)
-winopt_T    *wop UNUSED;
+void clear_winopt(winopt_T *wop)
 {
   clear_string_option(&wop->wo_fdi);
   clear_string_option(&wop->wo_fdm);
@@ -6983,9 +6959,7 @@ winopt_T    *wop UNUSED;
  *		appropriate.
  * BCO_NOHELP	Don't copy the values to a help buffer.
  */
-void buf_copy_options(buf, flags)
-buf_T       *buf;
-int flags;
+void buf_copy_options(buf_T *buf, int flags)
 {
   int should_copy = TRUE;
   char_u      *save_p_isk = NULL;           /* init for GCC */
@@ -7189,10 +7163,12 @@ static int expand_option_idx = -1;
 static char_u expand_option_name[5] = {'t', '_', NUL, NUL, NUL};
 static int expand_option_flags = 0;
 
-void set_context_in_set_cmd(xp, arg, opt_flags)
-expand_T    *xp;
-char_u      *arg;
-int opt_flags;                  /* OPT_GLOBAL and/or OPT_LOCAL */
+void 
+set_context_in_set_cmd (
+    expand_T *xp,
+    char_u *arg,
+    int opt_flags                  /* OPT_GLOBAL and/or OPT_LOCAL */
+)
 {
   int nextchar;
   long_u flags = 0;             /* init for GCC */
@@ -7359,11 +7335,7 @@ int opt_flags;                  /* OPT_GLOBAL and/or OPT_LOCAL */
   return;
 }
 
-int ExpandSettings(xp, regmatch, num_file, file)
-expand_T    *xp;
-regmatch_T  *regmatch;
-int         *num_file;
-char_u      ***file;
+int ExpandSettings(expand_T *xp, regmatch_T *regmatch, int *num_file, char_u ***file)
 {
   int num_normal = 0;               /* Nr of matching non-term-code settings */
   int num_term = 0;                 /* Nr of matching terminal code settings */
@@ -8129,8 +8101,7 @@ can_bs (
  * Save the current values of 'fileformat' and 'fileencoding', so that we know
  * the file must be considered changed when the value is different.
  */
-void save_file_ff(buf)
-buf_T       *buf;
+void save_file_ff(buf_T *buf)
 {
   buf->b_start_ffc = *buf->b_p_ff;
   buf->b_start_eol = buf->b_p_eol;
@@ -8152,9 +8123,7 @@ buf_T       *buf;
  * When "ignore_empty" is true don't consider a new, empty buffer to be
  * changed.
  */
-int file_ff_differs(buf, ignore_empty)
-buf_T       *buf;
-int ignore_empty;
+int file_ff_differs(buf_T *buf, int ignore_empty)
 {
   /* In a buffer that was never loaded the options are not valid. */
   if (buf->b_flags & BF_NEVERLOADED)
@@ -8187,8 +8156,7 @@ int check_ff_value(char_u *p)
  * Return the effective shiftwidth value for current buffer, using the
  * 'tabstop' value when 'shiftwidth' is zero.
  */
-long get_sw_value(buf)
-buf_T *buf;
+long get_sw_value(buf_T *buf)
 {
   return buf->b_p_sw ? buf->b_p_sw : buf->b_p_ts;
 }

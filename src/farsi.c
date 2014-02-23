@@ -2125,8 +2125,7 @@ int F_ischar(int c)
   return c >= TEE_ && c <= YE_;
 }
 
-void farsi_fkey(cap)
-cmdarg_T    *cap;
+void farsi_fkey(cmdarg_T *cap)
 {
   int c = cap->cmdchar;
 

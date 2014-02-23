@@ -172,10 +172,7 @@ int get_extra_op_char(int optype)
 /*
  * op_shift - handle a shift operation
  */
-void op_shift(oap, curs_top, amount)
-oparg_T         *oap;
-int curs_top;
-int amount;
+void op_shift(oparg_T *oap, int curs_top, int amount)
 {
   long i;
   int first_char;
@@ -298,9 +295,7 @@ shift_line (
  * Shift one line of the current block one shiftwidth right or left.
  * Leaves cursor on first character in block.
  */
-static void shift_block(oap, amount)
-oparg_T     *oap;
-int amount;
+static void shift_block(oparg_T *oap, int amount)
 {
   int left = (oap->op_type == OP_LSHIFT);
   int oldstate = State;
@@ -463,11 +458,7 @@ int amount;
  * Insert string "s" (b_insert ? before : after) block :AKelly
  * Caller must prepare for undo.
  */
-static void block_insert(oap, s, b_insert, bdp)
-oparg_T             *oap;
-char_u              *s;
-int b_insert;
-struct block_def    *bdp;
+static void block_insert(oparg_T *oap, char_u *s, int b_insert, struct block_def *bdp)
 {
   int p_ts;
   int count = 0;                /* extra spaces to replace a cut TAB */
@@ -1323,8 +1314,7 @@ cmdline_paste_reg (
  *
  * Return FAIL if undo failed, OK otherwise.
  */
-int op_delete(oap)
-oparg_T   *oap;
+int op_delete(oparg_T *oap)
 {
   int n;
   linenr_T lnum;
@@ -1665,8 +1655,7 @@ setmarks:
  * Adjust end of operating area for ending on a multi-byte character.
  * Used for deletion.
  */
-static void mb_adjust_opend(oap)
-oparg_T     *oap;
+static void mb_adjust_opend(oparg_T *oap)
 {
   char_u      *p;
 
@@ -1679,9 +1668,7 @@ oparg_T     *oap;
 /*
  * Replace a whole area with one character.
  */
-int op_replace(oap, c)
-oparg_T   *oap;
-int c;
+int op_replace(oparg_T *oap, int c)
 {
   int n, numc;
   int num_chars;
@@ -1883,8 +1870,7 @@ static int swapchars __ARGS((int op_type, pos_T *pos, int length));
 /*
  * Handle the (non-standard vi) tilde operator.  Also for "gu", "gU" and "g?".
  */
-void op_tilde(oap)
-oparg_T     *oap;
+void op_tilde(oparg_T *oap)
 {
   pos_T pos;
   struct block_def bd;
@@ -1959,10 +1945,7 @@ oparg_T     *oap;
  * Also works correctly when the number of bytes changes.
  * Returns TRUE if some character was changed.
  */
-static int swapchars(op_type, pos, length)
-int op_type;
-pos_T       *pos;
-int length;
+static int swapchars(int op_type, pos_T *pos, int length)
 {
   int todo;
   int did_change = 0;
@@ -1989,9 +1972,7 @@ int length;
  * else swap case of character at 'pos'
  * returns TRUE when something actually changed.
  */
-int swapchar(op_type, pos)
-int op_type;
-pos_T    *pos;
+int swapchar(int op_type, pos_T *pos)
 {
   int c;
   int nc;
@@ -2048,9 +2029,7 @@ pos_T    *pos;
 /*
  * op_insert - Insert and append operators for Visual mode.
  */
-void op_insert(oap, count1)
-oparg_T     *oap;
-long count1;
+void op_insert(oparg_T *oap, long count1)
 {
   long ins_len, pre_textlen = 0;
   char_u              *firstline, *ins_text;
@@ -2196,8 +2175,7 @@ long count1;
  *
  * return TRUE if edit() returns because of a CTRL-O command
  */
-int op_change(oap)
-oparg_T     *oap;
+int op_change(oparg_T *oap)
 {
   colnr_T l;
   int retval;
@@ -2365,10 +2343,7 @@ static void free_yank_all(void)                 {
  *
  * Return FAIL for failure, OK otherwise.
  */
-int op_yank(oap, deleting, mess)
-oparg_T   *oap;
-int deleting;
-int mess;
+int op_yank(oparg_T *oap, int deleting, int mess)
 {
   long y_idx;                           /* index in y_array[] */
   struct yankreg      *curr;            /* copy of y_current */
@@ -3240,8 +3215,7 @@ int get_register_name(int num)
 /*
  * ":dis" and ":registers": Display the contents of the yank registers.
  */
-void ex_display(eap)
-exarg_T     *eap;
+void ex_display(exarg_T *eap)
 {
   int i, n;
   long j;
@@ -3464,11 +3438,7 @@ static char_u *skip_comment(char_u *line, int process, int include_space, int *i
  *
  * return FAIL for failure, OK otherwise
  */
-int do_join(count, insert_space, save_undo, use_formatoptions)
-long count;
-int insert_space;
-int save_undo;
-int use_formatoptions UNUSED;
+int do_join(long count, int insert_space, int save_undo, int use_formatoptions)
 {
   char_u      *curr = NULL;
   char_u      *curr_start = NULL;
@@ -3707,9 +3677,11 @@ static int same_leader(linenr_T lnum, int leader1_len, char_u *leader1_flags, in
 /*
  * Implementation of the format operator 'gq'.
  */
-void op_format(oap, keep_cursor)
-oparg_T     *oap;
-int keep_cursor;                        /* keep cursor on same text char */
+void 
+op_format (
+    oparg_T *oap,
+    int keep_cursor                        /* keep cursor on same text char */
+)
 {
   long old_line_count = curbuf->b_ml.ml_line_count;
 
@@ -3775,8 +3747,7 @@ int keep_cursor;                        /* keep cursor on same text char */
 /*
  * Implementation of the format operator 'gq' for when using 'formatexpr'.
  */
-void op_formatexpr(oap)
-oparg_T     *oap;
+void op_formatexpr(oparg_T *oap)
 {
   if (oap->is_VIsual)
     /* When there is no change: need to remove the Visual selection */
@@ -4151,11 +4122,7 @@ int paragraph_start(linenr_T lnum)
  * - start/endspaces is the number of columns of the first/last yanked char
  *   that are to be yanked.
  */
-static void block_prep(oap, bdp, lnum, is_del)
-oparg_T             *oap;
-struct block_def    *bdp;
-linenr_T lnum;
-int is_del;
+static void block_prep(oparg_T *oap, struct block_def *bdp, linenr_T lnum, int is_del)
 {
   int incr = 0;
   char_u      *pend;
@@ -4513,9 +4480,7 @@ int do_addsub(int command, linenr_T Prenum1)
   return OK;
 }
 
-int read_viminfo_register(virp, force)
-vir_T       *virp;
-int force;
+int read_viminfo_register(vir_T *virp, int force)
 {
   int eof;
   int do_it = TRUE;
@@ -4605,8 +4570,7 @@ int force;
   return eof;
 }
 
-void write_viminfo_registers(fp)
-FILE    *fp;
+void write_viminfo_registers(FILE *fp)
 {
   int i, j;
   char_u  *type;
@@ -4985,8 +4949,7 @@ str_to_reg (
     y_ptr->y_width = 0;
 }
 
-void clear_oparg(oap)
-oparg_T     *oap;
+void clear_oparg(oparg_T *oap)
 {
   vim_memset(oap, 0, sizeof(oparg_T));
 }

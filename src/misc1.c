@@ -41,9 +41,7 @@ int get_indent_lnum(linenr_T lnum)
  * Count the size (in window cells) of the indent in line "lnum" of buffer
  * "buf".
  */
-int get_indent_buf(buf, lnum)
-buf_T       *buf;
-linenr_T lnum;
+int get_indent_buf(buf_T *buf, linenr_T lnum)
 {
   return get_indent_str(ml_get_buf(buf, lnum, FALSE), (int)buf->b_p_ts);
 }
@@ -1614,10 +1612,12 @@ int plines(linenr_T lnum)
   return plines_win(curwin, lnum, TRUE);
 }
 
-int plines_win(wp, lnum, winheight)
-win_T       *wp;
-linenr_T lnum;
-int winheight;                  /* when TRUE limit to window height */
+int 
+plines_win (
+    win_T *wp,
+    linenr_T lnum,
+    int winheight                  /* when TRUE limit to window height */
+)
 {
   /* Check for filler lines above this buffer line.  When folded the result
    * is one line anyway. */
@@ -1629,10 +1629,12 @@ int plines_nofill(linenr_T lnum)
   return plines_win_nofill(curwin, lnum, TRUE);
 }
 
-int plines_win_nofill(wp, lnum, winheight)
-win_T       *wp;
-linenr_T lnum;
-int winheight;                  /* when TRUE limit to window height */
+int 
+plines_win_nofill (
+    win_T *wp,
+    linenr_T lnum,
+    int winheight                  /* when TRUE limit to window height */
+)
 {
   int lines;
 
@@ -1657,9 +1659,7 @@ int winheight;                  /* when TRUE limit to window height */
  * Return number of window lines physical line "lnum" will occupy in window
  * "wp".  Does not care about folding, 'wrap' or 'diff'.
  */
-int plines_win_nofold(wp, lnum)
-win_T       *wp;
-linenr_T lnum;
+int plines_win_nofold(win_T *wp, linenr_T lnum)
 {
   char_u      *s;
   long col;
@@ -1694,10 +1694,7 @@ linenr_T lnum;
  * Like plines_win(), but only reports the number of physical screen lines
  * used from the start of the line to the given column number.
  */
-int plines_win_col(wp, lnum, column)
-win_T       *wp;
-linenr_T lnum;
-long column;
+int plines_win_col(win_T *wp, linenr_T lnum, long column)
 {
   long col;
   char_u      *s;
@@ -1745,9 +1742,7 @@ long column;
   return lines;
 }
 
-int plines_m_win(wp, first, last)
-win_T       *wp;
-linenr_T first, last;
+int plines_m_win(win_T *wp, linenr_T first, linenr_T last)
 {
   int count = 0;
 
@@ -2034,10 +2029,12 @@ int del_chars(long count, int fixpos)
  *
  * return FAIL for failure, OK otherwise
  */
-int del_bytes(count, fixpos_arg, use_delcombine)
-long count;
-int fixpos_arg;
-int use_delcombine UNUSED;                  /* 'delcombine' option applies */
+int 
+del_bytes (
+    long count,
+    int fixpos_arg,
+    int use_delcombine                  /* 'delcombine' option applies */
+)
 {
   char_u      *oldp, *newp;
   colnr_T oldlen;
@@ -2203,8 +2200,7 @@ del_lines (
   deleted_lines_mark(first, n);
 }
 
-int gchar_pos(pos)
-pos_T *pos;
+int gchar_pos(pos_T *pos)
 {
   char_u      *ptr = ml_get_pos(pos);
 
@@ -2344,9 +2340,7 @@ void changed_bytes(linenr_T lnum, colnr_T col)
   }
 }
 
-static void changedOneline(buf, lnum)
-buf_T       *buf;
-linenr_T lnum;
+static void changedOneline(buf_T *buf, linenr_T lnum)
 {
   if (buf->b_mod_set) {
     /* find the maximum area that must be redisplayed */
@@ -2445,11 +2439,13 @@ changed_lines (
   changed_common(lnum, col, lnume, xtra);
 }
 
-static void changed_lines_buf(buf, lnum, lnume, xtra)
-buf_T       *buf;
-linenr_T lnum;              /* first line with change */
-linenr_T lnume;             /* line below last changed line */
-long xtra;                  /* number of extra lines (negative when deleting) */
+static void 
+changed_lines_buf (
+    buf_T *buf,
+    linenr_T lnum,              /* first line with change */
+    linenr_T lnume,             /* line below last changed line */
+    long xtra                  /* number of extra lines (negative when deleting) */
+)
 {
   if (buf->b_mod_set) {
     /* find the maximum area that must be redisplayed */
@@ -2639,9 +2635,11 @@ static void changed_common(linenr_T lnum, colnr_T col, linenr_T lnume, long xtra
 /*
  * unchanged() is called when the changed flag must be reset for buffer 'buf'
  */
-void unchanged(buf, ff)
-buf_T       *buf;
-int ff;                 /* also reset 'fileformat' */
+void 
+unchanged (
+    buf_T *buf,
+    int ff                 /* also reset 'fileformat' */
+)
 {
   if (buf->b_changed || (ff && file_ff_differs(buf, FALSE))) {
     buf->b_changed = 0;
@@ -2659,8 +2657,7 @@ int ff;                 /* also reset 'fileformat' */
  * check_status: called when the status bars for the buffer 'buf'
  *		 need to be updated
  */
-void check_status(buf)
-buf_T       *buf;
+void check_status(buf_T *buf)
 {
   win_T       *wp;
 
@@ -3617,9 +3614,7 @@ void vim_setenv(char_u *name, char_u *val)
 /*
  * Function given to ExpandGeneric() to obtain an environment variable name.
  */
-char_u * get_env_name(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_env_name(expand_T *xp, int idx)
 {
 # if defined(AMIGA) || defined(__MRC__) || defined(__SC__)
   /*
@@ -3687,9 +3682,7 @@ static void init_users(void)                 {
 /*
  * Function given to ExpandGeneric() to obtain an user names.
  */
-char_u* get_users(xp, idx)
-expand_T    *xp UNUSED;
-int idx;
+char_u *get_users(expand_T *xp, int idx)
 {
   init_users();
   if (idx < ga_users.ga_len)
@@ -3724,13 +3717,15 @@ int match_user(char_u *name)
  * 'src'.
  * If anything fails (except when out of space) dst equals src.
  */
-void home_replace(buf, src, dst, dstlen, one)
-buf_T       *buf;       /* when not NULL, check for help files */
-char_u      *src;       /* input file name */
-char_u      *dst;       /* where to put the result */
-int dstlen;             /* maximum length of the result */
-int one;                /* if TRUE, only replace one file name, include
+void 
+home_replace (
+    buf_T *buf,       /* when not NULL, check for help files */
+    char_u *src,       /* input file name */
+    char_u *dst,       /* where to put the result */
+    int dstlen,             /* maximum length of the result */
+    int one                /* if TRUE, only replace one file name, include
                            spaces and commas in the file name. */
+)
 {
   size_t dirlen = 0, envlen = 0;
   size_t len;
@@ -3835,9 +3830,11 @@ int one;                /* if TRUE, only replace one file name, include
  * Like home_replace, store the replaced string in allocated memory.
  * When something fails, NULL is returned.
  */
-char_u  * home_replace_save(buf, src)
-buf_T       *buf;       /* when not NULL, check for help files */
-char_u      *src;       /* input file name */
+char_u *
+home_replace_save (
+    buf_T *buf,       /* when not NULL, check for help files */
+    char_u *src       /* input file name */
+)
 {
   char_u      *dst;
   unsigned len;
@@ -4137,9 +4134,7 @@ int vim_fnamecmp(char_u *x, char_u *y)
 #endif
 }
 
-int vim_fnamencmp(x, y, len)
-char_u      *x, *y;
-size_t len;
+int vim_fnamencmp(char_u *x, char_u *y, size_t len)
 {
 #ifdef BACKSLASH_IN_FILENAME
   char_u      *px = x;
@@ -4250,12 +4245,14 @@ static pos_T *ind_find_start_comment __ARGS((void));
  * Find the start of a comment, not knowing if we are in a comment right now.
  * Search starts at w_cursor.lnum and goes backwards.
  */
-static pos_T * ind_find_start_comment()                    { /* XXX */
+static pos_T *ind_find_start_comment(void)                    { /* XXX */
   return find_start_comment(curbuf->b_ind_maxcomment);
 }
 
-pos_T * find_start_comment(ind_maxcomment)  /* XXX */
-int ind_maxcomment;
+pos_T *
+find_start_comment (  /* XXX */
+    int ind_maxcomment
+)
 {
   pos_T       *pos;
   char_u      *line;
@@ -4429,7 +4426,7 @@ static int cin_nocode(char_u *s)
 /*
  * Check previous lines for a "//" line comment, skipping over blank lines.
  */
-static pos_T * find_line_comment()                    { /* XXX */
+static pos_T *find_line_comment(void)                    { /* XXX */
   static pos_T pos;
   char_u       *line;
   char_u       *p;
@@ -5384,8 +5381,7 @@ static int cin_starts_with(char_u *s, char *word)
  * Skip strings, chars and comments until at or past "trypos".
  * Return the column found.
  */
-static int cin_skip2pos(trypos)
-pos_T       *trypos;
+static int cin_skip2pos(pos_T *trypos)
 {
   char_u      *line;
   char_u      *p;
@@ -5411,7 +5407,7 @@ pos_T       *trypos;
 /* {	    */
 /* }	    */
 
-static pos_T * find_start_brace()                    { /* XXX */
+static pos_T *find_start_brace(void)                    { /* XXX */
   pos_T cursor_save;
   pos_T       *trypos;
   pos_T       *pos;
@@ -5438,8 +5434,10 @@ static pos_T * find_start_brace()                    { /* XXX */
  * Find the matching '(', failing if it is in a comment.
  * Return NULL if no match found.
  */
-static pos_T * find_match_paren(ind_maxparen) /* XXX */
-int ind_maxparen;
+static pos_T *
+find_match_paren ( /* XXX */
+    int ind_maxparen
+)
 {
   pos_T cursor_save;
   pos_T       *trypos;
@@ -5468,8 +5466,7 @@ int ind_maxparen;
  * matching paren above the cursor line doesn't find a match because of
  * looking a few lines further.
  */
-static int corr_ind_maxparen(startpos)
-pos_T       *startpos;
+static int corr_ind_maxparen(pos_T *startpos)
 {
   long n = (long)startpos->lnum - (long)curwin->w_cursor.lnum;
 
@@ -5511,8 +5508,7 @@ static int find_last_paren(char_u *l, int start, int end)
  * Parse 'cinoptions' and set the values in "curbuf".
  * Must be called when 'cinoptions', 'shiftwidth' and/or 'tabstop' changes.
  */
-void parse_cino(buf)
-buf_T       *buf;
+void parse_cino(buf_T *buf)
 {
   char_u      *p;
   char_u      *l;
@@ -8014,12 +8010,14 @@ static int pstrcmp(const void *a, const void *b)
  * Return the number of matches found.
  * NOTE: much of this is identical to dos_expandpath(), keep in sync!
  */
-int unix_expandpath(gap, path, wildoff, flags, didstar)
-garray_T    *gap;
-char_u      *path;
-int wildoff;
-int flags;                      /* EW_* flags */
-int didstar;                    /* expanded "**" once already */
+int 
+unix_expandpath (
+    garray_T *gap,
+    char_u *path,
+    int wildoff,
+    int flags,                      /* EW_* flags */
+    int didstar                    /* expanded "**" once already */
+)
 {
   char_u      *buf;
   char_u      *path_end;
@@ -8232,10 +8230,7 @@ static int find_previous_pathsep(char_u *path, char_u **psep)
  * Returns TRUE if "maybe_unique" is unique wrt other_paths in "gap".
  * "maybe_unique" is the end portion of "((char_u **)gap->ga_data)[i]".
  */
-static int is_unique(maybe_unique, gap, i)
-char_u      *maybe_unique;
-garray_T    *gap;
-int i;
+static int is_unique(char_u *maybe_unique, garray_T *gap, int i)
 {
   int j;
   int candidate_len;
@@ -8270,9 +8265,7 @@ int i;
  * TODO: handle upward search (;) and path limiter (**N) notations by
  * expanding each into their equivalent path(s).
  */
-static void expand_path_option(curdir, gap)
-char_u      *curdir;
-garray_T    *gap;
+static void expand_path_option(char_u *curdir, garray_T *gap)
 {
   char_u      *path_option = *curbuf->b_p_path == NUL
                              ? p_path : curbuf->b_p_path;
@@ -8340,9 +8333,7 @@ garray_T    *gap;
  *   fname: /foo/bar/baz/quux.txt
  * returns:		 ^this
  */
-static char_u * get_path_cutoff(fname, gap)
-char_u *fname;
-garray_T *gap;
+static char_u *get_path_cutoff(char_u *fname, garray_T *gap)
 {
   int i;
   int maxlen = 0;
@@ -8374,9 +8365,7 @@ garray_T *gap;
  * that they are unique with respect to each other while conserving the part
  * that matches the pattern. Beware, this is at least O(n^2) wrt "gap->ga_len".
  */
-static void uniquefy_paths(gap, pattern)
-garray_T    *gap;
-char_u      *pattern;
+static void uniquefy_paths(garray_T *gap, char_u *pattern)
 {
   int i;
   int len;
@@ -8527,10 +8516,12 @@ theend:
  * result in "gap".
  * Returns the total number of matches.
  */
-static int expand_in_path(gap, pattern, flags)
-garray_T    *gap;
-char_u      *pattern;
-int flags;                      /* EW_* flags */
+static int 
+expand_in_path (
+    garray_T *gap,
+    char_u *pattern,
+    int flags                      /* EW_* flags */
+)
 {
   char_u      *curdir;
   garray_T path_ga;
@@ -8584,8 +8575,7 @@ int flags;                      /* EW_* flags */
  * Sort "gap" and remove duplicate entries.  "gap" is expected to contain a
  * list of file names in allocated memory.
  */
-void remove_duplicates(gap)
-garray_T    *gap;
+void remove_duplicates(garray_T *gap)
 {
   int i;
   int j;
@@ -8797,10 +8787,12 @@ static int vim_backtick(char_u *p)
  * Currently only works when pat[] starts and ends with a `.
  * Returns number of file names found.
  */
-static int expand_backtick(gap, pat, flags)
-garray_T    *gap;
-char_u      *pat;
-int flags;              /* EW_* flags */
+static int 
+expand_backtick (
+    garray_T *gap,
+    char_u *pat,
+    int flags              /* EW_* flags */
+)
 {
   char_u      *p;
   char_u      *cmd;
@@ -8853,10 +8845,12 @@ int flags;              /* EW_* flags */
  * EW_NOTFOUND	add even when it doesn't exist
  * EW_ADDSLASH	add slash after directory name
  */
-void addfile(gap, f, flags)
-garray_T    *gap;
-char_u      *f;         /* filename */
-int flags;
+void 
+addfile (
+    garray_T *gap,
+    char_u *f,         /* filename */
+    int flags
+)
 {
   char_u      *p;
   int isdir;

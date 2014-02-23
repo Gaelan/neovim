@@ -1139,8 +1139,7 @@ static int old_mouse_col;       /* mouse_col related to old_char */
 /*
  * Save all three kinds of typeahead, so that the user must type at a prompt.
  */
-void save_typeahead(tp)
-tasave_T    *tp;
+void save_typeahead(tasave_T *tp)
 {
   tp->save_typebuf = typebuf;
   tp->typebuf_valid = (alloc_typebuf() == OK);
@@ -1162,8 +1161,7 @@ tasave_T    *tp;
  * Restore the typeahead to what it was before calling save_typeahead().
  * The allocated memory is freed, can only be called once!
  */
-void restore_typeahead(tp)
-tasave_T    *tp;
+void restore_typeahead(tasave_T *tp)
 {
   if (tp->typebuf_valid) {
     free_typebuf();
@@ -3004,8 +3002,7 @@ theend:
  * Delete one entry from the abbrlist or maphash[].
  * "mpp" is a pointer to the m_next field of the PREVIOUS entry!
  */
-static void map_free(mpp)
-mapblock_T  **mpp;
+static void map_free(mapblock_T **mpp)
 {
   mapblock_T  *mp;
 
@@ -3070,11 +3067,7 @@ int get_map_mode(char_u **cmdp, int forceit)
  * Clear all mappings or abbreviations.
  * 'abbr' should be FALSE for mappings, TRUE for abbreviations.
  */
-void map_clear(cmdp, arg, forceit, abbr)
-char_u      *cmdp;
-char_u      *arg UNUSED;
-int forceit;
-int abbr;
+void map_clear(char_u *cmdp, char_u *arg, int forceit, int abbr)
 {
   int mode;
   int local;
@@ -3094,11 +3087,13 @@ int abbr;
 /*
  * Clear all mappings in "mode".
  */
-void map_clear_int(buf, mode, local, abbr)
-buf_T       *buf UNUSED;        /* buffer for local mappings */
-int mode;                       /* mode in which to delete */
-int local UNUSED;               /* TRUE for buffer-local mappings */
-int abbr;                       /* TRUE for abbreviations */
+void 
+map_clear_int (
+    buf_T *buf,        /* buffer for local mappings */
+    int mode,                       /* mode in which to delete */
+    int local,               /* TRUE for buffer-local mappings */
+    int abbr                       /* TRUE for abbreviations */
+)
 {
   mapblock_T  *mp, **mpp;
   int hash;
@@ -3189,9 +3184,11 @@ char_u *map_mode_to_chars(int mode)
   return (char_u *)mapmode.ga_data;
 }
 
-static void showmap(mp, local)
-mapblock_T  *mp;
-int local;                  /* TRUE for buffer-local map */
+static void 
+showmap (
+    mapblock_T *mp,
+    int local                  /* TRUE for buffer-local map */
+)
 {
   int len = 1;
   char_u      *mapchars;
@@ -3338,15 +3335,16 @@ static int expand_buffer = FALSE;
  * Work out what to complete when doing command line completion of mapping
  * or abbreviation names.
  */
-char_u * set_context_in_map_cmd(xp, cmd, arg, forceit, isabbrev, isunmap,
-    cmdidx)
-expand_T    *xp;
-char_u      *cmd;
-char_u      *arg;
-int forceit;                    /* TRUE if '!' given */
-int isabbrev;                   /* TRUE if abbreviation */
-int isunmap;                    /* TRUE if unmap/unabbrev command */
-cmdidx_T cmdidx;
+char_u *
+set_context_in_map_cmd (
+    expand_T *xp,
+    char_u *cmd,
+    char_u *arg,
+    int forceit,                    /* TRUE if '!' given */
+    int isabbrev,                   /* TRUE if abbreviation */
+    int isunmap,                    /* TRUE if unmap/unabbrev command */
+    cmdidx_T cmdidx
+)
 {
   if (forceit && cmdidx != CMD_map && cmdidx != CMD_unmap)
     xp->xp_context = EXPAND_NOTHING;
@@ -3400,10 +3398,7 @@ cmdidx_T cmdidx;
  * For command line expansion of ":[un]map" and ":[un]abbrev" in all modes.
  * Return OK if matches found, FAIL otherwise.
  */
-int ExpandMappings(regmatch, num_file, file)
-regmatch_T  *regmatch;
-int         *num_file;
-char_u      ***file;
+int ExpandMappings(regmatch_T *regmatch, int *num_file, char_u ***file)
 {
   mapblock_T  *mp;
   int hash;
@@ -3793,9 +3788,11 @@ void vim_unescape_csi(char_u *p)
  * Write map commands for the current mappings to an .exrc file.
  * Return FAIL on error, OK otherwise.
  */
-int makemap(fd, buf)
-FILE        *fd;
-buf_T       *buf;           /* buffer for local mappings or NULL */
+int 
+makemap (
+    FILE *fd,
+    buf_T *buf           /* buffer for local mappings or NULL */
+)
 {
   mapblock_T  *mp;
   char_u c1, c2, c3;
@@ -3990,10 +3987,7 @@ buf_T       *buf;           /* buffer for local mappings or NULL */
  *
  * return FAIL for failure, OK otherwise
  */
-int put_escstr(fd, strstart, what)
-FILE        *fd;
-char_u      *strstart;
-int what;
+int put_escstr(FILE *fd, char_u *strstart, int what)
 {
   char_u      *str = strstart;
   int c;
@@ -4158,14 +4152,16 @@ void check_map_keycodes(void)          {
  * Return pointer to rhs of mapping (mapblock->m_str).
  * NULL when no mapping found.
  */
-char_u * check_map(keys, mode, exact, ign_mod, abbr, mp_ptr, local_ptr)
-char_u      *keys;
-int mode;
-int exact;                      /* require exact match */
-int ign_mod;                    /* ignore preceding modifier */
-int abbr;                       /* do abbreviations */
-mapblock_T  **mp_ptr;           /* return: pointer to mapblock or NULL */
-int         *local_ptr;         /* return: buffer-local mapping or NULL */
+char_u *
+check_map (
+    char_u *keys,
+    int mode,
+    int exact,                      /* require exact match */
+    int ign_mod,                    /* ignore preceding modifier */
+    int abbr,                       /* do abbreviations */
+    mapblock_T **mp_ptr,           /* return: pointer to mapblock or NULL */
+    int *local_ptr         /* return: buffer-local mapping or NULL */
+)
 {
   int hash;
   int len, minlen;

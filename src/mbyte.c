@@ -859,7 +859,7 @@ unsigned trail;
  * Returns 1 for a single-byte character.
  */
 int latin_char2len(c)
-int c UNUSED;
+int c;
 {
   return 1;
 }
@@ -1268,7 +1268,7 @@ int c;
  * This doesn't take care of unprintable characters, use ptr2cells() for that.
  */
 int latin_ptr2cells(p)
-char_u      *p UNUSED;
+char_u      *p;
 {
   return 1;
 }
@@ -1308,8 +1308,8 @@ char_u      *p;
  * For an empty string or truncated character returns 1.
  */
 int latin_ptr2cells_len(p, size)
-char_u      *p UNUSED;
-int size UNUSED;
+char_u      *p;
+int size;
 {
   return 1;
 }
@@ -1353,7 +1353,7 @@ int size;
  * Only takes care of multi-byte chars, not "^C" and such.
  */
 int latin_char2cells(c)
-int c UNUSED;
+int c;
 {
   return 1;
 }
@@ -1391,8 +1391,8 @@ int len;
  * We make sure that the offset used is less than "max_off".
  */
 int latin_off2cells(off, max_off)
-unsigned off UNUSED;
-unsigned max_off UNUSED;
+unsigned off;
+unsigned max_off;
 {
   return 1;
 }
@@ -3028,8 +3028,8 @@ void show_utf8()          {
  * Returns 0 when already at the first byte of a character.
  */
 int latin_head_off(base, p)
-char_u      *base UNUSED;
-char_u      *p UNUSED;
+char_u      *base;
+char_u      *p;
 {
   return 0;
 }

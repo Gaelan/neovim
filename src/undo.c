@@ -98,9 +98,9 @@ static void u_freeentries __ARGS((buf_T *buf, u_header_T *uhp,
 static void u_freeentry __ARGS((u_entry_T *, long));
 static void corruption_error __ARGS((char *mesg, char_u *file_name));
 static void u_free_uhp __ARGS((u_header_T *uhp));
-static size_t fwrite_crypt __ARGS((buf_T *buf UNUSED, char_u *ptr, size_t len,
+static size_t fwrite_crypt __ARGS((buf_T *buf, char_u *ptr, size_t len,
                                    FILE *fp));
-static char_u *read_string_decrypt __ARGS((buf_T *buf UNUSED, FILE *fd, int len));
+static char_u *read_string_decrypt __ARGS((buf_T *buf, FILE *fd, int len));
 static int serialize_header __ARGS((FILE *fp, buf_T *buf, char_u *hash));
 static int serialize_uhp __ARGS((FILE *fp, buf_T *buf, u_header_T *uhp));
 static u_header_T *unserialize_uhp __ARGS((FILE *fp, char_u *file_name));
@@ -732,8 +732,7 @@ static void corruption_error(char *mesg, char_u *file_name)
   EMSG3(_("E825: Corrupted undo file (%s): %s"), mesg, file_name);
 }
 
-static void u_free_uhp(uhp)
-u_header_T  *uhp;
+static void u_free_uhp(u_header_T *uhp)
 {
   u_entry_T   *nuep;
   u_entry_T   *uep;
@@ -751,11 +750,7 @@ u_header_T  *uhp;
  * Like fwrite() but crypt the bytes when 'key' is set.
  * Returns 1 if successful.
  */
-static size_t fwrite_crypt(buf, ptr, len, fp)
-buf_T       *buf UNUSED;
-char_u      *ptr;
-size_t len;
-FILE        *fp;
+static size_t fwrite_crypt(buf_T *buf, char_u *ptr, size_t len, FILE *fp)
 {
   char_u  *copy;
   char_u small_buf[100];
@@ -781,10 +776,7 @@ FILE        *fp;
  * Read a string of length "len" from "fd".
  * When 'key' is set decrypt the bytes.
  */
-static char_u * read_string_decrypt(buf, fd, len)
-buf_T   *buf UNUSED;
-FILE    *fd;
-int len;
+static char_u *read_string_decrypt(buf_T *buf, FILE *fd, int len)
 {
   char_u  *ptr;
 
@@ -794,10 +786,7 @@ int len;
   return ptr;
 }
 
-static int serialize_header(fp, buf, hash)
-FILE        *fp;
-buf_T       *buf;
-char_u      *hash;
+static int serialize_header(FILE *fp, buf_T *buf, char_u *hash)
 {
   int len;
 
@@ -859,10 +848,7 @@ char_u      *hash;
   return OK;
 }
 
-static int serialize_uhp(fp, buf, uhp)
-FILE        *fp;
-buf_T       *buf;
-u_header_T  *uhp;
+static int serialize_uhp(FILE *fp, buf_T *buf, u_header_T *uhp)
 {
   int i;
   u_entry_T   *uep;
@@ -901,9 +887,7 @@ u_header_T  *uhp;
   return OK;
 }
 
-static u_header_T * unserialize_uhp(fp, file_name)
-FILE        *fp;
-char_u      *file_name;
+static u_header_T *unserialize_uhp(FILE *fp, char_u *file_name)
 {
   u_header_T  *uhp;
   int i;
@@ -982,10 +966,7 @@ char_u      *file_name;
 /*
  * Serialize "uep" to "fp".
  */
-static int serialize_uep(fp, buf, uep)
-FILE        *fp;
-buf_T       *buf;
-u_entry_T   *uep;
+static int serialize_uep(FILE *fp, buf_T *buf, u_entry_T *uep)
 {
   int i;
   size_t len;
@@ -1004,10 +985,7 @@ u_entry_T   *uep;
   return OK;
 }
 
-static u_entry_T * unserialize_uep(fp, error, file_name)
-FILE        *fp;
-int         *error;
-char_u      *file_name;
+static u_entry_T *unserialize_uep(FILE *fp, int *error, char_u *file_name)
 {
   int i;
   u_entry_T   *uep;
@@ -1057,9 +1035,7 @@ char_u      *file_name;
 /*
  * Serialize "pos" to "fp".
  */
-static void serialize_pos(pos, fp)
-pos_T pos;
-FILE  *fp;
+static void serialize_pos(pos_T pos, FILE *fp)
 {
   put_bytes(fp, (long_u)pos.lnum, 4);
   put_bytes(fp, (long_u)pos.col, 4);
@@ -1069,9 +1045,7 @@ FILE  *fp;
 /*
  * Unserialize the pos_T at the current position in fp.
  */
-static void unserialize_pos(pos, fp)
-pos_T *pos;
-FILE  *fp;
+static void unserialize_pos(pos_T *pos, FILE *fp)
 {
   pos->lnum = get4c(fp);
   if (pos->lnum < 0)
@@ -1087,9 +1061,7 @@ FILE  *fp;
 /*
  * Serialize "info" to "fp".
  */
-static void serialize_visualinfo(info, fp)
-visualinfo_T    *info;
-FILE            *fp;
+static void serialize_visualinfo(visualinfo_T *info, FILE *fp)
 {
   serialize_pos(info->vi_start, fp);
   serialize_pos(info->vi_end, fp);
@@ -1100,9 +1072,7 @@ FILE            *fp;
 /*
  * Unserialize the visualinfo_T at the current position in fp.
  */
-static void unserialize_visualinfo(info, fp)
-visualinfo_T    *info;
-FILE            *fp;
+static void unserialize_visualinfo(visualinfo_T *info, FILE *fp)
 {
   unserialize_pos(&info->vi_start, fp);
   unserialize_pos(&info->vi_end, fp);
@@ -1114,9 +1084,7 @@ FILE            *fp;
  * Write the pointer to an undo header.  Instead of writing the pointer itself
  * we use the sequence number of the header.  This is converted back to
  * pointers when reading. */
-static void put_header_ptr(fp, uhp)
-FILE        *fp;
-u_header_T  *uhp;
+static void put_header_ptr(FILE *fp, u_header_T *uhp)
 {
   put_bytes(fp, (long_u)(uhp != NULL ? uhp->uh_seq : 0), 4);
 }
@@ -1130,11 +1098,7 @@ u_header_T  *uhp;
  * "forceit" is TRUE for ":wundo!", FALSE otherwise.
  * "hash[UNDO_HASH_SIZE]" must be the hash value of the buffer text.
  */
-void u_write_undo(name, forceit, buf, hash)
-char_u      *name;
-int forceit;
-buf_T       *buf;
-char_u      *hash;
+void u_write_undo(char_u *name, int forceit, buf_T *buf, char_u *hash)
 {
   u_header_T  *uhp;
   char_u      *file_name;
@@ -2414,8 +2378,7 @@ u_sync (
 /*
  * ":undolist": List the leafs of the undo tree
  */
-void ex_undolist(eap)
-exarg_T *eap UNUSED;
+void ex_undolist(exarg_T *eap)
 {
   garray_T ga;
   u_header_T  *uhp;
@@ -2508,10 +2471,7 @@ exarg_T *eap UNUSED;
 /*
  * Put the timestamp of an undo header in "buf[buflen]" in a nice format.
  */
-static void u_add_time(buf, buflen, tt)
-char_u      *buf;
-size_t buflen;
-time_t tt;
+static void u_add_time(char_u *buf, size_t buflen, time_t tt)
 {
 #ifdef HAVE_STRFTIME
   struct tm   *curtime;
@@ -2533,8 +2493,7 @@ time_t tt;
 /*
  * ":undojoin": continue adding to the last entry list
  */
-void ex_undojoin(eap)
-exarg_T *eap UNUSED;
+void ex_undojoin(exarg_T *eap)
 {
   if (curbuf->b_u_newhead == NULL)
     return;                 /* nothing changed before */
@@ -2557,8 +2516,7 @@ exarg_T *eap UNUSED;
  * Called after writing or reloading the file and setting b_changed to FALSE.
  * Now an undo means that the buffer is modified.
  */
-void u_unchanged(buf)
-buf_T       *buf;
+void u_unchanged(buf_T *buf)
 {
   u_unch_branch(buf->b_u_oldhead);
   buf->b_did_warn = FALSE;
@@ -2600,8 +2558,7 @@ void u_find_first_changed(void)          {
  * Increase the write count, store it in the last undo header, what would be
  * used for "u".
  */
-void u_update_save_nr(buf)
-buf_T *buf;
+void u_update_save_nr(buf_T *buf)
 {
   u_header_T  *uhp;
 
@@ -2616,8 +2573,7 @@ buf_T *buf;
     uhp->uh_save_nr = buf->b_u_save_nr_last;
 }
 
-static void u_unch_branch(uhp)
-u_header_T  *uhp;
+static void u_unch_branch(u_header_T *uhp)
 {
   u_header_T  *uh;
 
@@ -2632,7 +2588,7 @@ u_header_T  *uhp;
  * Get pointer to last added entry.
  * If it's not valid, give an error message and return NULL.
  */
-static u_entry_T * u_get_headentry()                        {
+static u_entry_T *u_get_headentry(void)                        {
   if (curbuf->b_u_newhead == NULL || curbuf->b_u_newhead->uh_entry == NULL) {
     EMSG(_("E439: undo list corrupt"));
     return NULL;
@@ -2678,10 +2634,12 @@ static void u_getbot(void)                 {
 /*
  * Free one header "uhp" and its entry list and adjust the pointers.
  */
-static void u_freeheader(buf, uhp, uhpp)
-buf_T           *buf;
-u_header_T      *uhp;
-u_header_T      **uhpp;         /* if not NULL reset when freeing this header */
+static void 
+u_freeheader (
+    buf_T *buf,
+    u_header_T *uhp,
+    u_header_T **uhpp         /* if not NULL reset when freeing this header */
+)
 {
   u_header_T      *uhap;
 
@@ -2712,10 +2670,12 @@ u_header_T      **uhpp;         /* if not NULL reset when freeing this header */
 /*
  * Free an alternate branch and any following alternate branches.
  */
-static void u_freebranch(buf, uhp, uhpp)
-buf_T           *buf;
-u_header_T      *uhp;
-u_header_T      **uhpp;         /* if not NULL reset when freeing this header */
+static void 
+u_freebranch (
+    buf_T *buf,
+    u_header_T *uhp,
+    u_header_T **uhpp         /* if not NULL reset when freeing this header */
+)
 {
   u_header_T      *tofree, *next;
 
@@ -2744,10 +2704,12 @@ u_header_T      **uhpp;         /* if not NULL reset when freeing this header */
  * Free all the undo entries for one header and the header itself.
  * This means that "uhp" is invalid when returning.
  */
-static void u_freeentries(buf, uhp, uhpp)
-buf_T           *buf;
-u_header_T      *uhp;
-u_header_T      **uhpp;         /* if not NULL reset when freeing this header */
+static void 
+u_freeentries (
+    buf_T *buf,
+    u_header_T *uhp,
+    u_header_T **uhpp         /* if not NULL reset when freeing this header */
+)
 {
   u_entry_T       *uep, *nuep;
 
@@ -2774,9 +2736,7 @@ u_header_T      **uhpp;         /* if not NULL reset when freeing this header */
 /*
  * free entry 'uep' and 'n' lines in uep->ue_array[]
  */
-static void u_freeentry(uep, n)
-u_entry_T   *uep;
-long n;
+static void u_freeentry(u_entry_T *uep, long n)
 {
   while (n > 0)
     vim_free(uep->ue_array[--n]);
@@ -2790,8 +2750,7 @@ long n;
 /*
  * invalidate the undo buffer; called when storage has already been released
  */
-void u_clearall(buf)
-buf_T       *buf;
+void u_clearall(buf_T *buf)
 {
   buf->b_u_newhead = buf->b_u_oldhead = buf->b_u_curhead = NULL;
   buf->b_u_synced = TRUE;
@@ -2875,8 +2834,7 @@ void u_undoline(void)          {
 /*
  * Free all allocated memory blocks for the buffer 'buf'.
  */
-void u_blockfree(buf)
-buf_T       *buf;
+void u_blockfree(buf_T *buf)
 {
   while (buf->b_u_oldhead != NULL)
     u_freeheader(buf, buf->b_u_oldhead, NULL);
@@ -2897,8 +2855,7 @@ static char_u *u_save_line(linenr_T lnum)
  * check the first character, because it can only be "dos", "unix" or "mac").
  * "nofile" and "scratch" type buffers are considered to always be unchanged.
  */
-int bufIsChanged(buf)
-buf_T       *buf;
+int bufIsChanged(buf_T *buf)
 {
   return
     !bt_dontwrite(buf) &&
@@ -2915,9 +2872,7 @@ int curbufIsChanged(void)         {
  * For undotree(): Append the list of undo blocks at "first_uhp" to "list".
  * Recursive.
  */
-void u_eval_tree(first_uhp, list)
-u_header_T  *first_uhp;
-list_T      *list;
+void u_eval_tree(u_header_T *first_uhp, list_T *list)
 {
   u_header_T  *uhp = first_uhp;
   dict_T      *dict;

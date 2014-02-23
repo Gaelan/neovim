@@ -1960,8 +1960,7 @@ char_u *keymap_init(void)              {
 /*
  * ":loadkeymap" command: load the following lines as the keymap.
  */
-void ex_loadkeymap(eap)
-exarg_T     *eap;
+void ex_loadkeymap(exarg_T *eap)
 {
   char_u      *line;
   char_u      *p;

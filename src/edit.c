@@ -1266,8 +1266,10 @@ force_cindent:
  * Only redraw when there are no characters available.  This speeds up
  * inserting sequences of characters (e.g., for CTRL-R).
  */
-static void ins_redraw(ready)
-int ready UNUSED;                   /* not busy with something */
+static void 
+ins_redraw (
+    int ready                   /* not busy with something */
+)
 {
   linenr_T conceal_old_cursor_line = 0;
   linenr_T conceal_new_cursor_line = 0;
@@ -1739,8 +1741,7 @@ void backspace_until_column(int col)
  * Only matters when there are composing characters.
  * Return TRUE when something was deleted.
  */
-static int del_char_after_col(limit_col)
-int limit_col UNUSED;
+static int del_char_after_col(int limit_col)
 {
   if (enc_utf8 && limit_col >= 0) {
     colnr_T ecol = curwin->w_cursor.col + 1;
@@ -2264,9 +2265,7 @@ static int ins_compl_make_cyclic(void)                {
  * "startcol" is where the matched text starts (1 is first column).
  * "list" is the list of matches.
  */
-void set_completion(startcol, list)
-colnr_T startcol;
-list_T  *list;
+void set_completion(colnr_T startcol, list_T *list)
 {
   /* If already doing completions stop it. */
   if (ctrl_x_mode != 0)
@@ -2606,14 +2605,7 @@ theend:
   vim_free(buf);
 }
 
-static void ins_compl_files(count, files, thesaurus, flags, regmatch, buf, dir)
-int count;
-char_u      **files;
-int thesaurus;
-int flags;
-regmatch_T  *regmatch;
-char_u      *buf;
-int         *dir;
+static void ins_compl_files(int count, char_u **files, int thesaurus, int flags, regmatch_T *regmatch, char_u *buf, int *dir)
 {
   char_u      *ptr;
   int i;
@@ -3288,9 +3280,7 @@ static void ins_compl_fixRedoBufForLeader(char_u *ptr_arg)
  *
  * Returns the buffer to scan, if any, otherwise returns curbuf -- Acevedo
  */
-static buf_T * ins_compl_next_buf(buf, flag)
-buf_T       *buf;
-int flag;
+static buf_T *ins_compl_next_buf(buf_T *buf, int flag)
 {
   static win_T *wp;
 
@@ -3390,8 +3380,7 @@ theend:
 /*
  * Add completions from a list.
  */
-static void ins_compl_add_list(list)
-list_T      *list;
+static void ins_compl_add_list(list_T *list)
 {
   listitem_T  *li;
   int dir = compl_direction;
@@ -3409,8 +3398,7 @@ list_T      *list;
 /*
  * Add completions from a dict.
  */
-static void ins_compl_add_dict(dict)
-dict_T      *dict;
+static void ins_compl_add_dict(dict_T *dict)
 {
   dictitem_T  *di_refresh;
   dictitem_T  *di_words;
@@ -3437,9 +3425,7 @@ dict_T      *dict;
  * NOTDONE, otherwise add it to the list and return OK.  If there is an error,
  * maybe because alloc() returns NULL, then FAIL is returned.
  */
-int ins_compl_add_tv(tv, dir)
-typval_T    *tv;
-int dir;
+int ins_compl_add_tv(typval_T *tv, int dir)
 {
   char_u      *word;
   int icase = FALSE;
@@ -3481,8 +3467,7 @@ int dir;
  * This may return before finding all the matches.
  * Return the total number of matches or -1 if still unknown -- Acevedo
  */
-static int ins_compl_get_exp(ini)
-pos_T       *ini;
+static int ins_compl_get_exp(pos_T *ini)
 {
   static pos_T first_match_pos;
   static pos_T last_match_pos;
@@ -5632,8 +5617,10 @@ static void redo_literal(int c)
  * start_arrow() is called when an arrow key is used in insert mode.
  * For undo/redo it resembles hitting the <ESC> key.
  */
-static void start_arrow(end_insert_pos)
-pos_T    *end_insert_pos;           /* can be NULL */
+static void 
+start_arrow (
+    pos_T *end_insert_pos           /* can be NULL */
+)
 {
   if (!arrow_used) {        /* something has been inserted */
     AppendToRedobuff(ESC_STR);
@@ -5705,10 +5692,12 @@ int stop_arrow(void)         {
  * "end_insert_pos" is where insert ended.  It is NULL when we already jumped
  * to another window/buffer.
  */
-static void stop_insert(end_insert_pos, esc, nomove)
-pos_T       *end_insert_pos;
-int esc;                                /* called by ins_esc() */
-int nomove;                             /* <c-\><c-o>, don't move cursor */
+static void 
+stop_insert (
+    pos_T *end_insert_pos,
+    int esc,                                /* called by ins_esc() */
+    int nomove                             /* <c-\><c-o>, don't move cursor */
+)
 {
   int cc;
   char_u      *ptr;
