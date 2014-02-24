@@ -923,7 +923,7 @@ int latin_ptr2len_len(char_u *p, int size)
   return 1;
 }
 
-static int dbcs_ptr2len_len(char_u p, int size)
+static int dbcs_ptr2len_len(char_u *p, int size)
 {
   int len;
 
@@ -1607,7 +1607,7 @@ int utfc_ptr2char(
 int utfc_ptr2char_len(
     char_u      *p,
     int         *pcc,       /* return: composing chars, last one is 0 */
-    int maxlen,
+    int maxlen
     )
 {
   int len;
